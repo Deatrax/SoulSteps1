@@ -1,101 +1,106 @@
 package com.DMA173.soulsteps;
 
-import java.util.ArrayList;
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer; // ** NOW: The correct renderer for top-down maps **
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.ScreenUtils;
 
 public class FirstScreen extends ScreenAdapter {
 
-    OrthographicCamera camera;
-    TiledMap map;
-    OrthogonalTiledMapRenderer renderer;
+    private OrthographicCamera camera;
+    private TiledMap map;
+    private OrthogonalTiledMapRenderer mapRenderer; // ** WAS: IsometricTiledMapRenderer **
 
-    Texture playerTex;
-    Vector2 playerPos;
-    float speed = 100;
+    private SpriteBatch batch;
+    private Texture playerTex;
+    private Vector2 playerPos;
+    private float speed = 250f;
 
-    ArrayList<Rectangle> collisionRects = new ArrayList<>();
-    SpriteBatch batch;
+    // --- Define layers based on your new map ---
+    // Layer indices start from 0 at the bottom in Tiled.
+    private int[] backgroundLayers = new int[]{0}; // Layer 0: "road"
+    private int[] foregroundLayers = new int[]{1, 2}; // Layer 1: "cars", Layer 2: "door"
 
     @Override
     public void show() {
-        batch = new SpriteBatch();
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1600, 1200);
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = 0.7f; // Adjust zoom as needed
 
-        map = new TmxMapLoader().load("mymap.tmx"); // Put your map in assets folder
-        renderer = new OrthogonalTiledMapRenderer(map);
+        // --- Load your new map ---
+        map = new TmxMapLoader().load("modernCityMap1.tmx");
 
-        playerTex = new Texture("player.png");
-        playerPos = new Vector2(100, 100);
+        // --- THE MAIN FIX: Use the OrthogonalTiledMapRenderer ---
+        mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-        MapLayer collisionLayer = map.getLayers().get("Collisions");
-        if (collisionLayer != null) {
-            for (MapObject object : collisionLayer.getObjects()) {
-                if (object instanceof RectangleMapObject) {
-                    Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                    collisionRects.add(rect);
-                }
-            }
-        }
+        batch = new SpriteBatch();
+        playerTex = new Texture("player.png"); 
+        playerPos = new Vector2(400, 400); // Set a good starting position
+
+        camera.position.set(playerPos.x, playerPos.y, 0);
+        camera.update();
     }
 
     @Override
     public void render(float delta) {
-                ScreenUtils.clear(Color.BLACK);
-        Vector2 oldPos = new Vector2(playerPos);
-        
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))  playerPos.x -= speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) playerPos.x += speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.UP))    playerPos.y += speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))  playerPos.y -= speed * delta;
+        handleInput(delta);
 
-        // Rectangle playerRect = new Rectangle(playerPos.x, playerPos.y, playerTex.getWidth(), playerTex.getHeight());
-        // for (Rectangle rect : collisionRects) {
-        //     if (playerRect.overlaps(rect)) {
-        //         playerPos.set(oldPos);
-        //         break;
-        //     }
-        // }
-
-        // camera.position.set(playerPos.x + playerTex.getWidth() / 2f, playerPos.y + playerTex.getHeight() / 2f, 0);
+        camera.position.set(playerPos.x, playerPos.y, 0);
         camera.update();
 
-        renderer.setView(camera);
-        renderer.render();
-        
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1); // A dark grey background
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        mapRenderer.setView(camera);
+
+        // 1. Render the background layer(s)
+        mapRenderer.render(backgroundLayers);
+
+        // 2. Render the player
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
-        float scale = 50f; // Scale down player to 30%
-        batch.draw(playerTex, playerPos.x, playerPos.y,
-                playerTex.getWidth() * scale, playerTex.getHeight() * scale);
-
+        batch.draw(playerTex, playerPos.x - playerTex.getWidth() / 2f, playerPos.y); // Draw player with feet at playerPos.y
         batch.end();
-        renderer.getBatch().begin();
-        renderer.getBatch().draw(playerTex, playerPos.x, playerPos.y);
-        renderer.getBatch().end();
+
+        // 3. Render the foreground layer(s) over the player
+        mapRenderer.render(foregroundLayers);
+    }
+
+    private void handleInput(float delta) {
+        // --- Simple movement for a top-down map ---
+        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            playerPos.y += speed * delta;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            playerPos.y -= speed * delta;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            playerPos.x -= speed * delta;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            playerPos.x += speed * delta;
+        }
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.update();
     }
 
     @Override
     public void dispose() {
         map.dispose();
-        renderer.dispose();
+        mapRenderer.dispose();
         playerTex.dispose();
+        batch.dispose();
     }
 }
