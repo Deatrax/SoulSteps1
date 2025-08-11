@@ -29,24 +29,31 @@ public class FirstScreen extends ScreenAdapter {
     private int[] foregroundLayers = new int[]{1, 2}; // Layer 1: "cars", Layer 2: "door"
 
     @Override
-    public void show() {
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 0.7f; // Adjust zoom as needed
+public void show() {
+    camera = new OrthographicCamera();
+    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-        // --- Load your new map ---
-        map = new TmxMapLoader().load("modernCityMap1.tmx");
+    // --- Zoom in more (lower = closer) ---
+    camera.zoom = 0.5f; // try 0.5 or even 0.4 for a closer view
 
-        // --- THE MAIN FIX: Use the OrthogonalTiledMapRenderer ---
-        mapRenderer = new OrthogonalTiledMapRenderer(map);
+    // Load map
+    map = new TmxMapLoader().load("modernCityMap1.tmx");
+    mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-        batch = new SpriteBatch();
-        playerTex = new Texture("player.png"); 
-        playerPos = new Vector2(400, 400); // Set a good starting position
+    batch = new SpriteBatch();
+    playerTex = new Texture("player.png"); 
 
-        camera.position.set(playerPos.x, playerPos.y, 0);
-        camera.update();
-    }
+    // Center player in middle of map instead of fixed 400,400
+    float mapWidth = (float) map.getProperties().get("width", Integer.class) 
+                     * (float) map.getProperties().get("tilewidth", Integer.class);
+    float mapHeight = (float) map.getProperties().get("height", Integer.class) 
+                      * (float) map.getProperties().get("tileheight", Integer.class);
+
+    playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
+
+    camera.position.set(playerPos.x, playerPos.y, 0);
+    camera.update();
+}
 
     @Override
     public void render(float delta) {
@@ -86,6 +93,12 @@ public class FirstScreen extends ScreenAdapter {
         }
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             playerPos.x += speed * delta;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
+            camera.zoom -= 0.01f; // zoom in
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
+            camera.zoom += 0.01f; // zoom out
         }
     }
 
