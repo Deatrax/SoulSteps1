@@ -1,45 +1,101 @@
 package com.DMA173.soulsteps;
 
-import com.badlogic.gdx.Screen;
+import java.util.ArrayList;
 
-/** First screen of the application. Displayed after the application is created. */
-public class FirstScreen implements Screen {
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
+import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ScreenUtils;
+
+public class FirstScreen extends ScreenAdapter {
+
+    OrthographicCamera camera;
+    TiledMap map;
+    OrthogonalTiledMapRenderer renderer;
+
+    Texture playerTex;
+    Vector2 playerPos;
+    float speed = 100;
+
+    ArrayList<Rectangle> collisionRects = new ArrayList<>();
+    SpriteBatch batch;
+
     @Override
     public void show() {
-        // Prepare your screen here.
+        batch = new SpriteBatch();
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 1600, 1200);
+
+        map = new TmxMapLoader().load("mymap.tmx"); // Put your map in assets folder
+        renderer = new OrthogonalTiledMapRenderer(map);
+
+        playerTex = new Texture("player.png");
+        playerPos = new Vector2(100, 100);
+
+        MapLayer collisionLayer = map.getLayers().get("Collisions");
+        if (collisionLayer != null) {
+            for (MapObject object : collisionLayer.getObjects()) {
+                if (object instanceof RectangleMapObject) {
+                    Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                    collisionRects.add(rect);
+                }
+            }
+        }
     }
 
     @Override
     public void render(float delta) {
-        // Draw your screen here. "delta" is the time since last render in seconds.
-    }
+                ScreenUtils.clear(Color.BLACK);
+        Vector2 oldPos = new Vector2(playerPos);
+        
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))  playerPos.x -= speed * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) playerPos.x += speed * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.UP))    playerPos.y += speed * delta;
+        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))  playerPos.y -= speed * delta;
 
-    @Override
-    public void resize(int width, int height) {
-        // If the window is minimized on a desktop (LWJGL3) platform, width and height are 0, which causes problems.
-        // In that case, we don't resize anything, and wait for the window to be a normal size before updating.
-        if(width <= 0 || height <= 0) return;
+        // Rectangle playerRect = new Rectangle(playerPos.x, playerPos.y, playerTex.getWidth(), playerTex.getHeight());
+        // for (Rectangle rect : collisionRects) {
+        //     if (playerRect.overlaps(rect)) {
+        //         playerPos.set(oldPos);
+        //         break;
+        //     }
+        // }
 
-        // Resize your screen here. The parameters represent the new window size.
-    }
+        // camera.position.set(playerPos.x + playerTex.getWidth() / 2f, playerPos.y + playerTex.getHeight() / 2f, 0);
+        camera.update();
 
-    @Override
-    public void pause() {
-        // Invoked when your application is paused.
-    }
+        renderer.setView(camera);
+        renderer.render();
+        
+        batch.setProjectionMatrix(camera.combined);
+        batch.begin();
 
-    @Override
-    public void resume() {
-        // Invoked when your application is resumed after pause.
-    }
+        float scale = 50f; // Scale down player to 30%
+        batch.draw(playerTex, playerPos.x, playerPos.y,
+                playerTex.getWidth() * scale, playerTex.getHeight() * scale);
 
-    @Override
-    public void hide() {
-        // This method is called when another screen replaces this one.
+        batch.end();
+        renderer.getBatch().begin();
+        renderer.getBatch().draw(playerTex, playerPos.x, playerPos.y);
+        renderer.getBatch().end();
     }
 
     @Override
     public void dispose() {
-        // Destroy screen's assets here.
+        map.dispose();
+        renderer.dispose();
+        playerTex.dispose();
     }
 }

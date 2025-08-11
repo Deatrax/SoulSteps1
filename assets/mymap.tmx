@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.10" tiledversion="1.11.2" orientation="isometric" renderorder="right-down" width="16" height="16" tilewidth="256" tileheight="128" infinite="0" nextlayerid="7" nextobjectid="1">
+ <tileset firstgid="1" source="jgjgjhghg.tsx"/>
+ <layer id="4" name="floor1 ground" width="16" height="16">
+  <data encoding="base64" compression="zlib">
+   eJwzYmBgMBrFo3gUj0gMAG3cMgE=
+  </data>
+ </layer>
+ <layer id="5" name="Tile Layer 2" width="16" height="16">
+  <data encoding="base64" compression="zlib">
+   eJxjYBheIAaIzbDgDCCOI0K/O5R+BMSiZNjvTlgJQf1PsIhbA3EgBfZbk2A/JfqdgdgDCcOAK5H60UEQFI8C2gAAiKwIdQ==
+  </data>
+ </layer>
+ <layer id="6" name="floor1 top" width="16" height="16">
+  <data encoding="base64" compression="zlib">
+   eJxjYBie4NdAO2AUjIIhAAAZPQD7
+  </data>
+ </layer>
+</map>
