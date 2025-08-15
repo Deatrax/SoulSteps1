@@ -9,79 +9,84 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer; // ** NOW: The correct renderer for top-down maps **
+import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 
 public class FirstScreen extends ScreenAdapter {
 
     private OrthographicCamera camera;
     private TiledMap map;
-    private OrthogonalTiledMapRenderer mapRenderer; // ** WAS: IsometricTiledMapRenderer **
+    private OrthogonalTiledMapRenderer mapRenderer;
 
     private SpriteBatch batch;
     private Texture playerTex;
     private Vector2 playerPos;
     private float speed = 250f;
 
-    // --- Define layers based on your new map ---
-    // Layer indices start from 0 at the bottom in Tiled.
-    private int[] backgroundLayers = new int[]{0}; // Layer 0: "road"
-    private int[] foregroundLayers = new int[]{1, 2}; // Layer 1: "cars", Layer 2: "door"
+    // --- Define your map layers ---
+    private int[] backgroundLayers = new int[]{0}; // ground/roads
+    private int[] foregroundLayers = new int[]{1, 2, 3, 4, 5, 6}; // decorations/buildings
 
     @Override
-public void show() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    public void show() {
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = 0.5f; // zoom in
 
-    // --- Zoom in more (lower = closer) ---
-    camera.zoom = 0.5f; // try 0.5 or even 0.4 for a closer view
+        // Load the map
+        map = new TmxMapLoader().load("Tile_City.tmx");
+        mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-    // Load map
-    map = new TmxMapLoader().load("modernCityMap1.tmx");
-    mapRenderer = new OrthogonalTiledMapRenderer(map);
+        batch = new SpriteBatch();
+        playerTex = new Texture("player.png");
 
-    batch = new SpriteBatch();
-    playerTex = new Texture("player.png"); 
+        // Get map size in pixels
+        float mapWidth = map.getProperties().get("width", Integer.class) 
+                         * map.getProperties().get("tilewidth", Integer.class);
+        float mapHeight = map.getProperties().get("height", Integer.class) 
+                          * map.getProperties().get("tileheight", Integer.class);
 
-    // Center player in middle of map instead of fixed 400,400
-    float mapWidth = (float) map.getProperties().get("width", Integer.class) 
-                     * (float) map.getProperties().get("tilewidth", Integer.class);
-    float mapHeight = (float) map.getProperties().get("height", Integer.class) 
-                      * (float) map.getProperties().get("tileheight", Integer.class);
+        // Start player at center of map
+        playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
 
-    playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
-
-    camera.position.set(playerPos.x, playerPos.y, 0);
-    camera.update();
-}
+        // Position camera initially
+        camera.position.set(playerPos.x, playerPos.y, 0);
+        camera.update();
+    }
 
     @Override
     public void render(float delta) {
         handleInput(delta);
 
+        // Make camera follow player
         camera.position.set(playerPos.x, playerPos.y, 0);
         camera.update();
 
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1); // A dark grey background
+        // Clear screen
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
         mapRenderer.setView(camera);
 
-        // 1. Render the background layer(s)
+        // Render background layers
         mapRenderer.render(backgroundLayers);
 
-        // 2. Render the player
+       
+
+        // Render foreground layers
+        mapRenderer.render(foregroundLayers);
+
+         // Render player
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.draw(playerTex, playerPos.x - playerTex.getWidth() / 2f, playerPos.y); // Draw player with feet at playerPos.y
+        batch.draw(playerTex, 
+                   playerPos.x - playerTex.getWidth() / 2f, 
+                   playerPos.y - playerTex.getHeight() / 2f); // Centered
         batch.end();
-
-        // 3. Render the foreground layer(s) over the player
-        mapRenderer.render(foregroundLayers);
     }
 
     private void handleInput(float delta) {
-        // --- Simple movement for a top-down map ---
+        // Movement
         if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             playerPos.y += speed * delta;
         }
@@ -94,11 +99,13 @@ public void show() {
         if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             playerPos.x += speed * delta;
         }
+
+        // Zoom
         if (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
-            camera.zoom -= 0.01f; // zoom in
+            camera.zoom -= 0.01f;
         }
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
-            camera.zoom += 0.01f; // zoom out
+            camera.zoom += 0.01f;
         }
     }
 
