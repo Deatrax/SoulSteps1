@@ -25,36 +25,37 @@ public class FirstScreen extends ScreenAdapter {
 
     // --- Define layers based on your new map ---
     // Layer indices start from 0 at the bottom in Tiled.
-    private int[] backgroundLayers = new int[]{0}; // Layer 0: "road"
-    private int[] foregroundLayers = new int[]{1, 2}; // Layer 1: "cars", Layer 2: "door"
+    private int[] backgroundLayers = new int[] { 0 }; // Layer 0: "road"
+    private int[] foregroundLayers = new int[] { 1, 2 }; // Layer 1: "cars", Layer 2: "door"
 
     @Override
-public void show() {
-    camera = new OrthographicCamera();
-    camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+    public void show() {
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
-    // --- Zoom in more (lower = closer) ---
-    camera.zoom = 0.5f; // try 0.5 or even 0.4 for a closer view
+        // --- Zoom in more (lower = closer) ---
+        camera.zoom = 0.5f; // try 0.5 or even 0.4 for a closer view
 
-    // Load map
-    map = new TmxMapLoader().load("modernCityMap1.tmx");
-    mapRenderer = new OrthogonalTiledMapRenderer(map);
+        // Load map
+        map = new TmxMapLoader().load("modernCityMap1.tmx");
+        mapRenderer = new OrthogonalTiledMapRenderer(map);
 
-    batch = new SpriteBatch();
-    playerTex = new Texture("player.png"); 
+        batch = new SpriteBatch();
+        playerTex = new Texture("player.png");
 
-    // Center player in middle of map instead of fixed 400,400
-    float mapWidth = (float) map.getProperties().get("width", Integer.class) 
-                     * (float) map.getProperties().get("tilewidth", Integer.class);
-    float mapHeight = (float) map.getProperties().get("height", Integer.class) 
-                      * (float) map.getProperties().get("tileheight", Integer.class);
+        // Center player in middle of map instead of fixed 400,400
+        float mapWidth = (float) map.getProperties().get("width", Integer.class)
+                * (float) map.getProperties().get("tilewidth", Integer.class);
+        float mapHeight = (float) map.getProperties().get("height", Integer.class)
+                * (float) map.getProperties().get("tileheight", Integer.class);
 
-    playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
+        playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
 
-    camera.position.set(playerPos.x, playerPos.y, 0);
-    camera.update();
-}
-
+        camera.position.set(playerPos.x, playerPos.y, 0);
+        camera.update();
+    }
+    
+    
     @Override
     public void render(float delta) {
         handleInput(delta);
@@ -73,7 +74,8 @@ public void show() {
         // 2. Render the player
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.draw(playerTex, playerPos.x - playerTex.getWidth() / 2f, playerPos.y); // Draw player with feet at playerPos.y
+        batch.draw(playerTex, playerPos.x - playerTex.getWidth() / 2f, playerPos.y); // Draw player with feet at
+                                                                                     // playerPos.y
         batch.end();
 
         // 3. Render the foreground layer(s) over the player
