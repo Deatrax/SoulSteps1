@@ -94,7 +94,7 @@ public class FirstScreen extends ScreenAdapter {
         //=======TESTING STUFF - MAHIM========
         if (useCharacterTest) {
             characterTest.update(delta);
-            characterTest.render(camera); // Pass camera for proper projection
+            characterTest.render(camera, batch); // Pass camera for proper projection
         } else {
             // Render regular player
             batch.setProjectionMatrix(camera.combined);

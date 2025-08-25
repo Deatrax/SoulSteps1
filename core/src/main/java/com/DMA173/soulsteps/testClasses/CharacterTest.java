@@ -12,7 +12,7 @@ import com.badlogic.gdx.math.Vector2;
 public class CharacterTest {
     public enum Direction { DOWN, LEFT, RIGHT, UP, IDLE }
     
-    private SpriteBatch batch;
+    //private SpriteBatch batch;
     private Texture sheet;
     
     // Animations for different directions
@@ -44,8 +44,8 @@ public class CharacterTest {
     
     public void init() {
         try {
-            batch = new SpriteBatch();
-            sheet = new Texture("Character/Character Model.png");
+            // batch = new SpriteBatch();
+            sheet = new Texture("Character/MetroCity/CharacterModel/Character Model.png");
             position = new Vector2(400, 300); // Starting position
             
             System.out.println("Texture size: " + sheet.getWidth() + "x" + sheet.getHeight());
@@ -297,7 +297,7 @@ public class CharacterTest {
         stateTime += delta;
     }
     
-    public void render(OrthographicCamera camera) {
+    public void render(OrthographicCamera camera, SpriteBatch batch) {
         if (currentAnimation == null || batch == null) return;
         
         TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
@@ -322,7 +322,7 @@ public class CharacterTest {
     }
     
     // Overloaded version for testing without camera
-    public void render() {
+    public void render(SpriteBatch batch) {
         if (currentAnimation == null || batch == null) return;
         
         TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
@@ -363,13 +363,15 @@ public class CharacterTest {
     
     public void dispose() {
         try {
-            if (batch != null) {
-                if (batch.isDrawing()) {
-                    batch.end();
-                }
-                batch.dispose();
-                batch = null;
-            }
+
+            //NO NEED in class batch
+            // if (batch != null) {
+            //     if (batch.isDrawing()) {
+            //         batch.end();
+            //     }
+            //     batch.dispose();
+            //     batch = null;
+            // }
             if (sheet != null) {
                 sheet.dispose();
                 sheet = null;
