@@ -162,7 +162,7 @@ public class CharacterTest {
             walkLeft = new Animation<>(0.1f, leftFrames);
             
             // Create idle animations (using the first frame of each direction - typically the "standing" frame)
-            idleDown = new Animation<>(0.1f, downFrames[0]);
+            idleDown = new Animation<>(1.0f, downFrames[0]);
             idleRight = new Animation<>(1.0f, rightFrames[0]);
             idleUp = new Animation<>(1.0f, upFrames[0]);
             idleLeft = new Animation<>(1.0f, leftFrames[0]);
@@ -231,33 +231,33 @@ public class CharacterTest {
     }
     
     private void setDirection(Direction dir) {
-        // if (dir != Direction.IDLE) {
-        //     facingDirection = dir;
-        // }
+        if (dir != Direction.IDLE) {
+            facingDirection = dir;
+        }
         
-        // if (currentDirection == dir) return; // No change
+        if (currentDirection == dir) return; // No change
         
-        // currentDirection = dir;
+        currentDirection = dir;
         
-        // if (dir == Direction.IDLE) {
-        //     // Set idle animation based on facing direction
-        //     switch (facingDirection) {
-        //         case DOWN: currentAnimation = idleDown; break;
-        //         case LEFT: currentAnimation = idleLeft; break;
-        //         case RIGHT: currentAnimation = idleRight; break;
-        //         case UP: currentAnimation = idleUp; break;
-        //     }
-        // } else {
-        //     // Set walking animation
-        //     switch (dir) {
-        //         case DOWN: currentAnimation = walkDown; break;
-        //         case LEFT: currentAnimation = walkLeft; break;
-        //         case RIGHT: currentAnimation = walkRight; break;
-        //         case UP: currentAnimation = walkUp; break;
-        //     }
-        // }
+        if (dir == Direction.IDLE) {
+            // Set idle animation based on facing direction
+            switch (facingDirection) {
+                case DOWN: currentAnimation = idleDown; break;
+                case LEFT: currentAnimation = idleLeft; break;
+                case RIGHT: currentAnimation = idleRight; break;
+                case UP: currentAnimation = idleUp; break;
+            }
+        } else {
+            // Set walking animation
+            switch (dir) {
+                case DOWN: currentAnimation = walkDown; break;
+                case LEFT: currentAnimation = walkLeft; break;
+                case RIGHT: currentAnimation = walkRight; break;
+                case UP: currentAnimation = walkUp; break;
+            }
+        }
         
-        //stateTime = 0f; // Reset animation time
+        stateTime = 0f; // Reset animation time
     }
     
     // private void switchCharacter(int row) {
