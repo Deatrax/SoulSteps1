@@ -26,18 +26,18 @@ public class CharacterTest {
     
     // Character position and movement
     private Vector2 position;
-    private float speed = 200f;
+    private final float speed = 200f;
     
     // Frame dimensions - adjust these based on your actual spritesheet
     private int frameWidth = 16;   // Character width
     private int frameHeight = 30;  // Character height
     private int spacing = 16;      // Spacing between frames
-    private int HSpacing = 16;
-    private int VSpacing = 2;
+    private final int HSpacing = 16;
+    private final int VSpacing = 2;
     private int marginLeft = 8;    // Left margin from edge of file
-    private int marginRight = 8;   // Right margin from edge of file  
+    private final int marginRight = 8;   // Right margin from edge of file  
     private int marginTop = 1;     // Top margin from edge of file
-    private int marginBottom = 1;  // Bottom margin (adjust if needed)
+    private final int marginBottom = 1;  // Bottom margin (adjust if needed)
     
     // Which character row to use (0 = first character, 1 = second, etc.)
     private int characterRow = 0;
@@ -84,9 +84,8 @@ public class CharacterTest {
             System.out.println("Frame size: " + frameWidth + "x" + frameHeight);
             System.out.println("Margins: left=" + marginLeft + ", top=" + marginTop + ", spacing=" + spacing);
             
-        } catch (Exception e) {
+        } catch (RuntimeException e) {
             System.err.println("Error initializing CharacterTest: " + e.getMessage());
-            e.printStackTrace();
             throw e;
         }
     }
@@ -133,9 +132,7 @@ public class CharacterTest {
         if (frames.length >= 24) {
             // Down animation: frames 0-5 (first 6 frames)
             TextureRegion[] downFrames = new TextureRegion[6];
-            for (int i = 0; i < 6; i++) {
-                downFrames[i] = frames[i];
-            }
+            System.arraycopy(frames, 0, downFrames, 0, 6);
             
             // Right animation: frames 6-11 (second group of 6)
             TextureRegion[] rightFrames = new TextureRegion[6];
@@ -246,6 +243,8 @@ public class CharacterTest {
                 case LEFT: currentAnimation = idleLeft; break;
                 case RIGHT: currentAnimation = idleRight; break;
                 case UP: currentAnimation = idleUp; break;
+                default:
+                    break;
             }
         } else {
             // Set walking animation
@@ -254,6 +253,8 @@ public class CharacterTest {
                 case LEFT: currentAnimation = walkLeft; break;
                 case RIGHT: currentAnimation = walkRight; break;
                 case UP: currentAnimation = walkUp; break;
+                default:
+                    break;
             }
         }
         
