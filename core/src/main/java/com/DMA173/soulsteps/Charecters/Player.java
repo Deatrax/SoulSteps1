@@ -20,7 +20,7 @@ public class Player extends Character {
     
     public Player(CharecterAssets assets, float startX, float startY) {
         // Use character type 0 for Elian's appearance
-        super(assets, 0, startX, startY, 250f);
+        super(assets, 0, startX, startY, 100f);
         
         // Initialize Elian's properties
         this.name = "Elian";
