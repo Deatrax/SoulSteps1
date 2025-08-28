@@ -18,12 +18,12 @@ public class CharecterAssets {
     private Texture sheet;
 
     // --- Spritesheet Dimensions ---
-    private final int FRAME_WIDTH = 16;
-    private final int FRAME_HEIGHT = 30;
-    private final int H_SPACING = 16; // Horizontal spacing between frames
-    private final int V_SPACING = 2;  // Vertical spacing between character rows
-    private final int MARGIN_LEFT = 8;
-    private final int MARGIN_TOP = 1;
+    private final int FRAME_WIDTH = 32;
+    private final int FRAME_HEIGHT = 32;
+    private final int H_SPACING = 0; // Horizontal spacing between frames
+    private final int V_SPACING = 0;  // Vertical spacing between character rows
+    private final int MARGIN_LEFT = 0;
+    private final int MARGIN_TOP = 0;
     private final int NUM_CHARACTER_TYPES = 6; // You have 6 rows of characters
 
     // --- Animation Storage ---
