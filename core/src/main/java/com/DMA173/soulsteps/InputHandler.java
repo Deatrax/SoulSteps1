@@ -1,185 +1,240 @@
 package com.DMA173.soulsteps;
 
+import com.DMA173.soulsteps.Charecters.NPC;
+import com.DMA173.soulsteps.Charecters.NPCManager;
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.UI.UIManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
 /**
- * InputHandler class manages all user input for the game.
- * Separates input logic from screen rendering logic.
- * Demonstrates separation of concerns in OOP design.
+ * Handles all input for the game including player movement, UI interactions, and game controls.
+ * Demonstrates separation of concerns by isolating input handling from rendering and game logic.
  */
 public class InputHandler {
-    
-    // Dependencies injected through constructor
     private OrthographicCamera camera;
     private Player player;
+    private UIManager uiManager;
+    private NPCManager npcManager;
     
     // Input state tracking
-    private boolean debugMode;
+    private boolean escapePressed = false;
+    private boolean f3Pressed = false;
+    private boolean ePressed = false;
     
-    /**
-     * Constructor - Dependency Injection pattern
-     * @param camera The game camera for zoom controls
-     * @param player The player character for game actions
-     */
-    public InputHandler(OrthographicCamera camera, Player player) {
+    public InputHandler(OrthographicCamera camera, Player player, UIManager uiManager, NPCManager npcManager) {
         this.camera = camera;
         this.player = player;
-        this.debugMode = true; // Enable debug mode for development
+        this.uiManager = uiManager;
+        this.npcManager = npcManager;
+    }
+    
+    public void handleInput(float delta) {
+        // If game is paused, only handle pause-related inputs
+        if (uiManager.isPaused()) {
+            handlePauseMenuInput();
+            return;
+        }
+        
+        // Handle UI inputs first
+        handleUIInput();
+        
+        // Handle player movement (only if not paused)
+        handlePlayerMovement(delta);
+        
+        // Handle camera controls
+        handleCameraControls(delta);
+        
+        // Handle interaction
+        handleInteractions();
     }
     
     /**
-     * Main input handling method called every frame
-     * @param delta Time elapsed since last frame
+     * Handle inputs when game is paused
      */
-    public void handleInput(float delta) {
-        handleCameraControls();
-        handleGameControls();
+    private void handlePauseMenuInput() {
+        // ESC - Resume game
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            uiManager.setPaused(false);
+            System.out.println("Game resumed");
+        }
         
-        if (debugMode) {
-            handleDebugControls();
+        // R - Restart level (placeholder)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            System.out.println("Restart level - Not implemented yet");
+            // TODO: Implement level restart
+        }
+        
+        // Q - Quit to menu (placeholder)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.Q)) {
+            System.out.println("Quit to menu - Not implemented yet");
+            // TODO: Implement quit to main menu
         }
     }
     
     /**
-     * Handles camera-related input (zoom)
+     * Handle UI-related inputs
      */
-    private void handleCameraControls() {
+    private void handleUIInput() {
+        // ESC - Toggle pause menu
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            uiManager.togglePause();
+            return;
+        }
+        
+        // F3 - Toggle debug mode
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            uiManager.toggleDebugMode();
+        }
+        
+        // I - Toggle inventory (placeholder)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
+            System.out.println("Inventory opened - Not implemented yet");
+            // TODO: Implement inventory system
+        }
+        
+        // M - Toggle map (placeholder)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
+            System.out.println("Map opened - Not implemented yet");
+            // TODO: Implement map system
+        }
+        
+        // Tab - Toggle objective list (placeholder)
+        if (Gdx.input.isKeyJustPressed(Input.Keys.TAB)) {
+            System.out.println("Objective list - Not implemented yet");
+            // TODO: Show detailed objective list
+        }
+    }
+    
+    /**
+     * Handle player movement inputs
+     */
+    private void handlePlayerMovement(float delta) {
+        boolean moved = false;
+        
+        // WASD movement controls
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            player.moveInDirection(com.DMA173.soulsteps.Charecters.CharecterAssets.Direction.UP, delta);
+            moved = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            player.moveInDirection(com.DMA173.soulsteps.Charecters.CharecterAssets.Direction.DOWN, delta);
+            moved = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            player.moveInDirection(com.DMA173.soulsteps.Charecters.CharecterAssets.Direction.LEFT, delta);
+            moved = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            player.moveInDirection(com.DMA173.soulsteps.Charecters.CharecterAssets.Direction.RIGHT, delta);
+            moved = true;
+        }
+        
+        player.setMoving(moved);
+    }
+    
+    /**
+     * Handle camera control inputs
+     */
+    private void handleCameraControls(float delta) {
         // Zoom controls
         if (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
-            camera.zoom -= 0.01f;
+            camera.zoom = Math.max(0.1f, camera.zoom - 0.02f);
         }
-        
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
-            camera.zoom += 0.01f;
+            camera.zoom = Math.min(2.0f, camera.zoom + 0.02f);
         }
         
-        // Clamp zoom to reasonable values
-        camera.zoom = Math.max(0.2f, Math.min(2.0f, camera.zoom));
+        // Reset zoom
+        if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_0)) {
+            camera.zoom = 0.5f;
+            System.out.println("Camera zoom reset");
+        }
     }
     
     /**
-     * Handles main game controls (interaction, inventory, menu)
+     * Handle interaction inputs
      */
-    private void handleGameControls() {
-        // Interaction key - will be used for talking to NPCs, examining objects
+    private void handleInteractions() {
+        // E - Interact with NPCs
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            handleInteractionInput();
+            boolean interacted = npcManager.handleInteraction(player);
+            if (interacted) {
+                uiManager.setInteractionHint(""); // Clear hint after interaction
+            } else {
+                uiManager.showNotification("Nothing to interact with here");
+            }
         }
         
-        // Inventory key
-        if (Gdx.input.isKeyJustPressed(Input.Keys.I)) {
-            handleInventoryInput();
+        // Check for nearby NPCs to show interaction hint
+        updateInteractionHints();
+    }
+    
+    /**
+     * Update interaction hints based on nearby NPCs
+     */
+    private void updateInteractionHints() {
+        // Check if there's an NPC nearby
+        boolean nearbyNPC = false;
+        for (NPC npc : npcManager.getAllNPCs()) {
+            float distance = npc.getPosition().dst(player.getPosition());
+            if (distance <= 50f && npc.isInteractable()) {
+                nearbyNPC = true;
+                uiManager.setInteractionHint("Press E to talk to " + npc.getName());
+                break;
+            }
         }
         
-        // Pause/Menu key
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            handlePauseInput();
-        }
-        
-        // Toggle debug mode
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-            debugMode = !debugMode;
-            System.out.println("Debug mode: " + (debugMode ? "ON" : "OFF"));
+        if (!nearbyNPC) {
+            uiManager.clearInteractionHint();
         }
     }
     
     /**
-     * Handles debug-only input (remove in final version)
+     * Handle special debug/cheat inputs (remove in final build)
      */
-    private void handleDebugControls() {
-        // Debug: Test kindness adjustment
-        if (Gdx.input.isKeyJustPressed(Input.Keys.K)) {
-            player.adjustKindness(10);
-            System.out.println("DEBUG: Kindness increased! Current: " + player.getKindnessLevel());
-            
-            if (player.isDangerZoneActive()) {
-                System.out.println("DEBUG: DANGER ZONE ACTIVE!");
-            }
+    private void handleDebugInputs() {
+        // Only process debug inputs if debug mode is on
+        if (!Gdx.input.isKeyPressed(Input.Keys.F3)) return;
+        
+        // Shift+H - Heal player
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.H)) {
+            player.setHealth(100);
+            uiManager.showNotification("Health restored");
         }
         
-        if (Gdx.input.isKeyJustPressed(Input.Keys.J)) {
-            player.adjustKindness(-10);
-            System.out.println("DEBUG: Kindness decreased! Current: " + player.getKindnessLevel());
-            
-            if (player.isDangerZoneActive()) {
-                System.out.println("DEBUG: DANGER ZONE ACTIVE!");
-            }
+        // Shift+K - Restore kindness
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.K)) {
+            player.adjustKindness(100);
+            uiManager.showNotification("Kindness restored");
         }
         
-        // Debug: Test evidence collection
-        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+        // Shift+E - Add evidence
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.E)) {
             player.collectEvidence();
-            System.out.println("DEBUG: Evidence collected! Total: " + player.getEvidenceCount());
+            uiManager.showNotification("Evidence added");
         }
         
-        // Debug: Test water limiter discovery
-        if (Gdx.input.isKeyJustPressed(Input.Keys.M)) {
-            player.findWaterLimiter();
+        // Number keys 1-6 - Change player outfit
+        for (int i = 1; i <= 6; i++) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i - 1)) {
+                player.changeOutfit(i);
+                uiManager.showNotification("Changed to outfit " + i);
+            }
         }
         
-        // Debug: Print player stats
-        if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
-            printPlayerStats();
+        // Shift + Number keys 1-6 - Change player hair
+        for (int i = 1; i <= 6; i++) {
+            if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) && Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i - 1)) {
+                player.changeHairstyle(i);
+                uiManager.showNotification("Changed to hairstyle " + i);
+            }
         }
     }
     
-    /**
-     * Handle interaction input (E key)
-     */
-    private void handleInteractionInput() {
-        System.out.println("Interaction key pressed - looking for nearby objects/NPCs");
-        // TODO: Implement interaction system
-        // - Check for nearby NPCs
-        // - Check for interactable objects
-        // - Trigger dialogue or object interaction
-    }
-    
-    /**
-     * Handle inventory input (I key)
-     */
-    private void handleInventoryInput() {
-        System.out.println("Inventory key pressed - opening inventory");
-        // TODO: Implement inventory system
-        // - Show inventory UI
-        // - Display collected items and evidence
-    }
-    
-    /**
-     * Handle pause/menu input (Escape key)
-     */
-    private void handlePauseInput() {
-        System.out.println("Escape pressed - opening pause menu");
-        // TODO: Implement pause menu
-        // - Show pause menu UI
-        // - Pause game logic
-        // - Provide save/load options
-    }
-    
-    /**
-     * Debug method to print all player statistics
-     */
-    private void printPlayerStats() {
-        System.out.println("=== PLAYER STATS ===");
-        System.out.println("Name: " + player.getName());
-        System.out.println("Position: (" + player.getPosition().x + ", " + player.getPosition().y + ")");
-        System.out.println("Kindness: " + player.getKindnessLevel() + " (" + 
-                          String.format("%.1f", player.getKindnessPercentage() * 100) + "%)");
-        System.out.println("Evidence Count: " + player.getEvidenceCount());
-        System.out.println("Has Water Limiter: " + player.hasWaterLimiter());
-        System.out.println("Danger Zone Active: " + player.isDangerZoneActive());
-        System.out.println("Speed: " + player.getSpeed());
-        System.out.println("==================");
-    }
-    
-    // Getters for external access if needed
-    public boolean isDebugMode() {
-        return debugMode;
-    }
-    
-    public void setDebugMode(boolean debugMode) {
-        this.debugMode = debugMode;
+    // Getters for external access
+    public boolean isPaused() {
+        return uiManager.isPaused();
     }
 }
