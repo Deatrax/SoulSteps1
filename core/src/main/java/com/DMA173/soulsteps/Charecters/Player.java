@@ -5,7 +5,7 @@ import com.badlogic.gdx.Input;
 
 /**
  * The Player class represents Elian, the protagonist of SoulSteps.
- * Now supports the clothing system.
+ * Now supports the hair and clothing system.
  * Demonstrates inheritance and polymorphism by extending Character.
  */
 public class Player extends Character {
@@ -20,9 +20,9 @@ public class Player extends Character {
     private int evidenceCount;
     
     public Player(CharecterAssets assets, float startX, float startY) {
-        // Use character type 3 for Elian's appearance with specific clothing configuration
+        // Use character type 3 for Elian's appearance with specific hair and clothing configuration
         // ClothesContainer(hairType, outfitType, modelType, accessoryType)
-        super(assets, 3, startX, startY, 100f, new ClothesContainer(1, 1, 1, 6));
+        super(assets, 1, startX, startY, 100f, new ClothesContainer(3, 6, 3, 6));
         
         // Initialize Elian's properties
         this.name = "Elian";
@@ -35,10 +35,10 @@ public class Player extends Character {
     }
     
     /**
-     * Constructor with clothing
+     * Constructor with clothing and hair
      */
     public Player(CharecterAssets assets, float startX, float startY, ClothesContainer clothes) {
-        // Use character type 3 for Elian's appearance with specified clothing
+        // Use character type 3 for Elian's appearance with specified clothing and hair
         super(assets, 3, startX, startY, 100f, clothes);
         
         // Initialize Elian's properties
@@ -114,6 +114,17 @@ public class Player extends Character {
         }
     }
     
+    // --- Hair-specific methods for Player ---
+    public void changeHairstyle(int hairType) {
+        changeHair(hairType);
+        System.out.println("Elian changed hairstyle to type " + hairType);
+    }
+    
+    public void removeHairstyle() {
+        //removeHair();
+        System.out.println("Elian removed hair (bald look)");
+    }
+    
     // --- Clothing-specific methods for Player ---
     public void equipWorkOutfit() {
         changeOutfit(5); // Outfit5.png - shirt and pants for men
@@ -146,6 +157,43 @@ public class Player extends Character {
         System.out.println("Elian changed to casual wear");
     }
     
+    // --- Complete appearance change methods ---
+    public void changeCompleteAppearance(int hairType, int outfitType) {
+        changeHair(hairType);
+        changeOutfit(outfitType);
+        System.out.println("Elian changed complete appearance: Hair " + hairType + ", Outfit " + outfitType);
+    }
+    
+    public void changeCompleteAppearance(ClothesContainer newClothes) {
+        changeAppearance(newClothes);
+        System.out.println("Elian changed complete appearance: " + newClothes.toString());
+    }
+    
+    // --- Disguise methods for story events ---
+    public void disguiseAsOfficeWorker() {
+        // Professional look for infiltrating Veridia Corporation
+        changeCompleteAppearance(2, 103); // Professional hair, office suit
+        System.out.println("Elian disguised as office worker");
+    }
+    
+    public void disguiseAsDeliveryPerson() {
+        // Casual look for delivery disguise
+        changeCompleteAppearance(1, 104); // Casual hair, delivery uniform
+        System.out.println("Elian disguised as delivery person");
+    }
+    
+    public void disguiseAsPoliceOfficer() {
+        // Official look for police infiltration
+        changeCompleteAppearance(1, 101); // Short hair, police uniform
+        System.out.println("Elian disguised as police officer");
+    }
+    
+    public void returnToNormalAppearance() {
+        // Return to Elian's default appearance
+        changeCompleteAppearance(new ClothesContainer(1, 4, 1, 6));
+        System.out.println("Elian returned to normal appearance");
+    }
+    
     // --- Getters for game state ---
     public int getKindnessLevel() { return kindnessLevel; }
     public boolean isDangerZoneActive() { return dangerZoneActive; }
@@ -155,5 +203,4 @@ public class Player extends Character {
     public float getKindnessPercentage() {
         return (float) kindnessLevel / maxKindness;
     }
-
 }

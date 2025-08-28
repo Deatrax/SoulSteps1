@@ -23,6 +23,7 @@ public class ClothesContainer {
     
     /**
      * Constructor with all clothing parameters
+     * @param modelType is deprecated
      */
     public ClothesContainer(int hairType, int outfitType, int modelType, int accessoryType) {
         this.hairType = hairType;

@@ -8,8 +8,8 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
 /**
- * This class acts as a manager for all character spritesheet assets including clothing.
- * It loads the main texture and pre-compiles all animations for all character variants and their outfits.
+ * This class acts as a manager for all character spritesheet assets including hair and clothing.
+ * It loads the main texture and pre-compiles all animations for all character variants, their hair, and their outfits.
  * Game objects like Player or Enemy can then request their specific animations from this class.
  */
 public class CharecterAssets {
@@ -19,6 +19,7 @@ public class CharecterAssets {
     }
 
     private Texture characterSheet;
+    private Texture hairSheet;
     private Map<String, Texture> outfitTextures;
 
     // --- Spritesheet Dimensions ---
@@ -29,6 +30,7 @@ public class CharecterAssets {
     private final int MARGIN_LEFT = 0;
     private final int MARGIN_TOP = 0;
     private final int NUM_CHARACTER_TYPES = 6; // You have 6 rows of characters
+    private final int NUM_HAIR_TYPES = 6; // Assuming 6 hair types (adjust as needed)
 
     // --- Animation Storage ---
     // Character animations
@@ -37,6 +39,13 @@ public class CharecterAssets {
     private Animation<TextureRegion>[] walkRightAnims;
     private Animation<TextureRegion>[] walkUpAnims;
     private TextureRegion[] idleFrames;
+    
+    // Hair animations
+    private Animation<TextureRegion>[] hairWalkDownAnims;
+    private Animation<TextureRegion>[] hairWalkLeftAnims;
+    private Animation<TextureRegion>[] hairWalkRightAnims;
+    private Animation<TextureRegion>[] hairWalkUpAnims;
+    private TextureRegion[] hairIdleFrames;
     
     // Clothing animations - organized by outfit path and row
     private Map<String, Animation<TextureRegion>[]> outfitWalkDownAnims;
@@ -50,6 +59,9 @@ public class CharecterAssets {
         // Initialize character sheet
         characterSheet = new Texture("Character/MetroCity/CharacterModel/Character Model.png");
         
+        // Initialize hair sheet
+        hairSheet = new Texture("Character/MetroCity/Hair/Hairs.png");
+        
         // Initialize outfit textures map
         outfitTextures = new HashMap<>();
         
@@ -59,6 +71,13 @@ public class CharecterAssets {
         walkRightAnims = new Animation[NUM_CHARACTER_TYPES];
         walkUpAnims = new Animation[NUM_CHARACTER_TYPES];
         idleFrames = new TextureRegion[NUM_CHARACTER_TYPES * 4];
+        
+        // Initialize hair animation arrays
+        hairWalkDownAnims = new Animation[NUM_HAIR_TYPES];
+        hairWalkLeftAnims = new Animation[NUM_HAIR_TYPES];
+        hairWalkRightAnims = new Animation[NUM_HAIR_TYPES];
+        hairWalkUpAnims = new Animation[NUM_HAIR_TYPES];
+        hairIdleFrames = new TextureRegion[NUM_HAIR_TYPES * 4];
         
         // Initialize outfit animation maps
         outfitWalkDownAnims = new HashMap<>();
@@ -75,10 +94,49 @@ public class CharecterAssets {
             }
         }
         
+        // Load hair animations
+        TextureRegion[][] allHairFrames = extractFramesManually(hairSheet);
+        for (int i = 0; i < NUM_HAIR_TYPES; i++) {
+            if (i < allHairFrames.length) {
+                createHairAnimationsForType(i, allHairFrames[i]);
+            }
+        }
+        
         // Load outfit animations
         loadOutfitAnimations();
         
-        System.out.println("Character assets loaded with clothing system.");
+        System.out.println("Character assets loaded with hair and clothing system.");
+    }
+    
+    private void createHairAnimationsForType(int hairIndex, TextureRegion[] frames) {
+        final int FRAMES_PER_DIRECTION = 6;
+        if (frames.length < FRAMES_PER_DIRECTION * 4) {
+            System.err.println("Not enough frames for hair type " + hairIndex);
+            return;
+        }
+
+        // Extract frames for each direction
+        TextureRegion[] downFrames = new TextureRegion[6];
+        TextureRegion[] rightFrames = new TextureRegion[6];
+        TextureRegion[] upFrames = new TextureRegion[6];
+        TextureRegion[] leftFrames = new TextureRegion[6];
+        
+        System.arraycopy(frames, 0, downFrames, 0, 6);      // Down: 0-5
+        System.arraycopy(frames, 6, rightFrames, 0, 6);     // Right: 6-11
+        System.arraycopy(frames, 12, upFrames, 0, 6);       // Up: 12-17
+        System.arraycopy(frames, 18, leftFrames, 0, 6);     // Left: 18-23
+
+        // Create walking animations
+        hairWalkDownAnims[hairIndex] = new Animation<>(0.1f, downFrames);
+        hairWalkRightAnims[hairIndex] = new Animation<>(0.1f, rightFrames);
+        hairWalkUpAnims[hairIndex] = new Animation<>(0.1f, upFrames);
+        hairWalkLeftAnims[hairIndex] = new Animation<>(0.1f, leftFrames);
+
+        // Store the idle frames
+        hairIdleFrames[hairIndex * 4 + 0] = frames[0];  // Down
+        hairIdleFrames[hairIndex * 4 + 1] = frames[18]; // Left
+        hairIdleFrames[hairIndex * 4 + 2] = frames[6];  // Right
+        hairIdleFrames[hairIndex * 4 + 3] = frames[12]; // Up
     }
     
     private void loadOutfitAnimations() {
@@ -227,6 +285,24 @@ public class CharecterAssets {
     }
     
     /**
+     * Gets the walking animation for hair based on hair type.
+     */
+    public Animation<TextureRegion> getHairWalkAnimation(int hairType, Direction direction) {
+        // /*DEBUG */ hairType =4;
+        if (hairType <= 0 || hairType > NUM_HAIR_TYPES) return null; // Hair type 0 = no hair
+        
+        int hairIndex = hairType - 1; // Convert to 0-based index
+        
+        switch (direction) {
+            case DOWN: return hairWalkDownAnims[hairIndex];
+            case LEFT: return hairWalkLeftAnims[hairIndex];
+            case RIGHT: return hairWalkRightAnims[hairIndex];
+            case UP: return hairWalkUpAnims[hairIndex];
+            default: return null;
+        }
+    }
+    
+    /**
      * Gets the walking animation for clothing based on ClothesContainer.
      */
     public Animation<TextureRegion> getClothingWalkAnimation(ClothesContainer clothes, Direction direction) {
@@ -259,6 +335,7 @@ public class CharecterAssets {
      * Gets the idle frame for a specific character type and direction.
      */
     public TextureRegion getIdleFrame(int characterType, Direction direction) {
+        // /*DEBUG*/ characterType =1;
         if (characterType < 0 || characterType >= NUM_CHARACTER_TYPES) return null;
         
         int index = characterType * 4;
@@ -268,6 +345,26 @@ public class CharecterAssets {
             case RIGHT: return idleFrames[index + 2];
             case UP: return idleFrames[index + 3];
             default: return idleFrames[index + 0];
+        }
+    }
+    
+    /**
+     * Gets the idle frame for hair based on hair type.
+     */
+    public TextureRegion getHairIdleFrame(int hairType, Direction direction) {
+        if (hairType <= 0 || hairType > NUM_HAIR_TYPES) return null; // Hair type 0 = no hair
+        
+        int hairIndex = hairType - 1; // Convert to 0-based index
+        int index = hairIndex * 4;
+        
+        if (index >= hairIdleFrames.length) return null;
+        
+        switch (direction) {
+            case DOWN: return hairIdleFrames[index + 0];
+            case LEFT: return hairIdleFrames[index + 1];
+            case RIGHT: return hairIdleFrames[index + 2];
+            case UP: return hairIdleFrames[index + 3];
+            default: return hairIdleFrames[index + 0];
         }
     }
     
@@ -324,6 +421,10 @@ public class CharecterAssets {
     public void dispose() {
         if (characterSheet != null) {
             characterSheet.dispose();
+        }
+        
+        if (hairSheet != null) {
+            hairSheet.dispose();
         }
         
         // Dispose all outfit textures

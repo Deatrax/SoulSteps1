@@ -7,8 +7,10 @@ import com.badlogic.gdx.math.Vector2;
 
 /**
  * An abstract base class for all characters in the game (Player, Enemies, NPCs).
- * Now supports clothing system with ClothesContainer.
+ * Now supports hair and clothing system with ClothesContainer.
  * Demonstrates core OOP principles: abstraction, encapsulation, inheritance.
+ * 
+ * Rendering order: Character Base → Hair → Clothing
  */
 public abstract class Character {
     protected CharecterAssets assets;
@@ -20,7 +22,7 @@ public abstract class Character {
     protected boolean isMoving;
     protected int characterType;
     protected float speed;
-    protected ClothesContainer clothes; // New clothing system
+    protected ClothesContainer clothes; // Clothing system including hair
     
     // --- Game-specific properties for SoulSteps ---
     protected String name;
@@ -37,7 +39,7 @@ public abstract class Character {
         this.isMoving = false;
         this.health = 100; // Default health
         this.isInteractable = false;
-        this.clothes = new ClothesContainer(); // Default: no outfit
+        this.clothes = new ClothesContainer(); // Default: no outfit or hair
     }
     
     public Character(CharecterAssets assets, int characterType, float startX, float startY, float speed, ClothesContainer clothes) {
@@ -60,14 +62,20 @@ public abstract class Character {
     public abstract void update(float delta);
     
     /**
-     * Shared rendering logic for all characters with clothing support
+     * Shared rendering logic for all characters with hair and clothing support
+     * Rendering order: Character Base → Hair → Clothing
      * Demonstrates code reuse through inheritance
      */
     public void render(Batch batch) {
-        // Render base character first
+        // Layer 1: Render base character
         renderCharacterLayer(batch);
         
-        // Render clothing on top if present
+        // Layer 2: Render hair on top of character if present
+        if (clothes.hairType != 0) {
+            renderHairLayer(batch);
+        }
+        
+        // Layer 3: Render clothing on top if present
         if (clothes.outfitType != 0) {
             renderClothingLayer(batch);
         }
@@ -98,7 +106,31 @@ public abstract class Character {
     }
     
     /**
-     * Render the clothing layer on top of character
+     * Render the hair layer on top of character
+     */
+    private void renderHairLayer(Batch batch) {
+        TextureRegion hairFrame;
+        
+        if (isMoving) {
+            Animation<TextureRegion> hairAnimation = assets.getHairWalkAnimation(this.clothes.hairType, this.currentDir);
+            if (hairAnimation != null) {
+                hairFrame = hairAnimation.getKeyFrame(stateTime, true);
+            } else {
+                hairFrame = assets.getHairIdleFrame(this.clothes.hairType, this.currentDir);
+            }
+        } else {
+            hairFrame = assets.getHairIdleFrame(this.clothes.hairType, this.currentDir);
+        }
+        
+        if (hairFrame != null) {
+            float drawX = position.x - hairFrame.getRegionWidth() / 2f;
+            float drawY = position.y;
+            batch.draw(hairFrame, drawX, drawY);
+        }
+    }
+    
+    /**
+     * Render the clothing layer on top of hair
      */
     private void renderClothingLayer(Batch batch) {
         TextureRegion clothingFrame;
@@ -146,17 +178,33 @@ public abstract class Character {
         }
     }
     
-    // --- Clothing methods ---
+    // --- Hair and Clothing methods ---
+    public void changeHair(int hairType) {
+        this.clothes.hairType = hairType;
+    }
+    
     public void changeOutfit(int outfitType) {
         this.clothes.outfitType = outfitType;
     }
     
-    public void changeOutfit(ClothesContainer newClothes) {
+    public void changeAppearance(ClothesContainer newClothes) {
         this.clothes = newClothes != null ? newClothes : new ClothesContainer();
+    }
+    
+    public void removeHair() {
+        this.clothes.hairType = 0;
     }
     
     public void removeOutfit() {
         this.clothes.outfitType = 0;
+    }
+    
+    public void changeAccessory(int accessoryType) {
+        this.clothes.accessoryType = accessoryType;
+    }
+    
+    public void changeModel(int modelType) {
+        this.clothes.modelType = modelType;
     }
     
     // --- Getters and Setters (Encapsulation) ---
