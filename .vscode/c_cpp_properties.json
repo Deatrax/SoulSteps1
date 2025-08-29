@@ -1,0 +1,72 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "${workspaceFolder}/ALL  HTML/**",
+                "${workspaceFolder}/BFINE TRADING/**",
+                "${workspaceFolder}/C programming/**",
+                "${workspaceFolder}/ChatGPT/**",
+                "${workspaceFolder}/CP/**",
+                "${workspaceFolder}/JAVA/**",
+                "${workspaceFolder}/MCFUNCTION/**",
+                "${workspaceFolder}/Personal Projects/**",
+                "${workspaceFolder}/Problems by friends/**",
+                "${workspaceFolder}/Experimentation lab/**",
+                "${workspaceFolder}/system Scripting /**",
+                "${workspaceFolder}/UNI-IUT coding/**",
+                "/opt/homebrew/Cellar/openssl@3/3.3.2/**",
+                "/Users/sadmanshaharier/Documents/CODING - Mac/git repo projects/codenheimer",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/include/**",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/lib/QtCore.framework/Versions/A/Headers/**",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/lib",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/bin",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/include",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/lib/QtWidgets.framework/Versions/A/Headers",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/lib/QtGui.framework/Versions/A/Headers",
+                "/Users/sadmanshaharier/Qt/6.7.0/macos/lib/QtCore.framework/Versions/A/Headers",
+                "/Users/sadmanshaharier/Documents/CODING - Mac/git repo projects/build-codenheimer-Qt_6_7_0_for_macOS-Debug"
+            ],
+            "defines": [
+                "QT_CORE_LIB",
+                "QT_GUI_LIB",
+                "QT_WIDGETS_LIB"
+            ],
+            "macFrameworkPath": [
+                "/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/System/Library/Frameworks"
+            ],
+            "compilerPath": "/usr/bin/clang++",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "macos-clang-arm64"
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/**",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/lib/**",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/bin/**",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/**",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/QtCore",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/QtGui",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/QtWidgets",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/include/QtNetwork",
+                "E:/1.DEVELOPMENT/1.Qt/6.7.0/mingw_64/mkspecs/win32-g++",
+                "${workspaceFolder}/Qt/Qt_projects/testing openSSL/openSSL_Test/openssl_libs/mac/include",
+                "E:/1.DEVELOPMENT/My Git repo projects/codenheimer/main_stuff/build-codenheimer-Desktop_Qt_6_7_0_MinGW_64_bit-Release"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
+            "cStandard": "c17",
+            "cppStandard": "c++20",
+            "intelliSenseMode": "windows-gcc-x64",
+            "compilerPath": "C:/Program Files/CodeBlocks/MinGW/bin/g++.exe"
+        }
+    ],
+    "version": 4
+}

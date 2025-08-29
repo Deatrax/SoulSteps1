@@ -1,101 +1,190 @@
 package com.DMA173.soulsteps;
 
-import java.util.ArrayList;
-
+import com.DMA173.soulsteps.Charecters.CharecterAssets;
+import com.DMA173.soulsteps.Charecters.Player;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
-import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.math.Vector3;
 
+/**
+ * FirstScreen handles the main game rendering and update loop.
+ * Input handling is delegated to InputHandler class.
+ * Demonstrates separation of concerns in OOP design.
+ */
 public class FirstScreen extends ScreenAdapter {
-
-    OrthographicCamera camera;
-    TiledMap map;
-    OrthogonalTiledMapRenderer renderer;
-
-    Texture playerTex;
-    Vector2 playerPos;
-    float speed = 100;
-
-    ArrayList<Rectangle> collisionRects = new ArrayList<>();
-    SpriteBatch batch;
+    // Rendering components
+    private OrthographicCamera camera;
+    private TiledMap map;
+    private OrthogonalTiledMapRenderer mapRenderer;
+    private SpriteBatch batch;
+    
+    // Game objects
+    private Player elian;
+    private CharecterAssets characterAssets;
+    
+    // Input handling
+    private InputHandler inputHandler;
+    
+    // Map layers
+    private int[] backgroundLayers = new int[]{0}; // ground/roads
+    private int[] foregroundLayers = new int[]{1, 2, 3, 4, 5, 6}; // decorations/buildings
 
     @Override
     public void show() {
-        batch = new SpriteBatch();
+        initializeCamera();
+        initializeMap();
+        initializeRendering();
+        initializePlayer();
+        initializeInput();
+        
+        System.out.println("SoulSteps - Game initialized successfully!");
+        System.out.println("Controls: WASD/Arrow Keys - Move, E - Interact, I - Inventory, ESC - Menu");
+        System.out.println("Camera: +/- - Zoom, F3 - Toggle Debug Mode");
+    }
+    
+    private void initializeCamera() {
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1600, 1200);
+        camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+        camera.zoom = 0.5f; // Start zoomed in for better visibility
+    }
+    
+    private void initializeMap() {
+        map = new TmxMapLoader().load("Tile_City.tmx");
+        mapRenderer = new OrthogonalTiledMapRenderer(map);
+    }
+    
+    private void initializeRendering() {
+        batch = new SpriteBatch();
+    }
+    
+    private void initializePlayer() {
+        // Get map dimensions for player positioning
+        float mapWidth = map.getProperties().get("width", Integer.class)
+                * map.getProperties().get("tilewidth", Integer.class);
+        float mapHeight = map.getProperties().get("height", Integer.class)
+                * map.getProperties().get("tileheight", Integer.class);
 
-        map = new TmxMapLoader().load("mymap.tmx"); // Put your map in assets folder
-        renderer = new OrthogonalTiledMapRenderer(map);
+        // Initialize character assets and create Elian
+        characterAssets = new CharecterAssets();
+        characterAssets.init();
+        
+        // Create Elian at the center of the map
+        elian = new Player(characterAssets, mapWidth / 2f, mapHeight / 2f);
 
-        playerTex = new Texture("player.png");
-        playerPos = new Vector2(100, 100);
-
-        MapLayer collisionLayer = map.getLayers().get("Collisions");
-        if (collisionLayer != null) {
-            for (MapObject object : collisionLayer.getObjects()) {
-                if (object instanceof RectangleMapObject) {
-                    Rectangle rect = ((RectangleMapObject) object).getRectangle();
-                    collisionRects.add(rect);
-                }
-            }
-        }
+        // Position camera initially on player
+        camera.position.set(elian.getPosition().x, elian.getPosition().y, 0);
+        camera.update();
+    }
+    
+    private void initializeInput() {
+        // Create input handler with dependencies
+        inputHandler = new InputHandler(camera, elian);
     }
 
     @Override
     public void render(float delta) {
-                ScreenUtils.clear(Color.BLACK);
-        Vector2 oldPos = new Vector2(playerPos);
+        // Handle input first
+        inputHandler.handleInput(delta);
         
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT))  playerPos.x -= speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) playerPos.x += speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.UP))    playerPos.y += speed * delta;
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN))  playerPos.y -= speed * delta;
-
-        // Rectangle playerRect = new Rectangle(playerPos.x, playerPos.y, playerTex.getWidth(), playerTex.getHeight());
-        // for (Rectangle rect : collisionRects) {
-        //     if (playerRect.overlaps(rect)) {
-        //         playerPos.set(oldPos);
-        //         break;
-        //     }
-        // }
-
-        // camera.position.set(playerPos.x + playerTex.getWidth() / 2f, playerPos.y + playerTex.getHeight() / 2f, 0);
+        // Update game objects
+        updateGame(delta);
+        
+        // Update camera
+        updateCamera();
+        
+        // Render everything
+        renderGame();
+    }
+    
+    private void updateGame(float delta) {
+        // Update Elian
+        elian.update(delta);
+        
+        // TODO: Update other game objects (NPCs, animations, etc.)
+    }
+    
+    private void updateCamera() {
+        // Make camera follow Elian smoothly
+        Vector2 elianPos = elian.getPosition();
+        
+        // Option 1: Smooth camera following with lerp (CORRECTED)
+        float cameraSpeed = 8.0f;
+        Vector3 targetPosition = new Vector3(elianPos.x, elianPos.y, 0);
+        camera.position.lerp(targetPosition, cameraSpeed * Gdx.graphics.getDeltaTime());
+        
+        // Option 2: Direct camera following (simpler, no smoothing)
+        // camera.position.set(elianPos.x, elianPos.y, 0);
+        
         camera.update();
+    }
 
-        renderer.setView(camera);
-        renderer.render();
+    
+    private void renderGame() {
+        // Clear screen
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Set up map renderer
+        mapRenderer.setView(camera);
         
+        // Render background layers (ground, roads)
+        mapRenderer.render(backgroundLayers);
+
+        // Render characters
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-
-        float scale = 50f; // Scale down player to 30%
-        batch.draw(playerTex, playerPos.x, playerPos.y,
-                playerTex.getWidth() * scale, playerTex.getHeight() * scale);
-
+        elian.render(batch);
+        // TODO: Render NPCs and other characters here
         batch.end();
-        renderer.getBatch().begin();
-        renderer.getBatch().draw(playerTex, playerPos.x, playerPos.y);
-        renderer.getBatch().end();
+
+        // Render foreground layers (buildings, decorations)
+        mapRenderer.render(foregroundLayers);
+        
+        // TODO: Render UI elements here (kindness bar, inventory, etc.)
+    }
+
+    @Override
+    public void resize(int width, int height) {
+        camera.viewportWidth = width;
+        camera.viewportHeight = height;
+        camera.update();
     }
 
     @Override
     public void dispose() {
-        map.dispose();
-        renderer.dispose();
-        playerTex.dispose();
+        // Dispose of resources in reverse order of creation
+        if (characterAssets != null) {
+            characterAssets.dispose();
+        }
+        
+        if (batch != null) {
+            batch.dispose();
+        }
+        
+        if (mapRenderer != null) {
+            mapRenderer.dispose();
+        }
+        
+        if (map != null) {
+            map.dispose();
+        }
+        
+        System.out.println("SoulSteps - Resources disposed successfully!");
+    }
+    
+    // Getter methods for debugging or external access
+    public Player getPlayer() {
+        return elian;
+    }
+    
+    public InputHandler getInputHandler() {
+        return inputHandler;
     }
 }
