@@ -2,7 +2,7 @@ package com.DMA173.soulsteps;
 
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.ui.UIManager;
-import com.DMA173.soulsteps.world.WorldManager; // <-- CHANGE IMPORT
+import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -11,27 +11,26 @@ public class InputHandler {
     private OrthographicCamera camera;
     private Player player;
     private UIManager uiManager;
-    private WorldManager worldManager; // <-- CHANGED from NPCManager
+    private WorldManager worldManager;
     private Boolean debugMode = true;
 
-    public InputHandler(OrthographicCamera camera, Player player, UIManager uiManager, WorldManager worldManager) { // <--
-                                                                                                                    // CHANGED
+    public InputHandler(OrthographicCamera camera, Player player, UIManager uiManager, WorldManager worldManager) {
         this.camera = camera;
         this.player = player;
         this.uiManager = uiManager;
-        this.worldManager = worldManager; // <-- CHANGED
+        this.worldManager = worldManager;
     }
 
     public void handleInput(float delta) {
-        if (uiManager.isPaused()) {
-            handlePauseMenuInput();
-            return;
+        // Check if any menu is active - if so, don't handle game input
+        if (uiManager.isAnyMenuActive()) {
+            return; // Let the menu system handle all input
         }
 
         handleUIInput();
         handlePlayerMovement(delta);
         handleCameraControls(delta);
-        handleInteractions(); // This method now uses worldManager
+        handleInteractions();
 
         if(debugMode){
             handleDebugControls();
@@ -41,7 +40,7 @@ public class InputHandler {
     private void handleInteractions() {
         // Interaction press
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            boolean interacted = worldManager.handleInteraction(player); // <-- CHANGED
+            boolean interacted = worldManager.handleInteraction(player);
             if (interacted) {
                 uiManager.setInteractionHint("");
             } else {
@@ -50,7 +49,7 @@ public class InputHandler {
         }
 
         // Interaction hint update
-        String hint = worldManager.getInteractionHint(player); // <-- CHANGED
+        String hint = worldManager.getInteractionHint(player);
         if (hint != null) {
             uiManager.setInteractionHint(hint);
         } else {
@@ -62,9 +61,9 @@ public class InputHandler {
             handleInventoryInput();
         }
 
-        // Pause/Menu key
+        // Pause/Menu key - Updated to use new menu system
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            handlePauseInput();
+            uiManager.showPauseMenu();
         }
 
         // Toggle debug mode
@@ -85,17 +84,6 @@ public class InputHandler {
     }
 
     /**
-     * Handle pause/menu input (Escape key)
-     */
-    private void handlePauseInput() {
-        System.out.println("Escape pressed - opening pause menu");
-        // TODO: Implement pause menu
-        // - Show pause menu UI
-        // - Pause game logic
-        // - Provide save/load options
-    }
-
-    /**
      * Debug method to print all player statistics
      */
     private void printPlayerStats() {
@@ -111,18 +99,13 @@ public class InputHandler {
         System.out.println("==================");
     }
 
-    // ... (keep all other methods like handlePlayerMovement, handlePauseMenuInput,
-    // etc. exactly as they were in your original file)
-    private void handlePauseMenuInput() {
-        /* ... your original code ... */ 
-    }
-
     private void handleUIInput() {
-        /* ... your original code ... */ 
+        // Additional UI controls can go here
     }
 
     private void handlePlayerMovement(float delta) {
-        /* ... your original code ... */ 
+        // Player movement is now handled in the Player class itself
+        // This method is kept for potential future movement restrictions or special cases
     }
 
     private void handleCameraControls(float delta) {
@@ -140,18 +123,7 @@ public class InputHandler {
     }
 
     public boolean isPaused() {
-        return uiManager.isPaused();
-    }
-
-    /**
-     * Handle interaction input (E key)
-     */
-    private void handleInteractionInput() {
-        System.out.println("Interaction key pressed - looking for nearby objects/NPCs");
-        // TODO: Implement interaction system
-        // - Check for nearby NPCs
-        // - Check for interactable objects
-        // - Trigger dialogue or object interaction
+        return uiManager.isAnyMenuActive();
     }
 
     /**
@@ -192,6 +164,10 @@ public class InputHandler {
         if (Gdx.input.isKeyJustPressed(Input.Keys.P)) {
             printPlayerStats();
         }
-    }
 
+        // Debug: Show main menu
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+            uiManager.showPauseMenu();
+        }
+    }
 }

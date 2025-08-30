@@ -3,7 +3,7 @@ package com.DMA173.soulsteps;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.ui.UIManager;
-import com.DMA173.soulsteps.world.WorldManager; // <-- ADD IMPORT
+import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
@@ -48,25 +48,31 @@ public class FirstScreen extends ScreenAdapter {
         elian = new Player(characterAssets, mapWidth / 2f, mapHeight / 2f);
 
         uiManager = new UIManager();
-        inputHandler = new InputHandler(camera, elian, uiManager, worldManager); // Pass worldManager
+        inputHandler = new InputHandler(camera, elian, uiManager, worldManager);
         
         System.out.println("SoulSteps - Game initialized successfully with new manager system!");
     }
 
     @Override
     public void render(float delta) {
+        // Update UI system (including menus)
+        uiManager.update(delta);
+        
+        // Handle input
         inputHandler.handleInput(delta);
         
+        // Only update game logic if not paused by menus
         if (!inputHandler.isPaused()) {
             elian.update(delta);
-            worldManager.update(delta); // Update the world (NPCs inside are updated)
+            worldManager.update(delta);
             updateCamera();
         }
         
+        // Clear screen
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // Always make sure the map renderer has the latest map from the world manager
+        // Always render game world (even when paused for visual feedback)
         mapRenderer.setMap(worldManager.getCurrentMap());
         mapRenderer.setView(camera);
         
@@ -76,14 +82,14 @@ public class FirstScreen extends ScreenAdapter {
         // Render characters
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        worldManager.getCurrentNpcManager().render(batch); // Render NPCs from the current zone
+        worldManager.getCurrentNpcManager().render(batch);
         elian.render(batch);
         batch.end();
 
         // Render foreground
         mapRenderer.render(new int[]{1, 2, 3, 4, 5, 6});
         
-        // Render UI on top
+        // Render UI and menus on top
         uiManager.render(elian);
     }
     

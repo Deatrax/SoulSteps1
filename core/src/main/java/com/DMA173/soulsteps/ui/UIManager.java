@@ -10,7 +10,8 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
 
 /**
- * Manages all UI elements that should remain fixed to the screen.
+ * Manages in-game UI elements that should remain fixed to the screen.
+ * Now works alongside MenuManager for comprehensive UI management.
  * Uses a separate camera for UI rendering independent of world camera.
  */
 public class UIManager {
@@ -21,8 +22,10 @@ public class UIManager {
     private ShapeRenderer shapeRenderer;
     private BitmapFont font;
     
+    // Menu integration
+    private MenuManager menuManager;
+    
     // UI State
-    private boolean isPaused = false;
     private boolean showDebugInfo = false;
     private String currentObjective = "Investigate the water supply system";
     private String interactionHint = "";
@@ -39,10 +42,11 @@ public class UIManager {
     private static final Color KINDNESS_COLOR = Color.CYAN;
     private static final Color BAR_BACKGROUND = Color.DARK_GRAY;
     private static final Color OBJECTIVE_COLOR = Color.YELLOW;
-    private static final Color PAUSE_OVERLAY = new Color(0, 0, 0, 0.7f);
     
     public UIManager() {
         initializeUI();
+        menuManager = new MenuManager();
+        menuManager.hideAllMenus(); // Start with menus hidden in game
     }
     
     private void initializeUI() {
@@ -62,24 +66,42 @@ public class UIManager {
     }
     
     /**
-     * Render all UI elements
+     * Update UI logic including menu handling
+     */
+    public void update(float delta) {
+        if (menuManager != null) {
+            menuManager.update(delta);
+        }
+    }
+    
+    /**
+     * Render all UI elements including menus when active
      */
     public void render(Player player) {
         // Set UI camera projection
         uiBatch.setProjectionMatrix(uiCamera.combined);
         shapeRenderer.setProjectionMatrix(uiCamera.combined);
         
-        // Render UI elements
+        // Only render game UI if no menu is active
+        if (!menuManager.isMenuActive()) {
+            renderGameUI(player);
+        }
+        
+        // Always render menu system (it handles its own visibility)
+        if (menuManager != null) {
+            menuManager.render();
+        }
+    }
+    
+    /**
+     * Render in-game UI elements (health, kindness, objectives, etc.)
+     */
+    private void renderGameUI(Player player) {
         renderHealthBar(player);
         renderKindnessBar(player);
         renderObjectiveText();
         renderInteractionHint();
         renderDebugInfo(player);
-        
-        // Render pause menu if paused
-        if (isPaused) {
-            renderPauseMenu();
-        }
     }
     
     private void renderHealthBar(Player player) {
@@ -165,40 +187,38 @@ public class UIManager {
         uiBatch.end();
     }
     
-    private void renderPauseMenu() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(PAUSE_OVERLAY);
-        shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        shapeRenderer.end();
-        
-        uiBatch.begin();
-        font.setColor(Color.WHITE);
-        
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f;
-        
-        font.getData().setScale(2f);
-        font.draw(uiBatch, "GAME PAUSED", centerX, centerY + 100, 0, Align.center, false);
-        
-        font.getData().setScale(1.5f);
-        font.draw(uiBatch, "ESC - Resume Game", centerX, centerY + 20, 0, Align.center, false);
-        font.draw(uiBatch, "R - Restart (Not Implemented)", centerX, centerY - 20, 0, Align.center, false);
-        font.draw(uiBatch, "Q - Quit to Menu (Not Implemented)", centerX, centerY - 60, 0, Align.center, false);
-        
-        font.getData().setScale(1.2f);
-        uiBatch.end();
-    }
-    
     public void resize(int width, int height) {
         uiCamera.viewportWidth = width;
         uiCamera.viewportHeight = height;
         uiCamera.update();
+        
+        if (menuManager != null) {
+            menuManager.resize(width, height);
+        }
+    }
+    
+    // --- Menu Integration Methods ---
+    public void showPauseMenu() {
+        if (menuManager != null) {
+            menuManager.showPauseMenu();
+        }
+    }
+    
+    public void hidePauseMenu() {
+        if (menuManager != null) {
+            menuManager.hideAllMenus();
+        }
+    }
+    
+    public boolean isPaused() {
+        return menuManager != null && menuManager.isPauseMenuActive();
+    }
+    
+    public boolean isAnyMenuActive() {
+        return menuManager != null && menuManager.isMenuActive();
     }
     
     // --- UI State Management Methods ---
-    public void togglePause() { isPaused = !isPaused; }
-    public void setPaused(boolean paused) { isPaused = paused; }
-    public boolean isPaused() { return isPaused; }
     public void toggleDebugMode() { showDebugInfo = !showDebugInfo; }
     public void setObjective(String objective) { this.currentObjective = objective; }
     public void setInteractionHint(String hint) { this.interactionHint = hint; }
@@ -206,12 +226,14 @@ public class UIManager {
     
     public void showNotification(String message) {
         System.out.println("NOTIFICATION: " + message);
-        // This is where you could add logic for animated floating text.
+        // TODO: Add animated floating text notifications here
+        // You can implement a queue of notifications with timers and positions
     }
     
     public void dispose() {
         if (uiBatch != null) uiBatch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
         if (font != null) font.dispose();
+        if (menuManager != null) menuManager.dispose();
     }
 }
