@@ -1,3 +1,5 @@
+// In theMain.java
+
 package com.DMA173.soulsteps;
 
 import com.badlogic.gdx.Game;
@@ -6,6 +8,9 @@ import com.badlogic.gdx.Game;
 public class theMain extends Game {
     @Override
     public void create() {
-        setScreen(new FirstScreen());
+        // --- CHANGE THIS LINE ---
+        // Old: setScreen(new FirstScreen());
+        // New:
+        setScreen(new MainMenuScreen(this)); 
     }
 }

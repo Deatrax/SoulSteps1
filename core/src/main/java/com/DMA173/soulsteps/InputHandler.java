@@ -1,5 +1,6 @@
 package com.DMA173.soulsteps;
 
+import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameState;
 import com.DMA173.soulsteps.ui.DialogueUI;
@@ -13,43 +14,41 @@ public class InputHandler extends InputAdapter {
     private Player player;
     private WorldManager worldManager;
     private DialogueUI dialogueUI;
+    private GameState gameState;
 
     public InputHandler(OrthographicCamera camera, Player player, WorldManager worldManager, DialogueUI dialogueUI) {
         this.camera = camera;
         this.player = player;
         this.worldManager = worldManager;
         this.dialogueUI = dialogueUI;
+        this.gameState = GameState.getInstance();
     }
 
     @Override
     public boolean keyDown(int keycode) {
-        // If the dialogue UI is active, it consumes the input first
+        // If the dialogue UI is active, it gets first priority for input.
+        // This is the fix for the freeze.
         if (dialogueUI.isActive()) {
             dialogueUI.handleInput(keycode);
             return true;
         }
 
-        // --- Game Controls ---
-        if (keycode == Input.Keys.E) {
-            worldManager.handleInteraction();
-            return true;
+        // If dialogue is not active, handle game world input.
+        switch (keycode) {
+            case Input.Keys.E:
+                NPC targetNpc = worldManager.findNearbyNpc(player.getPosition(), 60f);
+                if (targetNpc != null) {
+                    // Tell the NPC to handle its own interaction logic.
+                    targetNpc.interact(gameState, dialogueUI, player);
+                }
+                return true;
+            // Add other controls like ESC for pause menu here if needed.
         }
-
-        // --- Debug Controls ---
-        if (keycode == Input.Keys.F5) {
-            System.out.println("DEBUG: Current Chapter: " + GameState.getInstance().getCurrentChapter());
-        }
-        if (keycode == Input.Keys.F7) {
-             System.out.println("DEBUG: Unlocking residential_area");
-             GameState.getInstance().unlockZone("residential_area");
-        }
-
-        return false; // Input not handled
+        return false;
     }
-
+    
     @Override
     public boolean scrolled(float amountX, float amountY) {
-        // Zoom with mouse wheel
         camera.zoom += amountY * 0.1f;
         camera.zoom = Math.max(0.2f, Math.min(2.0f, camera.zoom));
         return true;
