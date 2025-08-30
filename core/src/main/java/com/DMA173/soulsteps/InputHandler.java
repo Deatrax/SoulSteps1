@@ -5,21 +5,23 @@ import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager; // <-- CHANGE IMPORT
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputAdapter;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
-public class InputHandler {
+public class InputHandler extends InputAdapter  {
     private OrthographicCamera camera;
     private Player player;
     private UIManager uiManager;
     private WorldManager worldManager; // <-- CHANGED from NPCManager
     private Boolean debugMode = true;
+    private FirstScreen gameScreen; // A reference to the screen to pause it
 
-    public InputHandler(OrthographicCamera camera, Player player, UIManager uiManager, WorldManager worldManager) { // <--
-                                                                                                                    // CHANGED
+     public InputHandler(OrthographicCamera camera, Player player, UIManager uiManager, WorldManager worldManager, FirstScreen gameScreen) {
         this.camera = camera;
         this.player = player;
         this.uiManager = uiManager;
-        this.worldManager = worldManager; // <-- CHANGED
+        this.worldManager = worldManager;
+        this.gameScreen = gameScreen;
     }
 
     public void handleInput(float delta) {
@@ -31,13 +33,64 @@ public class InputHandler {
         handleUIInput();
         handlePlayerMovement(delta);
         handleCameraControls(delta);
-        handleInteractions(); // This method now uses worldManager
+        //handleInteractions(); // This method now uses worldManager
+        updateInteractionHints();
 
         if(debugMode){
             handleDebugControls();
         }
     }
+    
 
+    @Override
+    public boolean keyDown(int keycode) {
+
+        // Pause/Menu key
+        if (keycode == Input.Keys.ESCAPE) {
+            gameScreen.setPaused(true);
+            handlePauseInput();
+            return true;
+        }
+
+        if (keycode == Input.Keys.E) {
+            boolean interacted = worldManager.handleInteraction(player);
+            if (!interacted) {
+                uiManager.showNotification("Nothing to interact with here.");
+            }
+            return true;
+        }
+        
+        if (keycode == Input.Keys.F3) {
+            uiManager.toggleDebugMode();
+            return true;
+        }
+
+         // Inventory key
+        if (keycode == Input.Keys.I) {
+            handleInventoryInput();
+        }
+
+       
+        if (keycode == Input.Keys.ESCAPE) {
+            handlePauseInput();
+        }
+
+        
+        return false;
+    }
+
+    private void updateInteractionHints() {
+        String hint = worldManager.getInteractionHint(player);
+        if (hint != null) {
+            uiManager.setInteractionHint(hint);
+        } else {
+            uiManager.clearInteractionHint();
+        }
+    }
+
+    /*
+     * Old version of handle inteaction deprecated by keyDown();
+     */@Deprecated
     private void handleInteractions() {
         // Interaction press
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
@@ -78,8 +131,8 @@ public class InputHandler {
      * Handle inventory input (I key)
      */
     private void handleInventoryInput() {
-        System.out.println("Inventory key pressed - opening inventory");
-        // TODO: Implement inventory system
+        if(debugMode) System.out.println("Inventory key pressed - opening inventory");
+        // $TODO: Implement inventory system
         // - Show inventory UI
         // - Display collected items and evidence
     }
@@ -88,8 +141,8 @@ public class InputHandler {
      * Handle pause/menu input (Escape key)
      */
     private void handlePauseInput() {
-        System.out.println("Escape pressed - opening pause menu");
-        // TODO: Implement pause menu
+        if(debugMode) System.out.println("Escape pressed - opening pause menu");
+        // $TODO: Implement pause menu
         // - Show pause menu UI
         // - Pause game logic
         // - Provide save/load options
@@ -143,16 +196,7 @@ public class InputHandler {
         return uiManager.isPaused();
     }
 
-    /**
-     * Handle interaction input (E key)
-     */
-    private void handleInteractionInput() {
-        System.out.println("Interaction key pressed - looking for nearby objects/NPCs");
-        // TODO: Implement interaction system
-        // - Check for nearby NPCs
-        // - Check for interactable objects
-        // - Trigger dialogue or object interaction
-    }
+    
 
     /**
      * Handles debug-only input (remove in final version)
