@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Align;
  * Manages all game menus including Main Menu, Pause Menu, Settings, etc.
  * Designed to easily support background images and button sprites later.
  */
-public class MenuManager {
+public class mainMenuBackend {
     
     public enum MenuState {
         MAIN_MENU,
@@ -59,7 +59,7 @@ public class MenuManager {
     private final Color BUTTON_TEXT_COLOR = Color.WHITE;
     private final Color MENU_OVERLAY = new Color(0, 0, 0, 0.8f);
     
-    public MenuManager() {
+    public mainMenuBackend() {
         currentMenuState = MenuState.MAIN_MENU;
         selectedOption = 0;
         buttonPressTimer = 0;

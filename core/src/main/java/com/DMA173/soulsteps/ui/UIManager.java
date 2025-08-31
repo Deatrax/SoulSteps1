@@ -23,7 +23,7 @@ public class UIManager {
     private BitmapFont font;
     
     // Menu integration
-    private MenuManager menuManager;
+    private mainMenuBackend menuManager;
     
     // UI State
     private boolean showDebugInfo = false;
@@ -45,7 +45,7 @@ public class UIManager {
     
     public UIManager() {
         initializeUI();
-        menuManager = new MenuManager();
+        menuManager = new mainMenuBackend();
         menuManager.hideAllMenus(); // Start with menus hidden in game
     }
     
