@@ -5,7 +5,7 @@ import com.badlogic.gdx.Game;
 public class theMain extends Game {
     @Override
     public void create() {
-        // This now starts your game on the Main Menu screen.
+        // The game now starts on a dedicated main menu screen.
         setScreen(new MainMenuScreen(this));
     }
 }

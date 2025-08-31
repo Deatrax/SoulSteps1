@@ -1,217 +1,157 @@
 package com.DMA173.soulsteps.ui;
 
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.MainMenuScreen;
+import com.DMA173.soulsteps.story.GameStateManager;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Window;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
-/**
- * Manages all UI elements that should remain fixed to the screen.
- * Uses a separate camera for UI rendering independent of world camera.
- */
 public class UIManager {
+    private Game game;
+    private Stage stage;
+    private Skin skin;
+
+    // HUD Actors
+    private Label healthLabel;
+    private Label kindnessLabel;
+    private Label objectiveLabel;
+    private Label interactionLabel;
+    private Label debugLabel;
     
-    // UI Camera (separate from game world camera)
-    private OrthographicCamera uiCamera;
-    private SpriteBatch uiBatch;
-    private ShapeRenderer shapeRenderer;
-    private BitmapFont font;
-    
-    // UI State
+    // Pause Menu Actors
+    private Window pauseWindow;
     private boolean isPaused = false;
-    private boolean showDebugInfo = false;
-    private String currentObjective = "Investigate the water supply system";
-    private String interactionHint = "";
     
-    // UI Layout constants
-    private static final float HEALTH_BAR_WIDTH = 200f;
-    private static final float HEALTH_BAR_HEIGHT = 20f;
-    private static final float KINDNESS_BAR_WIDTH = 200f;
-    private static final float KINDNESS_BAR_HEIGHT = 20f;
-    private static final float UI_MARGIN = 20f;
-    
-    // Colors
-    private static final Color HEALTH_COLOR = Color.RED;
-    private static final Color KINDNESS_COLOR = Color.CYAN;
-    private static final Color BAR_BACKGROUND = Color.DARK_GRAY;
-    private static final Color OBJECTIVE_COLOR = Color.YELLOW;
-    private static final Color PAUSE_OVERLAY = new Color(0, 0, 0, 0.7f);
-    
-    public UIManager() {
-        initializeUI();
+    public UIManager(Game game) {
+        this.game = game;
+        stage = new Stage(new ScreenViewport());
+        createSkin();
+        buildHud();
+        buildPauseMenu();
     }
     
-    private void initializeUI() {
-        // Create UI camera that doesn't move with the world
-        uiCamera = new OrthographicCamera();
-        uiCamera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        
-        // UI rendering tools
-        uiBatch = new SpriteBatch();
-        shapeRenderer = new ShapeRenderer();
-        
-        // Load font
-        font = new BitmapFont(); // Default font
-        font.getData().setScale(1.2f); // Make text bigger
-        
-        System.out.println("UI Manager initialized");
+    private void createSkin() {
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json")); // Using the default skin
     }
     
-    /**
-     * Render all UI elements
-     */
+    private void buildHud() {
+        Table hudTable = new Table();
+        hudTable.setFillParent(true);
+        hudTable.top().left(); // Anchor to the top-left
+
+        healthLabel = new Label("Health:", skin);
+        kindnessLabel = new Label("Kindness:", skin);
+        objectiveLabel = new Label("Objective:", skin);
+        interactionLabel = new Label("", skin);
+        debugLabel = new Label("", skin);
+
+        hudTable.add(healthLabel).left().pad(10);
+        hudTable.row();
+        hudTable.add(kindnessLabel).left().pad(10);
+        hudTable.row();
+        hudTable.add(objectiveLabel).left().pad(10).width(300); // Give it width for wrapping
+        
+        // Another table for centered/bottom elements
+        Table bottomTable = new Table();
+        bottomTable.setFillParent(true);
+        bottomTable.bottom();
+        bottomTable.add(interactionLabel).pad(20);
+
+        stage.addActor(hudTable);
+        stage.addActor(bottomTable);
+    }
+    
+    private void buildPauseMenu() {
+        pauseWindow = new Window("PAUSED", skin);
+        pauseWindow.setSize(300, 250);
+        pauseWindow.setMovable(false);
+
+        TextButton resumeButton = new TextButton("Resume", skin);
+        TextButton mainMenuButton = new TextButton("Main Menu", skin);
+        TextButton exitButton = new TextButton("Exit Game", skin);
+        
+        pauseWindow.add(resumeButton).fillX().pad(5).row();
+        pauseWindow.add(mainMenuButton).fillX().pad(5).row();
+        pauseWindow.add(exitButton).fillX().pad(5);
+        
+        resumeButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                hideAllMenus();
+            }
+        });
+        mainMenuButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new MainMenuScreen(game));
+            }
+        });
+        exitButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                Gdx.app.exit();
+            }
+        });
+
+        pauseWindow.setVisible(false); // Start hidden
+        stage.addActor(pauseWindow);
+    }
+    
     public void render(Player player) {
-        // Set UI camera projection
-        uiBatch.setProjectionMatrix(uiCamera.combined);
-        shapeRenderer.setProjectionMatrix(uiCamera.combined);
+        updateHud(player);
+        stage.act(Gdx.graphics.getDeltaTime());
+        stage.draw();
         
-        // Render UI elements
-        renderHealthBar(player);
-        renderKindnessBar(player);
-        renderObjectiveText();
-        renderInteractionHint();
-        renderDebugInfo(player);
+    }
+    
+    private void updateHud(Player player) {
+        healthLabel.setText("Health: " + player.getHealth() + " / 100");
+        kindnessLabel.setText("Kindness: " + player.getKindnessLevel() + " / 100");
         
-        // Render pause menu if paused
-        if (isPaused) {
-            renderPauseMenu();
+        GameStateManager gsm = GameStateManager.getInstance();
+        if (gsm.hasCompletedObjective(GameStateManager.OBJ_TALK_TO_LENA)) {
+            objectiveLabel.setText("Objective: Find the main water valve.");
+        } else {
+            objectiveLabel.setText("Objective: Find and talk to Lena.");
         }
     }
-    
-    private void renderHealthBar(Player player) {
-        float x = UI_MARGIN;
-        float y = Gdx.graphics.getHeight() - UI_MARGIN - HEALTH_BAR_HEIGHT;
-        
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(BAR_BACKGROUND);
-        shapeRenderer.rect(x, y, HEALTH_BAR_WIDTH, HEALTH_BAR_HEIGHT);
-        
-        float healthPercent = player.getHealth() / 100f;
-        shapeRenderer.setColor(HEALTH_COLOR);
-        shapeRenderer.rect(x, y, HEALTH_BAR_WIDTH * healthPercent, HEALTH_BAR_HEIGHT);
-        shapeRenderer.end();
-        
-        uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, "Health: " + player.getHealth() + "/100", x, y + HEALTH_BAR_HEIGHT + 15);
-        uiBatch.end();
-    }
-    
-    private void renderKindnessBar(Player player) {
-        float x = UI_MARGIN;
-        float y = Gdx.graphics.getHeight() - UI_MARGIN - HEALTH_BAR_HEIGHT - 60;
-        
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(BAR_BACKGROUND);
-        shapeRenderer.rect(x, y, KINDNESS_BAR_WIDTH, KINDNESS_BAR_HEIGHT);
-        
-        float kindnessPercent = player.getKindnessPercentage();
-        Color kindnessColor = player.isDangerZoneActive() ? Color.ORANGE : KINDNESS_COLOR;
-        shapeRenderer.setColor(kindnessColor);
-        shapeRenderer.rect(x, y, KINDNESS_BAR_WIDTH * kindnessPercent, KINDNESS_BAR_HEIGHT);
-        shapeRenderer.end();
-        
-        uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, "Kindness: " + player.getKindnessLevel() + "/100", x, y + KINDNESS_BAR_HEIGHT + 15);
-        
-        if (player.isDangerZoneActive()) {
-            font.setColor(Color.RED);
-            font.draw(uiBatch, "DANGER ZONE!", x, y - 10);
-        }
-        uiBatch.end();
-    }
-    
-    private void renderObjectiveText() {
-        if (currentObjective.isEmpty()) return;
-        
-        float x = UI_MARGIN;
-        float y = Gdx.graphics.getHeight() / 2f + 50;
-        
-        uiBatch.begin();
-        font.setColor(OBJECTIVE_COLOR);
-        font.draw(uiBatch, "OBJECTIVE:", x, y + 20);
-        font.draw(uiBatch, currentObjective, x, y, 300f, Align.left, true);
-        uiBatch.end();
-    }
-    
-    private void renderInteractionHint() {
-        if (interactionHint.isEmpty()) return;
-        
-        float x = Gdx.graphics.getWidth() / 2f;
-        float y = 60;
-        
-        uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, interactionHint, x, y, 0, Align.center, false);
-        uiBatch.end();
-    }
-    
-    private void renderDebugInfo(Player player) {
-        if (!showDebugInfo) return;
-        
-        float x = Gdx.graphics.getWidth() - 250;
-        float y = Gdx.graphics.getHeight() - 30;
-        
-        uiBatch.begin();
-        font.setColor(Color.GREEN);
-        font.draw(uiBatch, "Player Pos: " + String.format("%.1f, %.1f", player.getPosition().x, player.getPosition().y), x, y);
-        font.draw(uiBatch, "Evidence: " + player.getEvidenceCount(), x, y - 20);
-        font.draw(uiBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), x, y - 40);
-        uiBatch.end();
-    }
-    
-    private void renderPauseMenu() {
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(PAUSE_OVERLAY);
-        shapeRenderer.rect(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        shapeRenderer.end();
-        
-        uiBatch.begin();
-        font.setColor(Color.WHITE);
-        
-        float centerX = Gdx.graphics.getWidth() / 2f;
-        float centerY = Gdx.graphics.getHeight() / 2f;
-        
-        font.getData().setScale(2f);
-        font.draw(uiBatch, "GAME PAUSED", centerX, centerY + 100, 0, Align.center, false);
-        
-        font.getData().setScale(1.5f);
-        font.draw(uiBatch, "ESC - Resume Game", centerX, centerY + 20, 0, Align.center, false);
-        font.draw(uiBatch, "R - Restart (Not Implemented)", centerX, centerY - 20, 0, Align.center, false);
-        font.draw(uiBatch, "Q - Quit to Menu (Not Implemented)", centerX, centerY - 60, 0, Align.center, false);
-        
-        font.getData().setScale(1.2f);
-        uiBatch.end();
-    }
-    
+
     public void resize(int width, int height) {
-        uiCamera.viewportWidth = width;
-        uiCamera.viewportHeight = height;
-        uiCamera.update();
+        stage.getViewport().update(width, height, true);
+        pauseWindow.setPosition(width / 2f - pauseWindow.getWidth() / 2, height / 2f - pauseWindow.getHeight() / 2);
     }
     
-    // --- UI State Management Methods ---
-    public void togglePause() { isPaused = !isPaused; }
-    public void setPaused(boolean paused) { isPaused = paused; }
-    public boolean isPaused() { return isPaused; }
-    public void toggleDebugMode() { showDebugInfo = !showDebugInfo; }
-    public void setObjective(String objective) { this.currentObjective = objective; }
-    public void setInteractionHint(String hint) { this.interactionHint = hint; }
-    public void clearInteractionHint() { this.interactionHint = ""; }
+    public void showPauseMenu() {
+        isPaused = true;
+        pauseWindow.setVisible(true);
+        Gdx.input.setInputProcessor(stage); // Let the stage handle clicks
+    }
     
-    public void showNotification(String message) {
-        System.out.println("NOTIFICATION: " + message);
-        // This is where you could add logic for animated floating text.
+    public void hideAllMenus() {
+        isPaused = false;
+        pauseWindow.setVisible(false);
+        // We will set the input processor back in FirstScreen or InputHandler
+    }
+
+    public boolean isAnyMenuActive() {
+        return isPaused;
+    }
+    
+    public void setInteractionHint(String hint) {
+        interactionLabel.setText(hint != null ? hint : "");
     }
     
     public void dispose() {
-        if (uiBatch != null) uiBatch.dispose();
-        if (shapeRenderer != null) shapeRenderer.dispose();
-        if (font != null) font.dispose();
+        stage.dispose();
+        skin.dispose();
     }
 }

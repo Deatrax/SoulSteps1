@@ -15,6 +15,10 @@ public class GameStateManager {
     private Set<String> completedObjectives;
     private Map<String, Boolean> storyFlags;
 
+    // Use public static final strings for objective IDs to avoid typos
+    public static final String OBJ_TALK_TO_LENA = "talked_to_lena_first_time";
+    public static final String OBJ_FIND_LIMITER = "find_the_water_limiter";
+
     private GameStateManager() {
         completedObjectives = new HashSet<>();
         storyFlags = new HashMap<>();
@@ -60,5 +64,6 @@ public class GameStateManager {
         completedObjectives.clear();
         storyFlags.clear();
         System.out.println("[STORY] Game State Reset.");
+        setFlag("limiter_found", false); // Add a new flag
     }
 }

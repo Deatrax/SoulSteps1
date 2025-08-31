@@ -158,7 +158,7 @@ public abstract class Character {
     }
     
     // --- Movement methods for shared functionality ---
-    protected void moveInDirection(CharecterAssets.Direction direction, float delta) {
+    public void moveInDirection(CharecterAssets.Direction direction, float delta) {
         this.currentDir = direction;
         this.isMoving = true;
         
