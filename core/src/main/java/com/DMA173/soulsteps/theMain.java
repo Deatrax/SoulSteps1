@@ -6,6 +6,8 @@ import com.badlogic.gdx.Game;
 public class theMain extends Game {
     @Override
     public void create() {
-        setScreen(new FirstScreen());
+        setScreen(new ObjectFinder(this));
+
+        //setScreen(new FirstScreen(this));
     }
 }
