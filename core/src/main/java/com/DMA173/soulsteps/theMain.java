@@ -3,13 +3,14 @@ package com.DMA173.soulsteps;
 import com.badlogic.gdx.Game;
 
 /** 
- * Updated main class to start with menu screen instead of directly into game.
- * The menu will handle transitioning to the game screen.
+ * Updated main class that properly handles screen transitions.
+ * Starts with menu screen and properly manages game flow.
  */
 public class theMain extends Game {
     @Override
     public void create() {
-        // Start with the menu screen instead of directly into the game
+        // Start with the menu screen
         setScreen(new MenuScreen(this));
+        System.out.println("SoulSteps game started with new menu system");
     }
 }

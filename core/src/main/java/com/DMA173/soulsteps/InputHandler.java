@@ -7,6 +7,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 
+/**
+ * Updated InputHandler that works properly with the new menu system.
+ * No longer manages its own menu backend.
+ */
 public class InputHandler {
     private OrthographicCamera camera;
     private Player player;
@@ -61,7 +65,7 @@ public class InputHandler {
             handleInventoryInput();
         }
 
-        // Pause/Menu key - Updated to use new menu system
+        // Pause/Menu key - Now properly shows pause menu
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             uiManager.showPauseMenu();
         }
@@ -69,7 +73,7 @@ public class InputHandler {
         // Toggle debug mode
         if (Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
             debugMode = !debugMode;
-            System.out.println("Debug mode: " + (debugMode ? "ON" : "OFF"));
+            uiManager.toggleDebugMode();
         }
     }
 
@@ -165,7 +169,7 @@ public class InputHandler {
             printPlayerStats();
         }
 
-        // Debug: Show main menu
+        // Debug: Show pause menu (alternative to ESC)
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             uiManager.showPauseMenu();
         }

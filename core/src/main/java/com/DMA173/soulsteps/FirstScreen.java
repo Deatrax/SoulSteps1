@@ -4,6 +4,7 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
@@ -12,7 +13,12 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector3;
 
+/**
+ * Updated FirstScreen that properly integrates with the new menu system.
+ * Now passes the Game reference for proper screen transitions.
+ */
 public class FirstScreen extends ScreenAdapter {
+    private Game game;
     private OrthographicCamera camera;
     private OrthogonalTiledMapRenderer mapRenderer;
     private SpriteBatch batch;
@@ -24,6 +30,10 @@ public class FirstScreen extends ScreenAdapter {
     
     // --- NEW MANAGER SYSTEM ---
     private WorldManager worldManager;
+    
+    public FirstScreen(Game game) {
+        this.game = game;
+    }
     
     @Override
     public void show() {
@@ -47,15 +57,15 @@ public class FirstScreen extends ScreenAdapter {
         float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * 32;
         elian = new Player(characterAssets, mapWidth / 2f, mapHeight / 2f);
 
-        uiManager = new UIManager();
+        uiManager = new UIManager(game); // Pass game reference for menu transitions
         inputHandler = new InputHandler(camera, elian, uiManager, worldManager);
         
-        System.out.println("SoulSteps - Game initialized successfully with new manager system!");
+        System.out.println("SoulSteps - Game initialized successfully with updated menu system!");
     }
 
     @Override
     public void render(float delta) {
-        // Update UI system (including menus)
+        // Update UI system first (including menus)
         uiManager.update(delta);
         
         // Handle input
