@@ -23,7 +23,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class FirstScreen implements Screen {
-    private Game game;
+    private final Game game;
     private OrthographicCamera camera;
     private OrthogonalTiledMapRenderer mapRenderer;
     private SpriteBatch batch;
@@ -47,7 +47,7 @@ public class FirstScreen implements Screen {
     public void show() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 0.5f;
+        camera.zoom = 0.3f;
 
         batch = new SpriteBatch();
         characterAssets = new CharecterAssets();

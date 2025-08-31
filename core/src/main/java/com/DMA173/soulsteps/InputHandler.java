@@ -79,6 +79,9 @@ public class InputHandler extends InputAdapter  {
         return false;
     }
 
+    /*
+     * Gets the nearest interaction hint from the world manager and then sets using uiManager
+     */
     private void updateInteractionHints() {
         String hint = worldManager.getInteractionHint(player);
         if (hint != null) {
@@ -139,7 +142,8 @@ public class InputHandler extends InputAdapter  {
 
     /**
      * Handle pause/menu input (Escape key)
-     */
+     * #Deprecated because the pause input is being handled within keyDown 
+     */ @Deprecated //
     private void handlePauseInput() {
         if(debugMode) System.out.println("Escape pressed - opening pause menu");
         // $TODO: Implement pause menu
@@ -166,18 +170,25 @@ public class InputHandler extends InputAdapter  {
 
     // ... (keep all other methods like handlePlayerMovement, handlePauseMenuInput,
     // etc. exactly as they were in your original file)
+    @Deprecated //as the pause menu interactions are being handled by pause menu itself by listeners
     private void handlePauseMenuInput() {
         /* ... your original code ... */ 
     }
 
+    
     private void handleUIInput() {
         /* ... your original code ... */ 
     }
 
+    @Deprecated //this is here but the player movement is also being processed by the  Player class itself
     private void handlePlayerMovement(float delta) {
         /* ... your original code ... */ 
     }
 
+
+    /*
+     * Is used to control the zoom of the screen 
+     */
     private void handleCameraControls(float delta) {
         // Zoom controls
         if (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
@@ -189,7 +200,7 @@ public class InputHandler extends InputAdapter  {
         }
 
         // Clamp zoom to reasonable values
-        camera.zoom = Math.max(0.2f, Math.min(2.0f, camera.zoom));
+        camera.zoom = Math.max(0.2f, Math.min(1.0f, camera.zoom));
     }
 
     public boolean isPaused() {
