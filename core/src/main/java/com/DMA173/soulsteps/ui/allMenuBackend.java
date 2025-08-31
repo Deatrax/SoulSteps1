@@ -14,7 +14,7 @@ import com.badlogic.gdx.utils.Align;
  * Manages all game menus including Main Menu, Pause Menu, Settings, etc.
  * Designed to easily support background images and button sprites later.
  */
-public class mainMenuBackend {
+public class allMenuBackend {
     
     public enum MenuState {
         MAIN_MENU,
@@ -59,7 +59,7 @@ public class mainMenuBackend {
     private final Color BUTTON_TEXT_COLOR = Color.WHITE;
     private final Color MENU_OVERLAY = new Color(0, 0, 0, 0.8f);
     
-    public mainMenuBackend() {
+    public allMenuBackend() {
         currentMenuState = MenuState.MAIN_MENU;
         selectedOption = 0;
         buttonPressTimer = 0;
@@ -91,16 +91,16 @@ public class mainMenuBackend {
     private void loadMenuAssets() {
         // PLACEHOLDER: Load background textures
         // Uncomment and modify these lines when you have PNG backgrounds:
-        /*
+        
         try {
-            mainMenuBackground = new Texture("ui/backgrounds/main_menu_bg.png");
-            pauseMenuBackground = new Texture("ui/backgrounds/pause_menu_bg.png");
-            settingsMenuBackground = new Texture("ui/backgrounds/settings_menu_bg.png");
-            creditsMenuBackground = new Texture("ui/backgrounds/credits_menu_bg.png");
+            mainMenuBackground = new Texture("ui/backgrounds/MainMenuBackgroundGemini1.png");
+            pauseMenuBackground = new Texture("ui/backgrounds/MainMenuBackgroundGemini1.png");
+            settingsMenuBackground = new Texture("ui/backgrounds/MainMenuBackgroundGemini1.png");
+            creditsMenuBackground = new Texture("ui/backgrounds/MainMenuBackgroundGemini1.png");
         } catch (Exception e) {
             System.out.println("Background textures not found, using solid colors");
         }
-        */
+        
         
         // PLACEHOLDER: Load button textures
         // Uncomment and modify these lines when you have PNG buttons:
@@ -476,11 +476,11 @@ public class mainMenuBackend {
     private void renderMenuBackground(Texture backgroundTexture, Color fallbackColor) {
         if (backgroundTexture != null) {
             // PLACEHOLDER: Render PNG background when available
-            /*
+            
             menuBatch.begin();
             menuBatch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             menuBatch.end();
-            */
+            
         } else {
             // Fallback: Solid color background
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);

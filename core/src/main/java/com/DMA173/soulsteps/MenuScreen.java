@@ -1,6 +1,6 @@
 package com.DMA173.soulsteps;
 
-import com.DMA173.soulsteps.ui.mainMenuBackend;
+import com.DMA173.soulsteps.ui.allMenuBackend;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -12,7 +12,7 @@ import com.badlogic.gdx.graphics.GL20;
  */
 public class MenuScreen extends ScreenAdapter {
     private Game game;
-    private mainMenuBackend menuBackend;
+    private allMenuBackend menuBackend;
     
     public MenuScreen(Game game) {
         this.game = game;
@@ -20,7 +20,7 @@ public class MenuScreen extends ScreenAdapter {
     
     @Override
     public void show() {
-        menuBackend = new mainMenuBackend();
+        menuBackend = new allMenuBackend();
         System.out.println("Menu Screen initialized");
     }
     
