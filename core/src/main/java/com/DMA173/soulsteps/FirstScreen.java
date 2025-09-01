@@ -1,141 +1,168 @@
 package com.DMA173.soulsteps;
 
+import com.DMA173.soulsteps.Charecters.CharecterAssets;
+import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
+import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 
+/**
+ * Updated FirstScreen that properly integrates with the new menu system.
+ * Now passes the Game reference for proper screen transitions.
+ */
 public class FirstScreen extends ScreenAdapter {
-
-    private final Game game;   // reference to main Game
-
+    private Game game;
     private OrthographicCamera camera;
-    private TiledMap map;
     private OrthogonalTiledMapRenderer mapRenderer;
-
     private SpriteBatch batch;
-    private Texture playerTex;
-    private Vector2 playerPos;
-    private float speed = 250f;
-
-    // Collision
+    
+    private Player elian;
+    private CharecterAssets characterAssets;
+    private UIManager uiManager;
+    private InputHandler inputHandler;
+    
+    private WorldManager worldManager;
+    private StoryProgressionManager storyManager;
+    
+    // --- MERGED: Features from teammate's code ---
     private TiledMapTileLayer collisionLayer;
     private float tileWidth, tileHeight;
-
-    // --- Define your map layers ---
-    private int[] backgroundLayers = new int[]{0}; // ground/roads
-    private int[] foregroundLayers = new int[]{1, 2, 3, 4, 5, 6}; //  for Tile_City.tmx
-    //private int[] foregroundLayers = new int[]{1, 2}; // for interior.tmx, office.tmx
+    private int[] backgroundLayers = new int[]{0};
+    private int[] foregroundLayers = new int[]{1, 2, 3, 4, 5, 6};
     
-
     public FirstScreen(Game game) {
         this.game = game;
     }
-
+    
     @Override
     public void show() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 0.5f; // zoom in
-
-        // Load the map
-        map = new TmxMapLoader().load("Tile_City.tmx");
-        mapRenderer = new OrthogonalTiledMapRenderer(map);
-
-        // Get the collision layer
-        collisionLayer = (TiledMapTileLayer) map.getLayers().get("Collision");
-        tileWidth = collisionLayer.getTileWidth();
-        tileHeight = collisionLayer.getTileHeight();
+        camera.zoom = 0.5f;
 
         batch = new SpriteBatch();
-        playerTex = new Texture("player.png");
+        characterAssets = new CharecterAssets();
+        characterAssets.init();
+        
+        worldManager = new WorldManager(characterAssets);
+        worldManager.loadZone("town_square");
+        
+        // The map renderer now gets its map from the world manager
+        mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 
-        // Get map size in pixels
-        float mapWidth = map.getProperties().get("width", Integer.class)
-                * map.getProperties().get("tilewidth", Integer.class);
-        float mapHeight = map.getProperties().get("height", Integer.class)
-                * map.getProperties().get("tileheight", Integer.class);
+        // MERGED: Initialize collision layer and tile properties after the map is loaded
+        System.out.println("entering collision init...");
+        initializeCollision();
 
-        // Start player at center of map
-        playerPos = new Vector2(mapWidth / 2f, mapHeight / 2f);
+        float mapWidth = worldManager.getCurrentMap().getProperties().get("width", Integer.class) * tileWidth;
+        float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * tileHeight;
+        elian = new Player(characterAssets, mapWidth / 2f, mapHeight / 2f);
+        elian.setCollisionLayer(collisionLayer); // MERGED: Give the player access to the collision layer
 
-        // Position camera initially
-        camera.position.set(playerPos.x, playerPos.y, 0);
-        camera.update();
+        uiManager = new UIManager(game);
+        inputHandler = new InputHandler(camera, elian, uiManager, worldManager);
+        
+        storyManager = new StoryProgressionManager(uiManager, worldManager);
+        inputHandler.setStoryManager(storyManager);
+        
+        System.out.println("SoulSteps - Game initialized successfully with MERGED collision and story systems!");
+    }
+    
+    // MERGED: New method to handle collision layer setup
+    private void initializeCollision() {
+        System.out.println("....initializing collision.....");
+        collisionLayer = (TiledMapTileLayer) worldManager.getCurrentMap().getLayers().get("Collision");
+        if (collisionLayer != null) {
+            tileWidth = collisionLayer.getTileWidth();
+            tileHeight = collisionLayer.getTileHeight();
+            System.out.println("Collision layer loaded successfully.");
+        } else {
+            System.out.println("WARNING: 'Collision' layer not found in map. Collision will not work.");
+            // Set default tile sizes to prevent crashes
+            tileWidth = 32;
+            tileHeight = 32;
+        }
     }
 
     @Override
     public void render(float delta) {
-        handleInput(delta);
-        checkTriggers();
-
-        // Make camera follow player
-        camera.position.set(playerPos.x, playerPos.y, 0);
-        camera.update();
-
-        // Clear screen
+        uiManager.update(delta);
+        inputHandler.handleInput(delta);
+        
+        if (!inputHandler.isPaused()) {
+            elian.update(delta);
+            worldManager.update(delta);
+            storyManager.update(delta, elian);
+            updateCamera();
+            
+            // MERGED: Check for map triggers
+            checkTriggers();
+        }
+        
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+        // MERGED: Check if the map has changed and update collision layer if it has
+        if (worldManager.hasMapChanged()) {
+            mapRenderer.setMap(worldManager.getCurrentMap());
+            initializeCollision(); // Reload collision for the new map
+            elian.setCollisionLayer(collisionLayer); // Update player's collision layer
+            worldManager.confirmMapChange(); // Reset the flag
+        }
+        
         mapRenderer.setView(camera);
-
-        // Render background layers
+        
         mapRenderer.render(backgroundLayers);
 
-        // Render foreground layers
-        mapRenderer.render(foregroundLayers);
-
-        // Render player
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        batch.draw(playerTex,
-                playerPos.x - playerTex.getWidth() / 2f,
-                playerPos.y - playerTex.getHeight() / 2f); // Centered
+        worldManager.getCurrentNpcManager().render(batch);
+        elian.render(batch);
         batch.end();
+
+        mapRenderer.render(foregroundLayers);
+        
+        uiManager.render(elian);
     }
+    
+    // MERGED: Trigger checking logic from your teammate
+    private void checkTriggers() {
+        MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
+        if (triggerLayer == null) return;
 
-    private void handleInput(float delta) {
-        float nextX = playerPos.x;
-        float nextY = playerPos.y;
+        for (MapObject obj : triggerLayer.getObjects()) {
+            if (obj instanceof RectangleMapObject) {
+                Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
 
-        if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            nextY += speed * delta;
+                if (triggerRect.contains(elian.getPosition())) {
+                    String type = obj.getProperties().get("type", String.class);
+                    if ("pipeGame".equals(type)) {
+                        System.out.println("Pipe game trigger activated!");
+                        // TODO: Implement the pipe game screen transition
+                        // game.setScreen(new PipeGameScreen(game, this)); // Example
+                    }
+                    // Add other trigger types here as needed
+                }
+            }
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            nextY -= speed * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            nextX -= speed * delta;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            nextX += speed * delta;
-        }
-
-        // Only move if not blocked
-        if (!isCellBlocked(nextX, nextY)) {
-            playerPos.set(nextX, nextY);
-        }
-
-        // Zoom
-        if (Gdx.input.isKeyPressed(Input.Keys.PLUS) || Gdx.input.isKeyPressed(Input.Keys.EQUALS)) {
-            camera.zoom -= 0.01f;
-        }
-        if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
-            camera.zoom += 0.01f;
-        }
+    }
+    
+    private void updateCamera() {
+        camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
+        camera.update();
     }
 
     private boolean isCellBlocked(float x, float y) {
@@ -158,42 +185,14 @@ public class FirstScreen extends ScreenAdapter {
         camera.viewportWidth = width;
         camera.viewportHeight = height;
         camera.update();
+        uiManager.resize(width, height);
     }
 
     @Override
     public void dispose() {
-        map.dispose();
-        mapRenderer.dispose();
-        playerTex.dispose();
         batch.dispose();
-    }
-
-    private void checkTriggers() {
-        MapLayer triggerLayer = map.getLayers().get("Triggers");
-        if (triggerLayer == null) return;
-
-        for (MapObject obj : triggerLayer.getObjects()) {
-            if (obj instanceof RectangleMapObject) {
-                RectangleMapObject rectObj = (RectangleMapObject) obj;
-                Rectangle rect = rectObj.getRectangle();
-
-                // Simple auto-trigger when player center enters the rectangle
-                if (rect.contains(playerPos.x, playerPos.y)) {
-                    String type = obj.getProperties().get("type", String.class);
-                    if ("pipeGame".equals(type)) {
-                        boolean launchOnce = obj.getProperties().containsKey("launchOnce")
-                                && (Boolean) obj.getProperties().get("launchOnce");
-                        if (launchOnce) {
-                            obj.getProperties().put("type", "used"); // disable retrigger
-                        }
-
-                        //game.setScreen(new PipeGameScreen(game)); // <-- fixed
-                        return;
-                    }
-                }
-            }
-        }
+        characterAssets.dispose();
+        worldManager.dispose();
+        uiManager.dispose();
     }
 }
-
-
