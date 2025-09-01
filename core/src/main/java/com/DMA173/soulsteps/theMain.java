@@ -14,5 +14,6 @@ public class theMain extends Game {
         System.out.println("SoulSteps game started with new menu system");
 
         ///setScreen(new ObjectFinder(this));
+        ///setScreen(new pipepuzzle());
     }
 }
