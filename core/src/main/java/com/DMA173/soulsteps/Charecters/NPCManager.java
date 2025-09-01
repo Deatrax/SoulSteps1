@@ -1,13 +1,17 @@
 package com.DMA173.soulsteps.Charecters;
 
-import com.DMA173.soulsteps.story.GameStateManager;
-import com.badlogic.gdx.graphics.g2d.Batch;
-import com.badlogic.gdx.math.Vector2;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.DMA173.soulsteps.story.GameStateManager;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.math.Vector2;
+
 /**
- * Manages NPCs for a SPECIFIC ZONE. It is created and controlled by the WorldManager.
+ * UPDATED NPC MANAGER
+ * 
+ * Now supports dynamic NPC loading and better integration with story system.
+ * Each zone can have different NPCs loaded dynamically.
  */
 public class NPCManager {
     private List<NPC> npcs;
@@ -19,25 +23,28 @@ public class NPCManager {
     }
 
     /**
-     * Loads the NPCs required for a given zone based on its ID.
+     * DEPRECATED: This method is now replaced by WorldManager.loadNpcsForZone()
+     * Keeping for backward compatibility, but NPCs should be loaded via WorldManager
      */
+    @Deprecated
     public void loadNpcsForZone(String zoneId) {
-        npcs.clear(); // Clear out NPCs from the previous zone
-
-        switch (zoneId) {
-            case "town_square":
-                // Create Lena only, as requested.
-                NPC lena = new NPC(assets, 1, 350, 250, "Lena", "ally");
-                lena.setDialogue("Elian! I've been looking for you. The water pressure is terrible!");
-                npcs.add(lena);
-                break;
-            
-            // You can add more cases for other zones later
-            // case "residential_area":
-            //     //...
-            //     break;
-        }
-        System.out.println("Loaded " + npcs.size() + " NPCs for zone '" + zoneId + "'.");
+        // This method is now handled by WorldManager
+        // See WorldManager.loadNpcsForZone() for NPC definitions
+    }
+    
+    /**
+     * Add a single NPC to this manager
+     * Used by WorldManager when setting up zones
+     */
+    public void addNPC(NPC npc) {
+        npcs.add(npc);
+    }
+    
+    /**
+     * Clear all NPCs (used when switching zones)
+     */
+    public void clearNPCs() {
+        npcs.clear();
     }
 
     public void update(float delta) {
@@ -53,7 +60,7 @@ public class NPCManager {
     }
     
     /**
-     * REFACTORED to pass the GameStateManager down to the NPC.
+     * Handle interaction with NPCs in this zone
      */
     public boolean handleInteraction(Player player, GameStateManager gsm) {
         NPC target = getNearbyInteractableNPC(player);
@@ -81,5 +88,49 @@ public class NPCManager {
 
     public List<NPC> getAllNPCs() {
         return npcs;
+    }
+    
+    /**
+     * Find NPC by name (useful for story-specific interactions)
+     */
+    public NPC getNPCByName(String name) {
+        for (NPC npc : npcs) {
+            if (npc.getName().equals(name)) {
+                return npc;
+            }
+        }
+        return null;
+    }
+    
+    /**
+     * Check if a specific NPC exists in this zone
+     */
+    public boolean hasNPC(String name) {
+        return getNPCByName(name) != null;
+    }
+    
+    /**
+     * Remove an NPC by name (useful for story events)
+     */
+    public boolean removeNPC(String name) {
+        NPC npc = getNPCByName(name);
+        if (npc != null) {
+            npcs.remove(npc);
+            System.out.println("[NPC] Removed NPC: " + name);
+            return true;
+        }
+        return false;
+    }
+    
+    /**
+     * Get count of NPCs in this zone
+     */
+    public int getNPCCount() {
+        return npcs.size();
+    }
+    
+    public void dispose() {
+        // NPCs don't need disposal, but keeping method for future use
+        npcs.clear();
     }
 }

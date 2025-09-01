@@ -250,7 +250,12 @@ public class UIManager {
     }
     
     public void setObjective(String objective) { 
-        this.currentObjective = objective; 
+        this.currentObjective = objective;
+        System.out.println("[UI] Objective updated: " + objective);
+    }
+    
+    public void updateObjective(String newObjective) {
+        setObjective(newObjective);
     }
     
     public void setInteractionHint(String hint) { 

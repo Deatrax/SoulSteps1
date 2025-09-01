@@ -4,6 +4,7 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -30,6 +31,7 @@ public class FirstScreen extends ScreenAdapter {
     
     // --- NEW MANAGER SYSTEM ---
     private WorldManager worldManager;
+    private StoryProgressionManager storyManager;
     
     public FirstScreen(Game game) {
         this.game = game;
@@ -60,6 +62,10 @@ public class FirstScreen extends ScreenAdapter {
         uiManager = new UIManager(game); // Pass game reference for menu transitions
         inputHandler = new InputHandler(camera, elian, uiManager, worldManager);
         
+        // --- INITIALIZE STORY SYSTEM ---
+        storyManager = new StoryProgressionManager(uiManager, worldManager);
+        inputHandler.setStoryManager(storyManager); // Give input handler access to story system
+        
         System.out.println("SoulSteps - Game initialized successfully with updated menu system!");
     }
 
@@ -75,6 +81,7 @@ public class FirstScreen extends ScreenAdapter {
         if (!inputHandler.isPaused()) {
             elian.update(delta);
             worldManager.update(delta);
+            storyManager.update(delta, elian); // Update story progression
             updateCamera();
         }
         
