@@ -2,6 +2,7 @@ package com.DMA173.soulsteps.Charecters;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 
 /**
  * The Player class represents Elian, the protagonist of SoulSteps.
@@ -18,6 +19,9 @@ public class Player extends Character {
     // --- Player inventory and interaction ---
     private boolean hasWaterLimiter;
     private int evidenceCount;
+
+    // MERGED: Add variables for collision detection
+    private TiledMapTileLayer collisionLayer;
     
     public Player(CharecterAssets assets, float startX, float startY) {
         // Use character type 3 for Elian's appearance with specific hair and clothing configuration
@@ -50,6 +54,11 @@ public class Player extends Character {
         this.evidenceCount = 0;
         this.isInteractable = false; // Player doesn't interact with himself
     }
+
+    // MERGED: A new method to give the player the collision layer from FirstScreen
+    public void setCollisionLayer(TiledMapTileLayer collisionLayer) {
+        this.collisionLayer = collisionLayer;
+    }
     
     /**
      * Implements the abstract update method with player-specific behavior
@@ -57,11 +66,18 @@ public class Player extends Character {
      */
     @Override
     public void update(float delta) {
+        // We no longer call handleInput from here, as the movement logic is now combined
+        // to include collision checks.
         updateStateTime(delta);
-        handleInput(delta);
+        
+        // MERGED: The movement logic is now inside the player's update loop
+        handleMovementWithCollision(delta);
+
         updateKindnessBar();
     }
     
+
+    /*  Old handleInput method
     private void handleInput(float delta) {
         boolean moved = false;
         
@@ -85,6 +101,87 @@ public class Player extends Character {
         
         this.setMoving(moved);
     }
+    */
+
+
+    // MERGED: This new method replaces your old `handleInput` and `moveInDirection` methods.
+    // It combines movement input with collision checking.
+    private void handleMovementWithCollision(float delta) {
+        boolean movedX = false;
+        boolean movedY = false;
+        
+        float oldX = position.x;
+        float oldY = position.y;
+        
+        // --- X-axis movement ---
+        if (Gdx.input.isKeyPressed(Input.Keys.A) || Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            position.x -= speed * delta;
+            setCurrentDir(CharecterAssets.Direction.LEFT);
+            movedX = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.D) || Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            position.x += speed * delta;
+            setCurrentDir(CharecterAssets.Direction.RIGHT);
+            movedX = true;
+        }
+        
+        // Check for X-axis collision
+        if (isCellBlocked(position.x, oldY)) {
+            position.x = oldX; // If blocked, revert X movement
+        }
+
+        // --- Y-axis movement ---
+        if (Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            position.y += speed * delta;
+            setCurrentDir(CharecterAssets.Direction.UP);
+            movedY = true;
+        }
+        if (Gdx.input.isKeyPressed(Input.Keys.S) || Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            position.y -= speed * delta;
+            setCurrentDir(CharecterAssets.Direction.DOWN);
+            movedY = true;
+        }
+        
+        // Check for Y-axis collision
+        if (isCellBlocked(position.x, position.y)) {
+            position.y = oldY; // If blocked, revert Y movement
+        }
+
+        // Update animation state
+        this.setMoving(movedX || movedY);
+    }
+
+    // MERGED: Collision checking logic from your teammate, adapted for this class
+    private boolean isCellBlocked(float x, float y) {
+        if (collisionLayer == null) {
+            return false; // If there's no collision layer, nothing is blocked
+        }
+
+        float tileWidth = collisionLayer.getTileWidth();
+        float tileHeight = collisionLayer.getTileHeight();
+
+        // Check the four corners of the player's bounding box for simplicity
+        // You can make this more precise later if needed
+        float playerWidth = 16; // Approximate width of your character sprite
+        float playerHeight = 16; // Approximate height
+
+        boolean bottomLeft = isTileBlocked(x - playerWidth / 2, y);
+        boolean bottomRight = isTileBlocked(x + playerWidth / 2, y);
+        boolean topLeft = isTileBlocked(x - playerWidth / 2, y + playerHeight);
+        boolean topRight = isTileBlocked(x + playerWidth / 2, y + playerHeight);
+
+        return bottomLeft || bottomRight || topLeft || topRight;
+    }
+
+
+    private boolean isTileBlocked(float x, float y) {
+        int cellX = (int) (x / collisionLayer.getTileWidth());
+        int cellY = (int) (y / collisionLayer.getTileHeight());
+
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(cellX, cellY);
+        return cell != null && cell.getTile() != null && cell.getTile().getProperties().containsKey("blocked");
+    }
+    
     
     // --- SoulSteps-specific methods ---
     public void adjustKindness(int amount) {

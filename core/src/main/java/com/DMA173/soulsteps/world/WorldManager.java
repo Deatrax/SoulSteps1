@@ -33,6 +33,9 @@ public class WorldManager {
     private GameStateManager gsm;
     private String currentZoneName; // Track which zone we're in
 
+    // MERGED: Add a flag to signal that the map has changed
+    private boolean mapChanged = false;
+
     public WorldManager(CharecterAssets assets) {
         this.characterAssets = assets;
         this.gsm = GameStateManager.getInstance();
@@ -68,6 +71,7 @@ public class WorldManager {
         // Create a new NPCManager and load the NPCs for this specific zone
         currentNpcManager = new NPCManager(characterAssets);
         loadNpcsForZone(zoneId);
+        this.mapChanged = true;
     }
     
     /**
@@ -149,6 +153,16 @@ public class WorldManager {
         
         System.out.println("[WORLD] Loaded " + currentNpcManager.getAllNPCs().size() + " NPCs for zone '" + zoneId + "'");
     }
+
+    // MERGED: Add these two new methods
+    public boolean hasMapChanged() {
+        return mapChanged;
+    }
+
+    public void confirmMapChange() {
+        this.mapChanged = false;
+    }
+
 
     public void update(float delta) {
         if (currentNpcManager != null) {
