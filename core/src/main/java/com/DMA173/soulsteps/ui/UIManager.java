@@ -1,11 +1,16 @@
 package com.DMA173.soulsteps.ui;
 
+import java.util.function.Consumer;
+
 import com.DMA173.soulsteps.Charecters.Player;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
@@ -43,6 +48,15 @@ public class UIManager {
     private static final Color KINDNESS_COLOR = Color.CYAN;
     private static final Color BAR_BACKGROUND = Color.DARK_GRAY;
     private static final Color OBJECTIVE_COLOR = Color.YELLOW;
+
+
+    // --- NEW: Dialogue Box System ---
+    private boolean isDialogueActive = false;
+    private String dialogueText;
+    private String speakerName;
+    private String[] dialogueChoices;
+    private Consumer<Integer> choiceCallback; // This will execute the choice
+    private Texture dialogueBoxTexture; // For your future PNG background
     
     public UIManager(Game game) {
         this.game = game;
@@ -65,6 +79,17 @@ public class UIManager {
         // Initialize pause menu
         pauseMenu = new PauseMenu(game);
         
+        // --- FUTURE ASSET LOADING FOR DIALOGUE BOX ---
+        // When you have a file like 'assets/ui/dialogue_box.png', uncomment this.
+        /*
+        try {
+            dialogueBoxTexture = new Texture(Gdx.files.internal("ui/dialogue_box.png"));
+        } catch (Exception e) {
+            System.err.println("Dialogue box texture not found. Using solid color.");
+            dialogueBoxTexture = null;
+        }
+        */
+
         System.out.println("UI Manager initialized with new menu system");
     }
     
@@ -97,8 +122,13 @@ public class UIManager {
         uiBatch.setProjectionMatrix(uiCamera.combined);
         shapeRenderer.setProjectionMatrix(uiCamera.combined);
         
-        // Always render game UI (health bars, objectives, etc.)
+        // Render the in-game HUD (health, objectives, etc)
         renderGameUI(player);
+
+        // --- NEW: Render the dialogue box if it's active ---
+        if (isDialogueActive) {
+            renderDialogueBox();
+        }
         
         // Render pause menu on top if active
         if (pauseMenu != null) {
@@ -271,6 +301,121 @@ public class UIManager {
         // TODO: Add animated floating text notifications here
         // You can implement a queue of notifications with timers and positions
     }
+
+
+
+     // --- NEW: Public methods to control the Dialogue Box ---
+
+    /**
+     * Shows a simple line of dialogue or narration.
+     * @param speaker The name of the character speaking (or null for narration).
+     * @param text The text to display.
+     */
+    public void showNarration(String speaker, String text) {
+        this.speakerName = speaker;
+        this.dialogueText = text;
+        this.dialogueChoices = null;
+        this.choiceCallback = null;
+        this.isDialogueActive = true;
+    }
+
+    /**
+     * Shows dialogue with multiple choices for the player.
+     * @param speaker The name of the character asking the question.
+     * @param text The question or prompt.
+     * @param choices An array of strings representing the choices.
+     * @param callback A function that will be executed with the player's choice (1, 2, 3...).
+     */
+    public void showChoice(String speaker, String text, String[] choices, Consumer<Integer> callback) {
+        this.speakerName = speaker;
+        this.dialogueText = text;
+        this.dialogueChoices = choices;
+        this.choiceCallback = callback;
+        this.isDialogueActive = true;
+    }
+
+    /**
+     * Hides the dialogue box.
+     */
+    public void hideDialogue() {
+        this.isDialogueActive = false;
+    }
+
+    /**
+     * The InputHandler will call this when the dialogue box is active.
+     */
+    public void handleDialogueInput() {
+        if (!isDialogueActive) return;
+
+        if (dialogueChoices != null) {
+            // Handle number key presses for choices
+            for (int i = 0; i < dialogueChoices.length; i++) {
+                if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i)) {
+                    choiceCallback.accept(i + 1); // Execute the chosen action
+                    hideDialogue();
+                    return;
+                }
+            }
+        } else {
+            // If it's just narration, any key press continues
+            if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.justTouched()) {
+                hideDialogue();
+            }
+        }
+    }
+
+    private void renderDialogueBox() {
+        float boxHeight = Gdx.graphics.getHeight() * 0.3f; // Box takes up bottom 30% of the screen
+        float boxY = 0;
+        float boxX = 0;
+        float padding = 20f;
+
+        // --- RENDER BACKGROUND ---
+        if (dialogueBoxTexture != null) {
+            // FUTURE: When you have a PNG, this will draw it.
+            // uiBatch.begin();
+            // uiBatch.draw(dialogueBoxTexture, boxX, boxY, Gdx.graphics.getWidth(), boxHeight);
+            // uiBatch.end();
+        } else {
+            // Fallback: A simple dark rectangle
+            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+            shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.85f);
+            shapeRenderer.rect(boxX, boxY, Gdx.graphics.getWidth(), boxHeight);
+            shapeRenderer.end();
+        }
+
+        // --- RENDER TEXT ---
+        uiBatch.begin();
+        // Speaker Name
+        if (speakerName != null && !speakerName.isEmpty()) {
+            font.setColor(Color.YELLOW);
+            font.draw(uiBatch, speakerName, boxX + padding, boxY + boxHeight - padding);
+        }
+
+        // Main Dialogue Text (with wrapping)
+        font.setColor(Color.WHITE);
+        GlyphLayout layout = new GlyphLayout(font, dialogueText, Color.WHITE, Gdx.graphics.getWidth() - (padding * 2), Align.left, true);
+        font.draw(uiBatch, layout, boxX + padding, boxY + boxHeight - padding - (speakerName != null ? 30 : 0));
+
+        // Choices or "Continue" prompt
+        if (dialogueChoices != null) {
+            float choiceY = boxY + padding + ((dialogueChoices.length - 1) * 25);
+            for (int i = 0; i < dialogueChoices.length; i++) {
+                font.draw(uiBatch, (i + 1) + ". " + dialogueChoices[i], boxX + padding, choiceY);
+                choiceY -= 25;
+            }
+        } else {
+            font.draw(uiBatch, "Press SPACE to continue...", Gdx.graphics.getWidth() - padding, boxY + padding, 0, Align.right, false);
+        }
+        uiBatch.end();
+    }
+    
+    // --- State Getters ---
+    public boolean isDialogueActive() {
+        return isDialogueActive;
+    }
+
+
     
     public void dispose() {
         if (uiBatch != null) uiBatch.dispose();

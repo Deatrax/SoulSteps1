@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 
@@ -62,10 +63,10 @@ public class NPCManager {
     /**
      * Handle interaction with NPCs in this zone
      */
-    public boolean handleInteraction(Player player, GameStateManager gsm) {
+    public boolean handleInteraction(Player player, GameStateManager gsm, UIManager uiManager) { // <-- Add UIManager
         NPC target = getNearbyInteractableNPC(player);
         if (target != null) {
-            target.interact(player, gsm);
+            target.interact(player, gsm, uiManager); // <-- Pass it to the NPC
             return true;
         }
         return false;

@@ -37,12 +37,20 @@ public class InputHandler {
     }
 
     public void handleInput(float delta) {
+
+        // --- NEW: Prioritize dialogue input ---
+        // If the dialogue box is active, it consumes all input and nothing else happens.
+        if (uiManager.isDialogueActive()) {
+            uiManager.handleDialogueInput();
+            return; 
+        }
+
         // Check if any menu is active - if so, don't handle game input
         if (uiManager.isAnyMenuActive()) {
             return; // Let the menu system handle all input
         }
 
-        handleUIInput();
+        //handleUIInput();
         handlePlayerMovement(delta);
         handleCameraControls(delta);
         handleInteractions();
@@ -58,9 +66,9 @@ public class InputHandler {
             boolean interactionHandled = false;
             
             // First try NPC interaction
-            boolean npcInteracted = worldManager.handleInteraction(player);
+            boolean npcInteracted = worldManager.handleInteraction(player, uiManager);
             if (npcInteracted) {
-                uiManager.setInteractionHint("");
+                uiManager.clearInteractionHint();
                 interactionHandled = true;
             }
             
@@ -146,6 +154,8 @@ public class InputHandler {
         System.out.println("==================");
     }
 
+    @SuppressWarnings("unused")
+	@Deprecated
     private void handleUIInput() {
         // Additional UI controls can go here
     }

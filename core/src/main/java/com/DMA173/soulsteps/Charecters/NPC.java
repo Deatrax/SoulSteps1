@@ -1,6 +1,7 @@
 package com.DMA173.soulsteps.Charecters;
 
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.ui.UIManager;
 
 /**
  * UPDATED NPC CLASS
@@ -56,84 +57,94 @@ public class NPC extends Character {
         this.setMoving(false);
     }
 
-    /**
-     * STORY-AWARE INTERACT METHOD
+     /**
+     * STORY-AWARE INTERACT METHOD (Refactored for On-Screen Dialogue)
      * 
-     * This method demonstrates how to create dynamic, story-responsive NPCs.
-     * Each NPC can have different behavior based on:
-     * - Current story objectives
-     * - Completed objectives
-     * - Story flags
-     * - Player stats (kindness, evidence, etc.)
-     * 
-     * EXAMPLES BELOW show different interaction patterns you can use.
+     * This method uses your original, detailed story logic and displays it
+     * using the UIManager's dialogue box instead of the console.
      */
-    public void interact(Player player, GameStateManager gsm) {
+    public void interact(Player player, GameStateManager gsm, UIManager uiManager) {
         
-        // EXAMPLE 1: Story-critical character (Lena)
-        if (this.name.equals("Lena")) {
-            handleLenaInteraction(player, gsm);
-            return;
+        // We use a switch on the NPC's name to route to the correct logic.
+        // This keeps the code organized as you add more important characters.
+        switch (this.name) {
+            case "Lena":
+                handleLenaInteraction(player, gsm, uiManager);
+                break;
+            
+            // FUTURE: Add other important NPCs here
+            // case "Ms. Chen":
+            //    handleReceptionistInteraction(player, gsm, uiManager);
+            //    break;
+
+            // ... etc.
+
+            default:
+                // For any other NPC that doesn't have special logic,
+                // just show their default dialogue line.
+                uiManager.showNarration(this.name, this.dialogue);
+                this.hasBeenTalkedTo = true;
+                break;
         }
-        
-        // EXAMPLE 2: Building receptionist with different responses
-        if (this.name.equals("Ms. Chen")) {
-            handleReceptionistInteraction(player, gsm);
-            return;
-        }
-        
-        // EXAMPLE 3: NPCs that respond to player's kindness level
-        if (this.npcType.equals("resident_casual") || this.npcType.equals("resident_formal")) {
-            handleResidentInteraction(player, gsm);
-            return;
-        }
-        
-        // EXAMPLE 4: Police NPCs that respond to evidence collection
-        if (this.npcType.equals("police")) {
-            handlePoliceInteraction(player, gsm);
-            return;
-        }
-        
-        // DEFAULT: Basic interaction for other NPCs
-        System.out.println(name + ": " + dialogue);
-        hasBeenTalkedTo = true;
     }
     
     /**
-     * EXAMPLE 1: Complex story-critical NPC interaction
-     * Shows how to create multi-stage conversations that progress the story
+     * Your original complex story logic for Lena, now using the UIManager.
      */
-    private void handleLenaInteraction(Player player, GameStateManager gsm) {
+    private void handleLenaInteraction(Player player, GameStateManager gsm, UIManager uiManager) {
+        
+        // FIRST MEETING: Introduces the problem and gives the player a choice.
         if (!gsm.hasCompletedObjective("talked_to_lena_first_time")) {
-            // FIRST MEETING: Introduces the problem
-            System.out.println("Lena: Elian! Thank goodness you're here. The water pressure in my apartment is terrible!");
-            System.out.println("Lena: I heard other residents complaining too. Something's not right with our water supply.");
-            System.out.println("Lena: Can you investigate? I think it might be connected to that new Veridia Corporation contract.");
             
-            player.adjustKindness(5); // Helping a friend increases kindness
-            gsm.completeObjective("talked_to_lena_first_time");
-            setDialogue("Did you find anything about the water system yet?");
-            
+            uiManager.showChoice(
+                "Lena", // Speaker
+                "Elian! Thank goodness. The water pressure is terrible. Could you investigate?", // Prompt
+                new String[] { "Of course. I'll look into it.", "I'm busy with other jobs right now." }, // Choices
+                (choice) -> {
+                    // This code runs AFTER the player makes a choice from the dialogue box.
+                    if (choice == 1) { // Chose to help
+                        player.adjustKindness(5);
+                        gsm.completeObjective("talked_to_lena_first_time");
+                        this.setDialogue("Did you find anything about the water system yet?");
+                        
+                        // Give the player their next objective via a narration box
+                        uiManager.showNarration(null, "New Objective: Investigate the water system.");
+                        
+                    } else { // Chose to refuse
+                        player.adjustKindness(-5);
+                        gsm.setFlag("refused_to_help_lena", true);
+                        this.setDialogue("If you change your mind, I'll be here.");
+                        
+                        uiManager.showNarration("Lena", "Oh... alright then.");
+                    }
+                }
+            );
+
+        // WAITING FOR EVIDENCE: Player has talked to Lena but hasn't found anything yet.
         } else if (!gsm.hasCompletedObjective("found_first_evidence") && player.getEvidenceCount() == 0) {
-            // WAITING FOR EVIDENCE: Encourages investigation
-            System.out.println("Lena: " + dialogue);
-            System.out.println("Lena: Try looking around town for any clues. Check near the water infrastructure.");
+            // This is a simple narration, no choice.
+            uiManager.showNarration("Lena", dialogue + " Try looking around town for clues.");
             
+        // PLAYER HAS EVIDENCE: React to the player's findings.
         } else if (player.getEvidenceCount() > 0 && !gsm.getFlag("lena_knows_evidence")) {
-            // PLAYER HAS EVIDENCE: React to findings
-            System.out.println("Lena: You found something? That's excellent work, Elian!");
-            System.out.println("Lena: This confirms my suspicions. You should investigate that Veridia building downtown.");
+            uiManager.showNarration("Lena", "You found something? Excellent work, Elian! You should investigate that Veridia building downtown.");
             
             player.adjustKindness(3);
             gsm.setFlag("lena_knows_evidence", true);
-            setDialogue("Be careful investigating Veridia. They're powerful people.");
+            this.setDialogue("Be careful investigating Veridia. They're powerful people.");
             
+        // ONGOING SUPPORT: General encouragement for the rest of the game.
         } else {
-            // ONGOING SUPPORT: General encouragement
-            System.out.println("Lena: " + dialogue);
+            uiManager.showNarration("Lena", this.dialogue);
+            
+            // You can even have conditional follow-up dialogue
             if (player.isDangerZoneActive()) {
-                System.out.println("Lena: You seem stressed, Elian. Remember to stay true to your values.");
-                player.adjustKindness(2); // Friend provides emotional support
+                // This will show up AFTER the player dismisses the first dialogue box.
+                // It makes the conversation feel more dynamic.
+                // Note: For a true multi-line conversation, you would build a more advanced dialogue queue system.
+                // For now, this is a simple way to add extra context.
+                // uiManager.showNarration("Lena", "You seem stressed, Elian. Remember to stay true to your values.");
+                // player.adjustKindness(2);
             }
         }
     }

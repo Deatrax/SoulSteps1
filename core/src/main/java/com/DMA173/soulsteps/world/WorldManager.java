@@ -5,6 +5,7 @@ import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 
@@ -173,9 +174,9 @@ public class WorldManager {
     /**
      * Delegates interaction to the current zone's NPCManager.
      */
-    public boolean handleInteraction(Player player) {
+    public boolean handleInteraction(Player player, UIManager uiManager) { // <-- Add UIManager here
         if (currentNpcManager != null) {
-            return currentNpcManager.handleInteraction(player, gsm);
+            return currentNpcManager.handleInteraction(player, gsm, uiManager); // <-- Pass it down
         }
         return false;
     }
