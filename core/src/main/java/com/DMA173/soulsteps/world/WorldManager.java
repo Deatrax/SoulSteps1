@@ -14,7 +14,7 @@ import com.badlogic.gdx.maps.tiled.TmxMapLoader;
  * Now supports the story progression system with zone tracking and easier map management.
  * 
  * HOW TO ADD NEW MAPS:
- * 1. Create your .tmx file in assets/maps/[zonename].tmx
+ * 1. Create your .tmx file in assets/[zonename].tmx
  * 2. Add NPCs for the zone in loadNpcsForZone() method below
  * 3. Add map transitions in StoryProgressionManager
  * 
@@ -54,11 +54,11 @@ public class WorldManager {
 
         // Load the map file corresponding to the zone ID
         try {
-            currentMap = new TmxMapLoader().load("maps/" + zoneId + ".tmx");
+            currentMap = new TmxMapLoader().load(zoneId + ".tmx");
             currentZoneName = zoneId;
             System.out.println("[WORLD] Loaded zone: " + zoneId);
         } catch (Exception e) {
-            System.err.println("[WORLD] Could not load map: maps/" + zoneId + ".tmx. Loading fallback.");
+            System.err.println("[WORLD] Could not load map: " + zoneId + ".tmx. Loading fallback.");
             try {
                 currentMap = new TmxMapLoader().load("Tile_City.tmx");
                 currentZoneName = "town_square"; // Default fallback
