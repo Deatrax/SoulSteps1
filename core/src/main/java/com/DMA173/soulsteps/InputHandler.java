@@ -116,6 +116,7 @@ public class InputHandler {
         // Only clear hint if neither NPC nor transition is available
         if (npcHint == null) {
             // Note: Don't clear here, let story manager handle transition hints
+             uiManager.clearInteractionHint();
         }
     }
 
