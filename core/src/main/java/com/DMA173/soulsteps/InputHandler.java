@@ -176,7 +176,7 @@ public class InputHandler {
         }
 
         // Clamp zoom to reasonable values
-        camera.zoom = Math.max(0.2f, Math.min(2.0f, camera.zoom));
+        camera.zoom = Math.max(0.3f, Math.min(1.5f, camera.zoom));
     }
 
     public boolean isPaused() {

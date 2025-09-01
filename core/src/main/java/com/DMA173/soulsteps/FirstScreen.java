@@ -51,13 +51,15 @@ public class FirstScreen extends ScreenAdapter {
     public void show() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 0.5f;
+        camera.zoom = 0.3f;
 
         batch = new SpriteBatch();
         characterAssets = new CharecterAssets();
         characterAssets.init();
         
         worldManager = new WorldManager(characterAssets);
+        
+        System.err.println("Starting new game.....");
         worldManager.loadZone("town_square");
         
         // The map renderer now gets its map from the world manager
