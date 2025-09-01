@@ -165,6 +165,21 @@ public class FirstScreen extends ScreenAdapter {
         camera.update();
     }
 
+    private boolean isCellBlocked(float x, float y) {
+        int cellX = (int) (x / tileWidth);
+        int cellY = (int) (y / tileHeight);
+
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(cellX, cellY);
+
+        if (cell == null || cell.getTile() == null) {
+            return false; // no tile → walkable
+        }
+
+        // Check if the tile has a "blocked" property in Tiled
+        Object blocked = cell.getTile().getProperties().get("blocked");
+        return blocked != null && blocked.equals(true);
+    }
+
     @Override
     public void resize(int width, int height) {
         camera.viewportWidth = width;
