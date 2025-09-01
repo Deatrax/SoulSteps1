@@ -12,5 +12,7 @@ public class theMain extends Game {
         // Start with the menu screen
         setScreen(new MenuScreen(this));
         System.out.println("SoulSteps game started with new menu system");
+
+        ///setScreen(new ObjectFinder(this));
     }
 }
