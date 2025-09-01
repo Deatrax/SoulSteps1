@@ -163,7 +163,7 @@ public class Player extends Character {
         // Check the four corners of the player's bounding box for simplicity
         // You can make this more precise later if needed
         float playerWidth = 16; // Approximate width of your character sprite
-        float playerHeight = 16; // Approximate height
+        float playerHeight = 30; // Approximate height
 
         boolean bottomLeft = isTileBlocked(x - playerWidth / 2, y);
         boolean bottomRight = isTileBlocked(x + playerWidth / 2, y);
