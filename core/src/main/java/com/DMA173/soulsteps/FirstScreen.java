@@ -71,7 +71,7 @@ public class FirstScreen extends ScreenAdapter {
 
         float mapWidth = worldManager.getCurrentMap().getProperties().get("width", Integer.class) * tileWidth;
         float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * tileHeight;
-        elian = new Player(characterAssets, mapWidth / 2f, mapHeight / 2f);
+        elian = new Player(characterAssets, 330, 130); //story start point
         elian.setCollisionLayer(collisionLayer); // MERGED: Give the player access to the collision layer
 
         uiManager = new UIManager(game);

@@ -350,9 +350,10 @@ public class UIManager {
         if (dialogueChoices != null) {
             // Handle number key presses for choices
             for (int i = 0; i < dialogueChoices.length; i++) {
+                System.err.println("[UIManager] iterating dialogue choices =" + i);
                 if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i)) {
                     choiceCallback.accept(i + 1); // Execute the chosen action
-                    hideDialogue();
+                    //hideDialogue();
                     return;
                 }
             }

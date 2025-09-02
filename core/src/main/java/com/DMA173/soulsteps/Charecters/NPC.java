@@ -109,6 +109,7 @@ public class NPC extends Character {
                         
                         // Give the player their next objective via a narration box
                         uiManager.showNarration(null, "New Objective: Investigate the water system.");
+                        uiManager.setObjective("Investigate the water system");
                         
                     } else { // Chose to refuse
                         player.adjustKindness(-5);

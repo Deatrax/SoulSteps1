@@ -1,14 +1,14 @@
 package com.DMA173.soulsteps.story;
 
-import com.DMA173.soulsteps.Charecters.Player;
-import com.DMA173.soulsteps.ui.UIManager;
-import com.DMA173.soulsteps.world.WorldManager;
-import com.badlogic.gdx.math.Vector2;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.world.WorldManager;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * STORY PROGRESSION SYSTEM
@@ -73,6 +73,10 @@ public class StoryProgressionManager {
         objectiveTexts = new HashMap<>();
         
         // EXAMPLE STORY FLOW - MODIFY THIS TO ADD YOUR STORY:
+
+        //Objective 0: monologue
+        objectiveOrder.add("introMonologue");
+        objectiveTexts.put("introMonologue", "");
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("talk_to_lena_first_time");
@@ -181,6 +185,24 @@ public class StoryProgressionManager {
         if (!objectiveOrder.isEmpty()) {
             currentObjective = objectiveOrder.get(0);
             uiManager.updateObjective(getObjectiveText(currentObjective));
+            //uiManager.showNarration("Narrator...", "Athelgard, once a thriving town with jolly people is now slowly\ntaking a dark turn. Captured into capitalistic greed the town is now seeing\na case of resource scarcity. You are elian, a plumber trying to live life without mich ruckus.\nHowever your choices will now seal the face of the town forever");
+            uiManager.showChoice(
+                "Narrator...", 
+                "Athelgard, once a thriving town with jolly people is now slowly\ntaking a dark turn. Captured into capitalistic greed the town is now seeing\na case of resource scarcity. You are elian, a plumber trying to live life without mich ruckus.\nHowever your choices will now seal the face of the town forever", 
+                new String[] { "Press [1] to continue" }, // Choices
+                (choice) -> {
+                    // This code runs AFTER the player makes a choice from the dialogue box.
+                    if (choice == 1) { 
+                        
+                        gameState.completeObjective("introMonologue");
+                        
+                        System.err.println("[narrator] Player pressed [1] ");
+                        // Give the player their next objective via a narration box
+                        uiManager.showNarration(null, "Press aswd / arrow keys to move, E to interact. You now will go to dan's house to check his kitchen plumbing");
+                        
+                    }
+                }
+            );
         }
         System.out.println("[STORY] Story started with objective: " + currentObjective);
     }
