@@ -3,7 +3,7 @@
  <tileset firstgid="1" source="asset2.tsx"/>
  <tileset firstgid="358" source="asset1.tsx"/>
  <tileset firstgid="556" source="table.tsx"/>
- <tileset firstgid="721" source="../../SoulStepsss - Copy/SoulSteps1/assets/redcol.tsx"/>
+ <tileset firstgid="721" source="redcol.tsx"/>
  <layer id="1" name="Tile Layer 1" width="40" height="25">
   <data encoding="csv">
 45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,45,430,430,430,430,430,430,430,430,430,430,
