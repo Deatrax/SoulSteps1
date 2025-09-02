@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.story.StoryProgressionManager.MapTransition;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.math.Vector2;
@@ -459,6 +460,57 @@ public class StoryProgressionManager {
      */
     public boolean isObjectiveActive(String objectiveId) {
         return objectiveId.equals(currentObjective);
+    }
+
+
+    /**
+     * NEW METHOD for programmatic, object-based interactions.
+     * Call this from other game systems (like after a puzzle is solved) to trigger a story event.
+     * @param eventId A unique string identifying the event, e.g., "found_limiter".
+     */
+    public void triggerStoryEvent(String eventId, Player player) {
+        System.out.println("[STORY] Programmatic event triggered: " + eventId);
+
+        // Use a switch to handle different programmed events
+        switch (eventId) {
+            
+            case "solved_lena_pipes_puzzle":
+                // This event is called after the player solves the pipe puzzle at Lena's house.
+                // It now presents the critical choice about the limiter.
+                uiManager.showChoice(
+                    "Investigation", // Speaker
+                    "While fixing the pipes, you discover a strange, non-standard device attached to the water main. It seems to be restricting the flow.", // Prompt
+                    new String[]{"Remove it and investigate.", "Just fix the pipes and ignore it."}, // Choices
+                    (choice) -> {
+                        // This code runs AFTER the player makes a choice.
+                        if (choice == 1) {
+                            player.findWaterLimiter(); // Method from Player.java
+                            uiManager.showNarration(null, "You carefully remove the device and stash it in your bag. This could be important evidence.");
+                            // You could also complete an objective here if you want
+                            // completeCurrentObjective(); 
+                        } else {
+                            gameState.setFlag("ignored_first_limiter", true);
+                            player.adjustKindness(-10);
+                            uiManager.showNarration(null, "It's not your business. You fix the pipes around the device and leave.");
+                        }
+                    }
+                );
+                break;
+
+            // --- FUTURE EXAMPLE: Interacting with a computer terminal ---
+            /*
+            case "hacked_veridia_computer":
+                uiManager.showNarration(
+                    "System Log",
+                    "Accessing encrypted files... \n\nProject Aquila: Water diversion to sector 7 approved. \nStatus: ACTIVE."
+                );
+                gameState.setFlag("knows_about_project_aquila", true);
+                player.collectEvidence();
+                break;
+            */
+            
+            // Add more cases for other programmatic events here.
+        }
     }
     
     /**
