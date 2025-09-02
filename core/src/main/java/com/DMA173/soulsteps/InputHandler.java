@@ -108,23 +108,22 @@ public class InputHandler {
     }
     
     /**
-     * Update interaction hints for both NPCs and map transitions
+     * Update interaction hints for both NPCs and map transitions.
      */
     private void updateInteractionHints() {
-        // First check for NPC interactions
-        String npcHint = worldManager.getInteractionHint(player);
-        if (npcHint != null) {
-            uiManager.setInteractionHint(npcHint);
-            return;
+        // --- THIS IS THE FIX ---
+        // Instead of asking the WorldManager, we now ask the StoryProgressionManager,
+        // which handles both map transitions and NPCs.
+        
+        String hint = null;
+        if (storyManager != null) {
+            hint = storyManager.getInteractionHint(player);
         }
-        
-        // If no NPC nearby, check for map transitions (handled in story manager update)
-        // The story manager sets interaction hints for map transitions automatically
-        
-        // Only clear hint if neither NPC nor transition is available
-        if (npcHint == null) {
-            // Note: Don't clear here, let story manager handle transition hints
-             uiManager.clearInteractionHint();
+
+        if (hint != null) {
+            uiManager.setInteractionHint(hint);
+        } else {
+            uiManager.clearInteractionHint();
         }
     }
 
@@ -152,6 +151,7 @@ public class InputHandler {
         System.out.println("Danger Zone Active: " + player.isDangerZoneActive());
         System.out.println("Speed: " + player.getSpeed());
         System.out.println("==================");
+        System.out.println("Current objective: "+ storyManager.getCurrentObjective());
     }
 
     @SuppressWarnings("unused")

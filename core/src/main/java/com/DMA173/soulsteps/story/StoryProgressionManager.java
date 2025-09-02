@@ -187,29 +187,34 @@ public class StoryProgressionManager {
     private void initializeMapTransitions() {
         mapTransitions = new HashMap<>();
         
+
+        MapTransition enterDansHouse = new MapTransition();
+        enterDansHouse.fromZone = "Tile_City";
+        enterDansHouse.toZone = "interior";
+        enterDansHouse.triggerArea = new Vector2(750, 550); // Position of building door
+        enterDansHouse.triggerRadius = 30f;
+        enterDansHouse.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
+        enterDansHouse.requiredObjective = "goToDanHouse"; // Must have this objective active
+        enterDansHouse.interactionText = "Press E to enter Dan's House";
+        mapTransitions.put("town_to_Dans_house", enterDansHouse);
+
+
+
+
+
         // EXAMPLE TRANSITIONS - MODIFY/ADD YOUR OWN:
         
         // From town_square to veridia_interior (entering building)
-        MapTransition enterBuilding = new MapTransition();
-        enterBuilding.fromZone = "town_square";
-        enterBuilding.toZone = "office";
-        enterBuilding.triggerArea = new Vector2(500, 300); // Position of building door
-        enterBuilding.triggerRadius = 30f;
-        enterBuilding.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
-        enterBuilding.requiredObjective = "enter_veridia_building"; // Must have this objective active
-        enterBuilding.interactionText = "Press E to enter Veridia Corporation";
-        mapTransitions.put("town_to_veridia", enterBuilding);
+        // MapTransition enterBuilding = new MapTransition();
+        // enterBuilding.fromZone = "town_square";
+        // enterBuilding.toZone = "office";
+        // enterBuilding.triggerArea = new Vector2(500, 300); // Position of building door
+        // enterBuilding.triggerRadius = 30f;
+        // enterBuilding.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
+        // enterBuilding.requiredObjective = "enter_veridia_building"; // Must have this objective active
+        // enterBuilding.interactionText = "Press E to enter Veridia Corporation";
+        // mapTransitions.put("town_to_veridia", enterBuilding);
         
-        // From veridia_interior back to town_square (exiting building)
-        MapTransition exitBuilding = new MapTransition();
-        exitBuilding.fromZone = "office";
-        exitBuilding.toZone = "town_square";
-        exitBuilding.triggerArea = new Vector2(100, 50); // Position of exit door inside
-        exitBuilding.triggerRadius = 30f;
-        exitBuilding.spawnPosition = new Vector2(500, 250); // Back outside the building
-        exitBuilding.requiredObjective = null; // No objective required to exit
-        exitBuilding.interactionText = "Press E to exit building";
-        mapTransitions.put("veridia_to_town", exitBuilding);
         
         // EXAMPLE: How to add more map transitions
         /*
@@ -224,16 +229,7 @@ public class StoryProgressionManager {
         toResidential.interactionText = "Press E to enter residential district";
         mapTransitions.put("town_to_residential", toResidential);
         
-        // From residential_area to police_station
-        MapTransition toPoliceStation = new MapTransition();
-        toPoliceStation.fromZone = "residential_area";
-        toPoliceStation.toZone = "police_station";
-        toPoliceStation.triggerArea = new Vector2(300, 150);
-        toPoliceStation.triggerRadius = 35f;
-        toPoliceStation.spawnPosition = new Vector2(200, 100);
-        toPoliceStation.requiredObjective = "report_to_authorities";
-        toPoliceStation.interactionText = "Press E to enter police station";
-        mapTransitions.put("residential_to_police", toPoliceStation);
+    
         */
         
         System.out.println("[STORY] Initialized " + mapTransitions.size() + " map transitions");
@@ -282,7 +278,7 @@ public class StoryProgressionManager {
      */
     public void update(float delta, Player player) {
         checkObjectiveCompletion(player);
-        checkMapTransitions(player);
+        //checkMapTransitions(player);
     }
     
     /**
@@ -373,31 +369,39 @@ public class StoryProgressionManager {
      * 
      * This automatically handles map transitions when player approaches trigger areas
      */
-    private void checkMapTransitions(Player player) {
+    /**
+     * DEPRECATED: This method is being replaced by the new getInteractionHint().
+     * You can delete this old method.
+     */
+    // private void checkMapTransitions(Player player) { ... }
+    
+    /**
+     * NEW, UNIFIED HINT SYSTEM
+     * This is now the single source of truth for all interaction hints.
+     * It prioritizes map transitions over NPC dialogue.
+     * @param player The player character.
+     * @return The text for the interaction hint, or null if nothing is in range.
+     */
+    public String getInteractionHint(Player player) {
         String currentZone = worldManager.getCurrentZoneName();
         Vector2 playerPos = player.getPosition();
-        
-        for (Map.Entry<String, MapTransition> entry : mapTransitions.entrySet()) {
-            MapTransition transition = entry.getValue();
-            
-            // Check if this transition applies to current zone
-            if (!transition.fromZone.equals(currentZone)) continue;
-            
-            // Check if player is near the transition trigger
-            float distance = playerPos.dst(transition.triggerArea);
-            if (distance <= transition.triggerRadius) {
-                // Check if objective requirement is met (if any)
-                if (transition.requiredObjective != null && 
-                    !currentObjective.equals(transition.requiredObjective)) {
-                    continue; // Objective not active
+
+        // 1. Check for Map Transitions First (they are high priority)
+        for (MapTransition transition : mapTransitions.values()) {
+            if (transition.fromZone.equals(currentZone) && playerPos.dst(transition.triggerArea) <= transition.triggerRadius) {
+                // Check if the objective requirement is met
+                if (transition.requiredObjective == null || isObjectiveActive(transition.requiredObjective)) {
+                    return transition.interactionText; // Return the map transition hint
                 }
-                
-                // Show interaction hint
-                uiManager.setInteractionHint(transition.interactionText);
-                return; // Only show one hint at a time
             }
         }
+
+        // 2. If no map transition is found, check for NPC interactions.
+        // We delegate this to the WorldManager.
+        return worldManager.getInteractionHint(player);
     }
+    
+    
     
     /**
      * Handle map transition when player presses E near a door/exit

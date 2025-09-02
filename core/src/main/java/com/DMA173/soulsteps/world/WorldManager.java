@@ -37,6 +37,9 @@ public class WorldManager {
     // MERGED: Add a flag to signal that the map has changed
     private boolean mapChanged = false;
 
+    // --- NEW: Define the name of the layer characters will be on ---
+    private final String characterLayerName = "PlayerLayer";
+
     public WorldManager(CharecterAssets assets) {
         this.characterAssets = assets;
         this.gsm = GameStateManager.getInstance();
@@ -89,7 +92,7 @@ public class WorldManager {
         currentNpcManager.clearNPCs(); // Clear previous zone's NPCs
         
         switch (zoneId) {
-            case "town_square":
+            case "Tile_City":
                 // EXAMPLE: Main town NPCs
                 NPC lena = new NPC(characterAssets, 1, 350, 250, "Lena", "ally");
                 lena.setDialogue("Elian! I've been looking for you. The water pressure is terrible!");
@@ -209,6 +212,11 @@ public class WorldManager {
     public String getCurrentZoneName() {
         return currentZoneName;
     }
+
+    public String getCharacterLayerName() {
+        return characterLayerName;
+    }
+
 
     public void dispose() {
         if (currentMap != null) {

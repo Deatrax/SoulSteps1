@@ -60,7 +60,7 @@ public class FirstScreen extends ScreenAdapter {
         worldManager = new WorldManager(characterAssets);
         
         System.err.println("Starting new game.....");
-        worldManager.loadZone("town_square");
+        worldManager.loadZone("Tile_City");
         
         // The map renderer now gets its map from the world manager
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
@@ -101,6 +101,7 @@ public class FirstScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
+        // --- Update Logic (no changes here) ---
         uiManager.update(delta);
         inputHandler.handleInput(delta);
         
@@ -109,34 +110,62 @@ public class FirstScreen extends ScreenAdapter {
             worldManager.update(delta);
             storyManager.update(delta, elian);
             updateCamera();
-            
-            // MERGED: Check for map triggers
             checkTriggers();
         }
         
+        // --- Clear Screen (no changes here) ---
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // MERGED: Check if the map has changed and update collision layer if it has
+        // --- Map Change Logic (no changes here) ---
         if (worldManager.hasMapChanged()) {
             mapRenderer.setMap(worldManager.getCurrentMap());
-            initializeCollision(); // Reload collision for the new map
-            elian.setCollisionLayer(collisionLayer); // Update player's collision layer
-            worldManager.confirmMapChange(); // Reset the flag
+            initializeCollision();
+            elian.setCollisionLayer(collisionLayer);
+            worldManager.confirmMapChange();
         }
         
         mapRenderer.setView(camera);
         
-        mapRenderer.render(backgroundLayers);
+        // --- NEW: DYNAMIC LAYER RENDERING ---
 
+        int characterLayerIndex = -1;
+        // Find the index of the layer named by getCharacterLayerName()
+        if (worldManager.getCurrentMap().getLayers().get(worldManager.getCharacterLayerName()) != null) {
+            characterLayerIndex = worldManager.getCurrentMap().getLayers().getIndex(worldManager.getCharacterLayerName());
+        }
+
+        if (characterLayerIndex == -1) {
+            // FALLBACK: If the character layer is not found, render all layers as background.
+            System.err.println("Warning: Map '" + worldManager.getCurrentZoneName() + "' is missing the '" + worldManager.getCharacterLayerName() + "' layer. Player will be drawn on top of everything.");
+            mapRenderer.render(); // Render all layers
+        } else {
+            // DYNAMICALLY RENDER BACKGROUND LAYERS
+            // This renders all layers from the bottom up to (but not including) the character layer.
+            for (int i = 0; i < characterLayerIndex; i++) {
+                mapRenderer.render(new int[]{i});
+            }
+        }
+
+        // --- RENDER CHARACTERS (at the correct depth) ---
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         worldManager.getCurrentNpcManager().render(batch);
         elian.render(batch);
         batch.end();
 
-        mapRenderer.render(foregroundLayers);
-        
+        if (characterLayerIndex != -1) {
+            // DYNAMICALLY RENDER FOREGROUND LAYERS
+            // This renders the character layer itself, plus all layers above it.
+            for (int i = characterLayerIndex; i < worldManager.getCurrentMap().getLayers().getCount(); i++) {
+                // We also make sure the layer is visible before rendering it
+                if (worldManager.getCurrentMap().getLayers().get(i).isVisible()) {
+                    mapRenderer.render(new int[]{i});
+                }
+            }
+        }
+
+        // --- RENDER UI (on top of everything) ---
         uiManager.render(elian, camera, storyManager);
     }
     
