@@ -9,7 +9,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
@@ -25,7 +24,8 @@ public class UIManager {
     private OrthographicCamera uiCamera;
     private SpriteBatch uiBatch;
     private ShapeRenderer shapeRenderer;
-    private BitmapFont font;
+    //font is no longer needed
+    // private BitmapFont font;
     
     // Menu integration
     private PauseMenu pauseMenu;
@@ -72,9 +72,9 @@ public class UIManager {
         uiBatch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         
-        // Load font
-        font = new BitmapFont(); // Default font
-        font.getData().setScale(1.2f); // Make text bigger
+        // Load font, no longer needed
+        // font = new BitmapFont(); // Default font
+        // FontManager.standardFont.getData().setScale(1.2f); // Make text bigger
         
         // Initialize pause menu
         pauseMenu = new PauseMenu(game);
@@ -164,8 +164,9 @@ public class UIManager {
         shapeRenderer.end();
         
         uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, "Health: " + player.getHealth() + "/100", x, y + HEALTH_BAR_HEIGHT + 15);
+        // --- USE FONT FROM MANAGER ---
+        FontManager.standardFont.setColor(Color.WHITE);
+        FontManager.standardFont.draw(uiBatch, "Health: " + player.getHealth() + "/100", x, y + HEALTH_BAR_HEIGHT + 15);
         uiBatch.end();
     }
     
@@ -186,12 +187,12 @@ public class UIManager {
         shapeRenderer.end();
         
         uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, "Kindness: " + player.getKindnessLevel() + "/100", x, y + KINDNESS_BAR_HEIGHT + 15);
+        FontManager.standardFont.setColor(Color.WHITE);
+        FontManager.standardFont.draw(uiBatch, "Kindness: " + player.getKindnessLevel() + "/100", x, y + KINDNESS_BAR_HEIGHT + 15);
         
         if (player.isDangerZoneActive()) {
-            font.setColor(Color.RED);
-            font.draw(uiBatch, "DANGER ZONE!", x, y - 10);
+            FontManager.standardFont.setColor(Color.RED);
+            FontManager.standardFont.draw(uiBatch, "DANGER ZONE!", x, y - 10);
         }
         uiBatch.end();
     }
@@ -204,9 +205,9 @@ public class UIManager {
         float y = Gdx.graphics.getHeight() / 2f + 50;
         
         uiBatch.begin();
-        font.setColor(OBJECTIVE_COLOR);
-        font.draw(uiBatch, "OBJECTIVE:", x, y + 20);
-        font.draw(uiBatch, currentObjective, x, y, Gdx.graphics.getWidth() * 0.3f, Align.left, true);
+        FontManager.standardFont.setColor(OBJECTIVE_COLOR);
+        FontManager.standardFont.draw(uiBatch, "OBJECTIVE:", x, y + 20);
+        FontManager.standardFont.draw(uiBatch, currentObjective, x, y, Gdx.graphics.getWidth() * 0.3f, Align.left, true);
         uiBatch.end();
     }
     
@@ -217,8 +218,8 @@ public class UIManager {
         float y = Gdx.graphics.getHeight() * 0.1f; // 10% from bottom
         
         uiBatch.begin();
-        font.setColor(Color.WHITE);
-        font.draw(uiBatch, interactionHint, x, y, 0, Align.center, false);
+        FontManager.standardFont.setColor(Color.WHITE);
+        FontManager.standardFont.draw(uiBatch, interactionHint, x, y, 0, Align.center, false);
         uiBatch.end();
     }
     
@@ -230,11 +231,11 @@ public class UIManager {
         float y = Gdx.graphics.getHeight() - 30;
         
         uiBatch.begin();
-        font.setColor(Color.GREEN);
-        font.draw(uiBatch, "Player Pos: " + String.format("%.1f, %.1f", player.getPosition().x, player.getPosition().y), x, y);
-        font.draw(uiBatch, "Evidence: " + player.getEvidenceCount(), x, y - 20);
-        font.draw(uiBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), x, y - 40);
-        font.draw(uiBatch, "Screen: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), x, y - 60);
+        FontManager.standardFont.setColor(Color.GREEN);
+        FontManager.standardFont.draw(uiBatch, "Player Pos: " + String.format("%.1f, %.1f", player.getPosition().x, player.getPosition().y), x, y);
+        FontManager.standardFont.draw(uiBatch, "Evidence: " + player.getEvidenceCount(), x, y - 20);
+        FontManager.standardFont.draw(uiBatch, "FPS: " + Gdx.graphics.getFramesPerSecond(), x, y - 40);
+        FontManager.standardFont.draw(uiBatch, "Screen: " + Gdx.graphics.getWidth() + "x" + Gdx.graphics.getHeight(), x, y - 60);
         uiBatch.end();
     }
     
@@ -350,7 +351,7 @@ public class UIManager {
         if (dialogueChoices != null) {
             // Handle number key presses for choices
             for (int i = 0; i < dialogueChoices.length; i++) {
-                System.err.println("[UIManager] iterating dialogue choices =" + i);
+                //System.err.println("[UIManager] iterating dialogue choices =" + i);
                 if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i)) {
                     choiceCallback.accept(i + 1); // Execute the chosen action
                     //hideDialogue();
@@ -389,24 +390,24 @@ public class UIManager {
         uiBatch.begin();
         // Speaker Name
         if (speakerName != null && !speakerName.isEmpty()) {
-            font.setColor(Color.YELLOW);
-            font.draw(uiBatch, speakerName, boxX + padding, boxY + boxHeight - padding);
+            FontManager.standardFont.setColor(Color.YELLOW);
+            FontManager.standardFont.draw(uiBatch, speakerName, boxX + padding, boxY + boxHeight - padding);
         }
 
         // Main Dialogue Text (with wrapping)
-        font.setColor(Color.WHITE);
-        GlyphLayout layout = new GlyphLayout(font, dialogueText, Color.WHITE, Gdx.graphics.getWidth() - (padding * 2), Align.left, true);
-        font.draw(uiBatch, layout, boxX + padding, boxY + boxHeight - padding - (speakerName != null ? 30 : 0));
+        FontManager.standardFont.setColor(Color.WHITE);
+        GlyphLayout layout = new GlyphLayout(FontManager.standardFont, dialogueText, Color.WHITE, Gdx.graphics.getWidth() - (padding * 2), Align.left, true);
+        FontManager.standardFont.draw(uiBatch, layout, boxX + padding, boxY + boxHeight - padding - (speakerName != null ? 30 : 0));
 
         // Choices or "Continue" prompt
         if (dialogueChoices != null) {
             float choiceY = boxY + padding + ((dialogueChoices.length - 1) * 25);
             for (int i = 0; i < dialogueChoices.length; i++) {
-                font.draw(uiBatch, (i + 1) + ". " + dialogueChoices[i], boxX + padding, choiceY);
+                FontManager.standardFont.draw(uiBatch, (i + 1) + ". " + dialogueChoices[i], boxX + padding, choiceY);
                 choiceY -= 25;
             }
         } else {
-            font.draw(uiBatch, "Press SPACE to continue...", Gdx.graphics.getWidth() - padding, boxY + padding, 0, Align.right, false);
+            FontManager.standardFont.draw(uiBatch, "Press SPACE to continue...", Gdx.graphics.getWidth() - padding, boxY + padding, 0, Align.right, false);
         }
         uiBatch.end();
     }
@@ -421,7 +422,7 @@ public class UIManager {
     public void dispose() {
         if (uiBatch != null) uiBatch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
-        if (font != null) font.dispose();
+        // NO LONGER NEEDED if (font != null) FontManager.standardFont.dispose();
         if (pauseMenu != null) pauseMenu.dispose();
     }
 }

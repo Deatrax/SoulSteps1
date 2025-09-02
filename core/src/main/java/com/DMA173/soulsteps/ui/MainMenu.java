@@ -1,18 +1,17 @@
 package com.DMA173.soulsteps.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Main menu that appears when the game starts.
@@ -23,8 +22,9 @@ public class MainMenu {
     private OrthographicCamera camera;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
-    private BitmapFont font;
-    private BitmapFont titleFont;
+    //using custom font, this is no longer necessary
+    // private BitmapFont font;
+    // private BitmapFont titleFont;
     
     private List<MenuButton> buttons;
     private int selectedButtonIndex = 0;
@@ -50,12 +50,12 @@ public class MainMenu {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         
-        // Initialize fonts
-        font = new BitmapFont();
-        font.getData().setScale(1.5f);
-        
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(3f);
+        // Initialize fonts, no longer necessary, using custom font
+        // font = new BitmapFont();
+        // font.getData().setScale(1.5f);
+
+        // titleFont = new BitmapFont();
+        // titleFont.getData().setScale(3f);
         
         // Load background
         loadBackground();
@@ -181,14 +181,19 @@ public class MainMenu {
         
         // Render title
         batch.begin();
-        titleFont.setColor(Color.CYAN);
-        titleFont.draw(batch, "SOUL STEPS", Gdx.graphics.getWidth() / 2f, 
-                      Gdx.graphics.getHeight() / 2f + 200, 0, Align.center, false);
+        // titleFont.setColor(Color.CYAN);
+        // titleFont.draw(batch, "SOUL STEPS", Gdx.graphics.getWidth() / 2f, 
+        //               Gdx.graphics.getHeight() / 2f + 200, 0, Align.center, false);
+
+        //new way with custom font
+        FontManager.titleFont.setColor(Color.CYAN);
+        FontManager.titleFont.draw(batch, "SOUL STEPS", Gdx.graphics.getWidth() / 2f, 
+                                   Gdx.graphics.getHeight() / 2f + 200, 0, Align.center, false);
         batch.end();
         
         // Render buttons
         for (MenuButton button : buttons) {
-            button.render(batch, shapeRenderer, font);
+            button.render(batch, shapeRenderer, FontManager.standardFont);
         }
     }
     
@@ -253,8 +258,11 @@ public class MainMenu {
     public void dispose() {
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
-        if (font != null) font.dispose();
-        if (titleFont != null) titleFont.dispose();
+
+        //font is no longer disposed here
+        // if (font != null) font.dispose();
+        // if (titleFont != null) titleFont.dispose();
+        
         if (backgroundTexture != null) backgroundTexture.dispose();
         
         for (MenuButton button : buttons) {

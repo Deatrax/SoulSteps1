@@ -72,3 +72,37 @@ subprojects {
 }
 
 eclipse.project.name = 'SoulSteps-v0.1' + '-parent'
+
+
+
+project(":core") {
+  apply plugin: "java-library"
+
+  dependencies {
+    api "com.badlogicgames.gdx:gdx:$gdxVersion"
+    api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
+    
+    // --- ADD THIS LINE FOR FONT SUPPORT ---
+    api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
+    // ------------------------------------
+
+    // You can add other dependencies here later if needed
+    // For example, for AI: api "com.badlogicgames.gdx:gdx-ai:$aiVersion"
+  }
+}
+
+
+// Find this block for your desktop project (LWJGL3)
+project(":lwjgl3") {
+  apply plugin: "java-library"
+  
+  dependencies {
+    // ... your other lwjgl3 dependencies ...
+    
+    // --- ADD THIS LINE ---
+    // This tells Gradle to include the native files (.dylib, .dll, .so)
+    // for the desktop version of your game.
+    implementation "com.badlogicgames.gdx:gdx-freetype-platform:$gdxVersion:natives-desktop"
+    // ---------------------
+  }
+}
