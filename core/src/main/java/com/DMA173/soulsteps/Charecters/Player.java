@@ -70,8 +70,8 @@ public class Player extends Character {
         // to include collision checks.
         updateStateTime(delta);
         
-        // MERGED: The movement logic is now inside the player's update loop
-        handleMovementWithCollision(delta);
+        // MERGED: The movement logic is now inside the player's update loop, being called from inputHandler
+        //handleMovementWithCollision(delta);
 
         updateKindnessBar();
     }
@@ -106,7 +106,7 @@ public class Player extends Character {
 
     // MERGED: This new method replaces your old `handleInput` and `moveInDirection` methods.
     // It combines movement input with collision checking.
-    private void handleMovementWithCollision(float delta) {
+    public void handleMovementWithCollision(float delta) {
         boolean movedX = false;
         boolean movedY = false;
         

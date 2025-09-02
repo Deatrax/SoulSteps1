@@ -163,6 +163,7 @@ public class InputHandler {
     private void handlePlayerMovement(float delta) {
         // Player movement is now handled in the Player class itself
         // This method is kept for potential future movement restrictions or special cases
+        player.handleMovementWithCollision(delta);
     }
 
     private void handleCameraControls(float delta) {
