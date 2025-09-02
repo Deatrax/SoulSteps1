@@ -2,11 +2,11 @@ package com.DMA173.soulsteps.ui;
 
 import com.DMA173.soulsteps.Charecters.Player;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 
 /**
  * A UI component that displays an arrow at the edge of the screen,
@@ -27,7 +27,7 @@ public class WaypointUI {
             arrowTexture = new Texture(Gdx.files.internal("ui/waypoint_arrow.png"));
             arrowRegion = new TextureRegion(arrowTexture);
         } catch (Exception e) {
-            System.err.println("Could not load 'ui/waypoint_arrow.png'. Waypoint will not be visible.");
+            System.out.println("[waypoint UI] Could not load 'ui/waypoint_arrow.png'. Waypoint will not be visible. Exception = "+e.getLocalizedMessage());
             arrowTexture = null;
         }
     }
@@ -83,8 +83,8 @@ public class WaypointUI {
             arrowRegion.getRegionHeight() / 2f, // originY
             arrowRegion.getRegionWidth(),       // width
             arrowRegion.getRegionHeight(),      // height
-            1f,                                 // scaleX
-            1f,                                 // scaleY
+            0.1f,                                 // scaleX
+            0.1f,                                 // scaleY
             arrowRotation                       // rotation
         );
     }

@@ -110,7 +110,7 @@ public class StoryProgressionManager {
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
-        objectiveTexts.put("goToDanHouse", "GO to Dan's house to check his plumbing");
+        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
         
         // Objective 2: Investigation begins
         objectiveOrder.add("investigate_water_system");
@@ -156,14 +156,9 @@ public class StoryProgressionManager {
         // These should match the locations in your Tiled maps.
 
         // Objective: "talk_to_lena_first_time" -> The location of Lena in the 'town_square' map.
-        objectiveLocations.put("talk_to_lena_first_time", new Vector2(350, 250));
+        //objectiveLocations.put("talk_to_lena_first_time", new Vector2(350, 250));
         
-        // Objective: "enter_veridia_building" -> The location of the Veridia building door.
-        objectiveLocations.put("enter_veridia_building", new Vector2(500, 300));
-        
-        // Objective: "talk_to_receptionist" -> The location of the receptionist in the 'office' map.
-        objectiveLocations.put("talk_to_receptionist", new Vector2(200, 150)); // Example coordinate
-
+        objectiveLocations.put("goToDanHouse", new Vector2(750,550));
         // As you add new objectives, you can add their target locations here.
         // If an objective doesn't have a specific location (e.g., "collect 3 items"),
         // you simply don't add an entry for it.
