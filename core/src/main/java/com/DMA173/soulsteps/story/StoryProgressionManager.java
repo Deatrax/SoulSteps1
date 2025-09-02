@@ -45,12 +45,31 @@ public class StoryProgressionManager {
     private List<String> objectiveOrder;
     private Map<String, String> objectiveTexts;
     private Map<String, MapTransition> mapTransitions;
+
+    //flag for if the game was loaded from a saved state or file
+    private Boolean isContinuedStory;
     
+    public Boolean getIsContinuedStory() {
+        return isContinuedStory;
+    }
+
+    public void setIsContinuedStory(Boolean isContinuedStory) {
+        this.isContinuedStory = isContinuedStory;
+    }
+
     public StoryProgressionManager(UIManager uiManager, WorldManager worldManager) {
         this.gameState = GameStateManager.getInstance();
         this.uiManager = uiManager;
         this.worldManager = worldManager;
         
+        initializeStorySystem();
+    }
+
+    public StoryProgressionManager(UIManager uiManager, WorldManager worldManager, Boolean continued) {
+        this.gameState = GameStateManager.getInstance();
+        this.uiManager = uiManager;
+        this.worldManager = worldManager;
+        isContinuedStory = continued;
         initializeStorySystem();
     }
     
@@ -133,7 +152,7 @@ public class StoryProgressionManager {
         // From town_square to veridia_interior (entering building)
         MapTransition enterBuilding = new MapTransition();
         enterBuilding.fromZone = "town_square";
-        enterBuilding.toZone = "veridia_interior";
+        enterBuilding.toZone = "office";
         enterBuilding.triggerArea = new Vector2(500, 300); // Position of building door
         enterBuilding.triggerRadius = 30f;
         enterBuilding.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
@@ -143,7 +162,7 @@ public class StoryProgressionManager {
         
         // From veridia_interior back to town_square (exiting building)
         MapTransition exitBuilding = new MapTransition();
-        exitBuilding.fromZone = "veridia_interior";
+        exitBuilding.fromZone = "office";
         exitBuilding.toZone = "town_square";
         exitBuilding.triggerArea = new Vector2(100, 50); // Position of exit door inside
         exitBuilding.triggerRadius = 30f;
