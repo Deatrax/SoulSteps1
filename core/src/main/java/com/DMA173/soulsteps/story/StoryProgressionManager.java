@@ -443,6 +443,7 @@ public class StoryProgressionManager {
         
         // Move player to spawn position
         player.setPosition(transition.spawnPosition.x, transition.spawnPosition.y);
+        player.setCurrentMapName(worldManager.getCurrentZoneName());
         
         // If this transition completes an objective, do it
         if (transition.requiredObjective != null && 

@@ -75,6 +75,10 @@ public class WorldManager {
         // Create a new NPCManager and load the NPCs for this specific zone
         currentNpcManager = new NPCManager(characterAssets);
         loadNpcsForZone(zoneId);
+
+        for (NPC npc : currentNpcManager.getAllNPCs()) {
+            npc.setCurrentMapName(zoneId);
+        }
         this.mapChanged = true;
     }
     

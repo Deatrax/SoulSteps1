@@ -40,8 +40,8 @@ public class FirstScreen extends ScreenAdapter {
     // --- MERGED: Features from teammate's code ---
     private TiledMapTileLayer collisionLayer;
     private float tileWidth, tileHeight;
-    private int[] backgroundLayers = new int[]{0};
-    private int[] foregroundLayers = new int[]{1, 2, 3, 4, 5, 6};
+    
+    private float camZoom = 0.3f;
     
     public FirstScreen(Game game) {
         this.game = game;
@@ -51,7 +51,7 @@ public class FirstScreen extends ScreenAdapter {
     public void show() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        camera.zoom = 0.3f;
+        camera.zoom = camZoom;
 
         batch = new SpriteBatch();
         characterAssets = new CharecterAssets();
@@ -72,6 +72,7 @@ public class FirstScreen extends ScreenAdapter {
         float mapWidth = worldManager.getCurrentMap().getProperties().get("width", Integer.class) * tileWidth;
         float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * tileHeight;
         elian = new Player(characterAssets, 330, 130); //story start point
+        elian.setCurrentMapName(worldManager.getCurrentZoneName());
         elian.setCollisionLayer(collisionLayer); // MERGED: Give the player access to the collision layer
 
         uiManager = new UIManager(game);
@@ -192,8 +193,23 @@ public class FirstScreen extends ScreenAdapter {
     }
     
     private void updateCamera() {
+        camera.zoom = updateCamZoom();
         camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
         camera.update();
+    }
+
+    private float updateCamZoom() {
+        switch (worldManager.getCurrentZoneName()) {
+            case "interior":
+                camZoom = 1f;
+                break;
+            case "Tile_City":
+                camZoom = 0.3f;
+                break;
+            default:
+                return camZoom;
+        }
+        return camZoom;
     }
 
     private boolean isCellBlocked(float x, float y) {
