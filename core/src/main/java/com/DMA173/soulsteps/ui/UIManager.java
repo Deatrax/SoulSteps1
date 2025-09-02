@@ -3,6 +3,7 @@ package com.DMA173.soulsteps.ui;
 import java.util.function.Consumer;
 
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,6 +13,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Align;
 
 /**
@@ -57,6 +59,9 @@ public class UIManager {
     private String[] dialogueChoices;
     private Consumer<Integer> choiceCallback; // This will execute the choice
     private Texture dialogueBoxTexture; // For your future PNG background
+
+    // --- NEW: Add the WaypointUI component ---
+    private WaypointUI waypointUI;
     
     public UIManager(Game game) {
         this.game = game;
@@ -90,7 +95,10 @@ public class UIManager {
         }
         */
 
-        System.out.println("UI Manager initialized with new menu system");
+        // --- NEW: Initialize the WaypointUI ---
+        waypointUI = new WaypointUI();
+
+        System.out.println("UI Manager initialized with Waypoint system.");
     }
     
     private void updateUICamera() {
@@ -117,13 +125,22 @@ public class UIManager {
     /**
      * Render all UI elements including menus when active
      */
-    public void render(Player player) {
+    public void render(Player player, OrthographicCamera gameCamera, StoryProgressionManager storyManager) {
+        // --- NEW: Update the waypoint's position and rotation ---
+        Vector2 targetLocation = storyManager.getCurrentObjectiveLocation();
+        waypointUI.update(gameCamera, player, targetLocation);
+        
         // Set UI camera projection
         uiBatch.setProjectionMatrix(uiCamera.combined);
         shapeRenderer.setProjectionMatrix(uiCamera.combined);
         
         // Render the in-game HUD (health, objectives, etc)
         renderGameUI(player);
+
+        // --- NEW: Render the waypoint arrow ---
+        uiBatch.begin();
+        waypointUI.render(uiBatch);
+        uiBatch.end();
 
         // --- NEW: Render the dialogue box if it's active ---
         if (isDialogueActive) {
@@ -424,5 +441,10 @@ public class UIManager {
         if (shapeRenderer != null) shapeRenderer.dispose();
         // NO LONGER NEEDED if (font != null) FontManager.standardFont.dispose();
         if (pauseMenu != null) pauseMenu.dispose();
+
+        // --- NEW: Dispose of the waypoint's resources ---
+        if (waypointUI != null) {
+            waypointUI.dispose();
+        }
     }
 }

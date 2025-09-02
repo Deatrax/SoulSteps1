@@ -137,7 +137,7 @@ public class FirstScreen extends ScreenAdapter {
 
         mapRenderer.render(foregroundLayers);
         
-        uiManager.render(elian);
+        uiManager.render(elian, camera, storyManager);
     }
     
     // MERGED: Trigger checking logic from your teammate

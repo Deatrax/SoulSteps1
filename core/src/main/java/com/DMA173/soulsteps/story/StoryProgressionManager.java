@@ -47,6 +47,9 @@ public class StoryProgressionManager {
     private Map<String, String> objectiveTexts;
     private Map<String, MapTransition> mapTransitions;
 
+    // --- NEW: A map to store the world coordinates for each objective ---
+    private Map<String, Vector2> objectiveLocations;
+    
     //flag for if the game was loaded from a saved state or file
     private Boolean isContinuedStory;
     
@@ -57,14 +60,21 @@ public class StoryProgressionManager {
     public void setIsContinuedStory(Boolean isContinuedStory) {
         this.isContinuedStory = isContinuedStory;
     }
+    
 
+    // --- MODIFY THE CONSTRUCTOR ---
     public StoryProgressionManager(UIManager uiManager, WorldManager worldManager) {
         this.gameState = GameStateManager.getInstance();
         this.uiManager = uiManager;
         this.worldManager = worldManager;
         
         initializeStorySystem();
+
+        // --- NEW: Add the initialization for objective locations ---
+        this.objectiveLocations = new HashMap<>();
+        initializeObjectiveLocations();
     }
+
 
     public StoryProgressionManager(UIManager uiManager, WorldManager worldManager, Boolean continued) {
         this.gameState = GameStateManager.getInstance();
@@ -99,8 +109,8 @@ public class StoryProgressionManager {
         objectiveTexts.put("introMonologue", "");
         
         // Objective 1: Tutorial/Introduction
-        objectiveOrder.add("talk_to_lena_first_time");
-        objectiveTexts.put("talk_to_lena_first_time", "Find Lena and learn about the water crisis");
+        objectiveOrder.add("goToDanHouse");
+        objectiveTexts.put("goToDanHouse", "GO to Dan's house to check his plumbing");
         
         // Objective 2: Investigation begins
         objectiveOrder.add("investigate_water_system");
@@ -135,6 +145,40 @@ public class StoryProgressionManager {
         */
         
         System.out.println("[STORY] Initialized " + objectiveOrder.size() + " objectives");
+    }
+
+
+    // --- NEW: Add this entire new method ---
+    private void initializeObjectiveLocations() {
+        System.out.println("[STORY] Initializing objective waypoint locations...");
+
+        // Define the X, Y world coordinates for the target of each objective.
+        // These should match the locations in your Tiled maps.
+
+        // Objective: "talk_to_lena_first_time" -> The location of Lena in the 'town_square' map.
+        objectiveLocations.put("talk_to_lena_first_time", new Vector2(350, 250));
+        
+        // Objective: "enter_veridia_building" -> The location of the Veridia building door.
+        objectiveLocations.put("enter_veridia_building", new Vector2(500, 300));
+        
+        // Objective: "talk_to_receptionist" -> The location of the receptionist in the 'office' map.
+        objectiveLocations.put("talk_to_receptionist", new Vector2(200, 150)); // Example coordinate
+
+        // As you add new objectives, you can add their target locations here.
+        // If an objective doesn't have a specific location (e.g., "collect 3 items"),
+        // you simply don't add an entry for it.
+    }
+
+    // --- NEW: Add this public getter method ---
+    /**
+     * Returns the world coordinates of the current objective's target.
+     * Returns null if the current objective has no specific location.
+     */
+    public Vector2 getCurrentObjectiveLocation() {
+        if (currentObjective != null) {
+            return objectiveLocations.get(currentObjective);
+        }
+        return null;
     }
     
     /**
@@ -258,6 +302,12 @@ public class StoryProgressionManager {
         if (currentObjective == null) return;
         
         switch (currentObjective) {
+            case "introMonologue":
+                if(gameState.hasCompletedObjective("introMonologue")){
+                    completeCurrentObjective();
+                }
+                break;
+
             case "talk_to_lena_first_time":
                 // This gets completed in NPC.interact() when talking to Lena
                 // No additional check needed here
