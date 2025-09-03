@@ -3,6 +3,7 @@ package com.DMA173.soulsteps.world;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
+import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
@@ -98,6 +99,11 @@ public class WorldManager {
         switch (zoneId) {
             case "Tile_City":
                 
+                beggerNPC begger = new beggerNPC(characterAssets, 5, 435, 300, "begger", "begger");
+                begger.setDialogue("Please help a man in need");
+                currentNpcManager.addNPC(begger);
+
+
                 
                 // EXAMPLE: Add more town NPCs
                 /*

@@ -15,7 +15,7 @@ import com.DMA173.soulsteps.ui.UIManager;
  * 4. Update dialogue based on story progression
  */
 public class NPC extends Character {
-    private String dialogue;
+    protected  String dialogue;
     private boolean hasBeenTalkedTo;
     private String npcType;
     private String npcId; // Unique identifier for story tracking
@@ -46,6 +46,7 @@ public class NPC extends Character {
             case "resident_woman": return new ClothesContainer(5, 1);
             case "cold_weather": return new ClothesContainer(3, 2);
             case "winter_resident": return new ClothesContainer(6, 4);
+            case "begger": return new ClothesContainer(2,3);
             case "ally":
             default: return new ClothesContainer(3, 5);
         }
