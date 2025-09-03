@@ -201,6 +201,7 @@ public class FirstScreen extends ScreenAdapter {
     private float updateCamZoom() {
         switch (worldManager.getCurrentZoneName()) {
             case "interior":
+            case "interior2":
                 camZoom = 1f;
                 break;
             case "Tile_City":

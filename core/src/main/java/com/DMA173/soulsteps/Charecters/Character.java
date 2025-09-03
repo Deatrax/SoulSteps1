@@ -309,6 +309,7 @@ public abstract class Character {
         this.currentMapName = currentMapName;
 
         switch (currentMapName) {
+            case "interior2":
             case "interior":
                 // For the 'interior' map, make the character 50% larger.
                 this.scale = 4f;
