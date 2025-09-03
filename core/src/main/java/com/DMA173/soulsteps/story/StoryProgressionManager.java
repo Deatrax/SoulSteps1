@@ -112,25 +112,7 @@ public class StoryProgressionManager {
         objectiveOrder.add("goToDanHouse");
         objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
         
-        // Objective 2: Investigation begins
-        objectiveOrder.add("investigate_water_system");
-        objectiveTexts.put("investigate_water_system", "Investigate the town's water supply system");
         
-        // Objective 3: First clue
-        objectiveOrder.add("find_first_evidence");
-        objectiveTexts.put("find_first_evidence", "Search for evidence of tampering (Press L to collect debug evidence)");
-        
-        // Objective 4: Map transition example
-        objectiveOrder.add("enter_veridia_building");
-        objectiveTexts.put("enter_veridia_building", "Enter the Veridia Corporation building");
-        
-        // Objective 5: Inside building investigation
-        objectiveOrder.add("talk_to_receptionist");
-        objectiveTexts.put("talk_to_receptionist", "Talk to the receptionist inside Veridia Corp");
-        
-        // Objective 6: Find the truth
-        objectiveOrder.add("discover_water_limiter");
-        objectiveTexts.put("discover_water_limiter", "Find evidence of the water limiting device");
         
         // EXAMPLE: How to add more objectives
         /*
@@ -299,43 +281,32 @@ public class StoryProgressionManager {
                 }
                 break;
 
-            case "talk_to_lena_first_time":
-                // This gets completed in NPC.interact() when talking to Lena
-                // No additional check needed here
-                break;
+            // case "talk_to_lena_first_time":
+            //     // This gets completed in NPC.interact() when talking to Lena
+            //     // No additional check needed here
+            //     break;
                 
-            case "investigate_water_system":
-                // Auto-complete after talking to Lena (could add timer or other conditions)
-                if (gameState.hasCompletedObjective("talked_to_lena_first_time")) {
-                    completeCurrentObjective();
-                }
-                break;
+            
+            // EXAMPLE for player
+            // case "find_first_evidence":
+            //     // Complete when player collects evidence (using debug key L or real evidence)
+            //     if (player.getEvidenceCount() > 0) {
+            //         completeCurrentObjective();
+            //     }
+            //     break;
                 
-            case "find_first_evidence":
-                // Complete when player collects evidence (using debug key L or real evidence)
-                if (player.getEvidenceCount() > 0) {
-                    completeCurrentObjective();
-                }
-                break;
+            // case "enter_veridia_building":
+            //     // This gets completed by map transition system
+            //     // No additional check needed here
+            //     break;
                 
-            case "enter_veridia_building":
-                // This gets completed by map transition system
-                // No additional check needed here
-                break;
                 
-            case "talk_to_receptionist":
-                // This would be completed by NPC interaction in the new map
-                if (gameState.hasCompletedObjective("talked_to_receptionist_veridia")) {
-                    completeCurrentObjective();
-                }
-                break;
-                
-            case "discover_water_limiter":
-                // Complete when player finds the water limiter device
-                if (player.hasWaterLimiter()) {
-                    completeCurrentObjective();
-                }
-                break;
+            // case "discover_water_limiter":
+            //     // Complete when player finds the water limiter device
+            //     if (player.hasWaterLimiter()) {
+            //         completeCurrentObjective();
+            //     }
+            //     break;
                 
             // EXAMPLE: How to add more objective completion conditions
             /*

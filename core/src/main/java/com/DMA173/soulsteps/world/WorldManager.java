@@ -97,10 +97,7 @@ public class WorldManager {
         
         switch (zoneId) {
             case "Tile_City":
-                // EXAMPLE: Main town NPCs
-                NPC lena = new NPC(characterAssets, 1, 350, 250, "Lena", "ally");
-                lena.setDialogue("Elian! I've been looking for you. The water pressure is terrible!");
-                currentNpcManager.addNPC(lena);
+                
                 
                 // EXAMPLE: Add more town NPCs
                 /*
