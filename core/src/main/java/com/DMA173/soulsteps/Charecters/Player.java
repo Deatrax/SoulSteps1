@@ -30,7 +30,7 @@ public class Player extends Character {
         
         // Initialize Elian's properties
         this.name = "Elian";
-        this.kindnessLevel = 100;
+        this.kindnessLevel = 50;
         this.maxKindness = 100;
         this.dangerZoneActive = false;
         this.hasWaterLimiter = false;
@@ -47,7 +47,7 @@ public class Player extends Character {
         
         // Initialize Elian's properties
         this.name = "Elian";
-        this.kindnessLevel = 100;
+        this.kindnessLevel = 50;
         this.maxKindness = 100;
         this.dangerZoneActive = false;
         this.hasWaterLimiter = false;
