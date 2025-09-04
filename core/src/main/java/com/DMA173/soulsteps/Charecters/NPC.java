@@ -378,20 +378,19 @@ public class NPC extends Character {
         }
     }
     
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    // --- Start of Necessary Change ---
+    /**
+     * Immediately stops the NPC's current movement path by clearing the path
+     * and setting the state to IDLE.
+     */
+    public void stopWalking() {
+        if (this.pathPoints != null) {
+            this.pathPoints.clear();
+        }
+        this.currentState = NpcState.IDLE;
+        this.setMoving(false); // Ensure animation stops
+    }
+    // --- End of Necessary Change ---
 
 // ━━━━━━━━━━━━━━━━━━━━━┏┓━┏┓━━━━━━━━━━━━━━━━┏┓━━━━━━┏┓━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┏┓━━━━━
 // ━━━━━━━━━━━━━━━━━━━━┏┛┗┓┃┃━━━━━━━━━━━━━━━━┃┃━━━━━━┃┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃┃━━━━━
