@@ -53,6 +53,7 @@ public class FirstScreen extends ScreenAdapter {
         worldManager = new WorldManager(characterAssets);
         worldManager.loadZone("Tile_City");
         gsm = worldManager.getGsm();
+        worldManager.setGam(game);
 
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 

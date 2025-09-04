@@ -3,12 +3,14 @@ package com.DMA173.soulsteps.world;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
+import com.DMA173.soulsteps.Charecters.NPCs.KaelNPC;
 import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
 import com.DMA173.soulsteps.Charecters.NPCs.manager;
 import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -36,6 +38,8 @@ public class WorldManager {
     private NPCManager currentNpcManager; // Each zone gets its own NPC manager
     private CharecterAssets characterAssets;
     private GameStateManager gsm;
+    KaelNPC kael;
+    Game gam;
     
 
 
@@ -118,28 +122,28 @@ public class WorldManager {
                 currentNpcManager.addNPC(begger);
 
                 // The NPC is created at position (200, 150)
-  /*  NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+                /*  NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
 
-    // Define the path for the NPC to walk
-    receptionist.walkPath(
-        50f,  // Speed
-        true, // Tell the NPC to loop this path
-        
-        // --- THIS IS THE FIX ---
-        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
-        new Vector2(50, 150),  
-        
-        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
-        new Vector2(200, 150)  
-        // --- END OF FIX ---
-    );
+                    // Define the path for the NPC to walk
+                    receptionist.walkPath(
+                        50f,  // Speed
+                        true, // Tell the NPC to loop this path
+                        
+                        // --- THIS IS THE FIX ---
+                        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+                        new Vector2(50, 150),  
+                        
+                        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+                        new Vector2(200, 150)  
+                        // --- END OF FIX ---
+                    );
                 receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
                 currentNpcManager.addNPC(receptionist);*/
 
                 NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
                 deliveryman1.walkPath(
                     50f, // Speed
-                    true,
+                    false,
                     new Vector2(50, 127)  // Then back to the start (to loop, you'd need more logic)
                 );
                 currentNpcManager.addNPC(deliveryman1);
@@ -154,6 +158,12 @@ public class WorldManager {
                     teen1.setCurrentDir(CharecterAssets.Direction.LEFT); // Make them face a wall
                     
                     currentNpcManager.addNPC(teen1);
+                }
+
+                if(true){
+                    kael =new KaelNPC(characterAssets, 920, 1152);
+                    kael.setGame(gam);
+                    currentNpcManager.addNPC(kael);
                 }
 
                 
@@ -172,19 +182,19 @@ public class WorldManager {
             case "office/office":
                 NPC receptionist = new NPC(characterAssets, 2, 380, 340, "Ms. Chen", "veridia_employee");
 
-    // Define the path for the NPC to walk
-    receptionist.walkPath(
-        50f,  // Speed
-        true, // Tell the NPC to loop this path
-        
-        // --- THIS IS THE FIX ---
-        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
-        new Vector2(960, 340),  
-        
-        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
-        new Vector2(380, 340)  
-        // --- END OF FIX ---
-    );
+                // Define the path for the NPC to walk
+                receptionist.walkPath(
+                    50f,  // Speed
+                    true, // Tell the NPC to loop this path
+                    
+                    // --- THIS IS THE FIX ---
+                    // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+                    new Vector2(960, 340),  
+                    
+                    // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+                    new Vector2(380, 340)  
+                    // --- END OF FIX ---
+                );
                // receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
                 currentNpcManager.addNPC(receptionist);
                 // EXAMPLE: Building interior NPCs
@@ -324,5 +334,9 @@ public class WorldManager {
         if (currentNpcManager != null) {
             currentNpcManager.dispose();
         }
+    }
+
+    public void setGam(Game gam) {
+        this.gam = gam;
     }
 }

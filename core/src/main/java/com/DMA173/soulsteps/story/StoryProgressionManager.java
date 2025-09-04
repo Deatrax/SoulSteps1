@@ -132,6 +132,8 @@ public class StoryProgressionManager {
         objectiveOrder.add("talked_to_man");
         objectiveTexts.put("talked_to_man","\nTalk to Manager");
 
+        objectiveOrder.add("exitOffice");
+        objectiveTexts.put("exitOffice","\nLeave the HQ");
        
         
         
@@ -222,6 +224,16 @@ public class StoryProgressionManager {
         enteroffice.requiredObjective = "Enteroffice";
         enteroffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("shku", enteroffice);
+
+        MapTransition exitOffice = new MapTransition();
+        exitOffice.fromZone = "office/office";
+        exitOffice.toZone = "Tile_City";
+        exitOffice.triggerArea = new Vector2(44,394 );
+        exitOffice.triggerRadius = 50f;
+        exitOffice.spawnPosition = new Vector2(852, 1197);
+        exitOffice.requiredObjective = "exitOffice";
+        exitOffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("ftdfg", exitOffice);
 
 
        

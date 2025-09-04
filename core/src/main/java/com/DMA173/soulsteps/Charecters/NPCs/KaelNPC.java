@@ -10,6 +10,8 @@ import com.badlogic.gdx.Game;
 // KaelNPC extends the base NPC class, inheriting all its basic properties.
 public class KaelNPC extends NPC {
 
+    private Game game;
+
     public KaelNPC(CharecterAssets assets, float startX, float startY) {
         // We call the parent constructor with Kael's specific details.
         // We can use character model '4' for him, for example.
@@ -17,12 +19,21 @@ public class KaelNPC extends NPC {
         this.setDialogue("You need to be more careful. They're watching.");
     }
 
+    public void setGame(Game game){
+        this.game = game;
+    }
+
+    @Override
+    public void interact(Player player, GameStateManager gsm, UIManager uiManager) {
+        interact2( player,  gsm,  uiManager,  game);
+    }
+
+
     /**
      * This is Kael's unique "brain". It OVERRIDES the default, simple interact method
      * from the parent NPC class. This is where all the logic from your story outline goes.
      */
-    @Override
-    public void interact(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
+    public void interact2(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
         
         // --- The "Hurt Man" Encounter ---
         // This entire block of logic only happens once. We use a flag to track it.
@@ -30,7 +41,7 @@ public class KaelNPC extends NPC {
             gsm.setFlag("kael_encounter_initiated", true);
 
             uiManager.showChoice(
-                "Hurt Man", // Speaker
+                "Mysterious Hurt Man", // Speaker
                 "Hey, you! Please, help me. They're after me... I dropped my car keys somewhere in this trash.", // Prompt
                 new String[]{"Help him look for the keys.", "Ignore him and walk away."}, // Choices for Path A and Path B
                 (choice) -> {
@@ -57,15 +68,7 @@ public class KaelNPC extends NPC {
         player.adjustKindness(10);
         gsm.setFlag("player_helped_kael", true);
         
-        // uiManager.showChoice("Elian", "Alright, stay calm. I'll help you look.",  new String[] {
-        //     // This code runs AFTER the first narration box is closed.
-        //     uiManager.showChoice("Kael", "Thank you! I think they're buried under all this junk.",  new String[] {
-        //         // This runs after the second narration, triggering the minigame.
-        //         System.out.println("[STORY] Triggering Object Finder Minigame to find Kael's keys.");
-        //         // --- MINIGAME TRIGGER ---
-        //         // game.setScreen(new ObjectFinder(game, thisScreen, ...)); // TODO: Launch the ObjectFinder screen
-        //     });
-        // });
+       uiManager.showNarration("system", "you will now enter the obj game");
     }
 
     /**
@@ -75,14 +78,7 @@ public class KaelNPC extends NPC {
         player.adjustKindness(-15);
         gsm.setFlag("player_ignored_kael", true);
         
-        // uiManager.showChoice("Elian", "Sorry, I can't get involved.",  new String[] {
-        //     uiManager.showChoice("Narrator", "The man is quickly apprehended by security. As they drag him away, you notice a shredded file fall from his jacket.",  new String[] {
-        //         System.out.println("[STORY] Player can now interact with the file to trigger the Paper Puzzle.");
-        //         // Here, you would typically spawn a new interactable "object" in the world.
-        //         // For now, we can launch the puzzle directly for testing.
-        //         // --- MINIGAME TRIGGER ---
-        //         // game.setScreen(new PagePuzzle(game, thisScreen, ...)); // TODO: Launch the PagePuzzle screen
-        //     });
-        // });
+       uiManager.showNarration("system", "you will now see him get abducted");
+        
     }
 }
