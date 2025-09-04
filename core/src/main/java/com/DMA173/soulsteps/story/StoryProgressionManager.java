@@ -122,6 +122,9 @@ public class StoryProgressionManager {
         objectiveOrder.add("Enteroffice");
         objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
 
+        objectiveOrder.add("talked_to_rep");
+        objectiveTexts.put("talked_to_rep","\nTalk to receptionist");
+
        
         
         
