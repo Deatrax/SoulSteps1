@@ -105,7 +105,9 @@ public class WorldManager {
                 begger.setDialogue("Please help a man in need");
                 currentNpcManager.addNPC(begger);
 
-
+                NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+                currentNpcManager.addNPC(receptionist);
 
                 NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
                 deliveryman1.walkPath(
@@ -140,11 +142,11 @@ public class WorldManager {
                 */
                 break;
                 
-            case "veridia_interior":
+            case "office":
                 // EXAMPLE: Building interior NPCs
-                NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+              /*   NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
                 receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
-                currentNpcManager.addNPC(receptionist);
+                currentNpcManager.addNPC(receptionist);*/
                 
                 // EXAMPLE: Add security guard
                 /*
