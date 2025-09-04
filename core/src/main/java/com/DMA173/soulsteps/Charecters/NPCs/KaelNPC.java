@@ -7,76 +7,82 @@ import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.Game;
 
+// KaelNPC extends the base NPC class, inheriting all its basic properties.
 public class KaelNPC extends NPC {
 
-    public KaelNPC(CharecterAssets assets, int characterType, float startX, float startY) {
-        super(assets, characterType, startX, startY, "Kael", "ally");
+    public KaelNPC(CharecterAssets assets, float startX, float startY) {
+        // We call the parent constructor with Kael's specific details.
+        // We can use character model '4' for him, for example.
+        super(assets, 4, startX, startY, "Kael", "ally");
         this.setDialogue("You need to be more careful. They're watching.");
     }
 
+    /**
+     * This is Kael's unique "brain". It OVERRIDES the default, simple interact method
+     * from the parent NPC class. This is where all the logic from your story outline goes.
+     */
     @Override
     public void interact(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
+        
+        // --- The "Hurt Man" Encounter ---
+        // This entire block of logic only happens once. We use a flag to track it.
         if (!gsm.getFlag("kael_encounter_initiated")) {
             gsm.setFlag("kael_encounter_initiated", true);
 
             uiManager.showChoice(
                 "Hurt Man", // Speaker
-                "Hey, you! Please, you have to help me. They're after me... I dropped my keys somewhere around here.", // Prompt
-                new String[]{"Help him look for the keys.", "Ignore him and walk away."}, // Choices (Path A, Path B)
+                "Hey, you! You're the one who was at Dan's place, right? I saw you. You're looking into the water problem.\n We need to talk, but not here. Please, help me. They're after me... I dropped my car keys somewhere in this trash.", // Prompt
+                new String[]{"Help him look for the keys.", "Ignore him and walk away."}, // Choices for Path A and Path B
                 (choice) -> {
                     if (choice == 1) {
+                        // --- Player chose PATH A ---
                         handlePathA(player, gsm, uiManager, game);
                     } else {
+                        // --- Player chose PATH B ---
                         handlePathB(player, gsm, uiManager, game);
                     }
                 }
             );
+
         } else {
-            // Default dialogue if the player talks to Kael again later.
-            uiManager.showNarration(this.getName(), this.getDialogue());
+            // This is the default dialogue if the player interacts with Kael at any other time.
+            uiManager.showNarration(this.getName(), this.getDialogue(), () -> {});
         }
     }
 
+    /**
+     * Handles the story progression if the player chooses to help Kael.
+     */
     private void handlePathA(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
-        // --- PATH A: HELP THE MAN ---
         player.adjustKindness(10);
         gsm.setFlag("player_helped_kael", true);
         
-        // Use showChoice with one option to act like a narration box that waits for input.
-        uiManager.showChoice(
-            "Elian",
-            "Alright, stay here. I'll help you find them.",
-            new String[]{"[1] Start looking..."},
-            (choice) -> {
-                // This code runs AFTER the player presses '1'.
-                // --- TRIGGER THE OBJECT FINDER MINIGAME ---
+        uiManager.showNarration("Elian", "Alright, stay calm. I'll help you look.", () -> {
+            // This code runs AFTER the first narration box is closed.
+            uiManager.showNarration("Kael", "Thank you! I think they're buried under all this junk.", () -> {
+                // This runs after the second narration, triggering the minigame.
                 System.out.println("[STORY] Triggering Object Finder Minigame to find Kael's keys.");
-                // game.setScreen(new ObjectFinder(game)); // TODO: Launch the minigame screen
-            }
-        );
+                // --- MINIGAME TRIGGER ---
+                // game.setScreen(new ObjectFinder(game, thisScreen, ...)); // TODO: Launch the ObjectFinder screen
+            });
+        });
     }
 
+    /**
+     * Handles the story progression if the player chooses to ignore Kael.
+     */
     private void handlePathB(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
-        // --- PATH B: IGNORE THE MAN ---
         player.adjustKindness(-15);
         gsm.setFlag("player_ignored_kael", true);
         
-        uiManager.showChoice(
-            "Elian",
-            "Sorry, I can't get involved.",
-            new String[]{"[1] Walk away..."},
-            (choice) -> {
-                uiManager.showChoice(
-                    "Narrator",
-                    "The man is quickly apprehended by Veridia security. As they drag him away, you notice a file fall from his jacket near a trash bin.",
-                    new String[]{"[1] Investigate the file..."},
-                    (choice2) -> {
-                        // --- TRIGGER THE PAPER PUZZLE MINIGAME ---
-                        System.out.println("[STORY] Triggering Paper Puzzle minigame from the discarded file.");
-                        // game.setScreen(new PagePuzzle(game, ...)); // TODO: Launch the paper puzzle minigame
-                    }
-                );
-            }
-        );
+        uiManager.showNarration("Elian", "Sorry, I can't get involved.", () -> {
+            uiManager.showNarration("Narrator", "The man is quickly apprehended by security. As they drag him away, you notice a shredded file fall from his jacket.", () -> {
+                System.out.println("[STORY] Player can now interact with the file to trigger the Paper Puzzle.");
+                // Here, you would typically spawn a new interactable "object" in the world.
+                // For now, we can launch the puzzle directly for testing.
+                // --- MINIGAME TRIGGER ---
+                // game.setScreen(new PagePuzzle(game, thisScreen, ...)); // TODO: Launch the PagePuzzle screen
+            });
+        });
     }
 }
