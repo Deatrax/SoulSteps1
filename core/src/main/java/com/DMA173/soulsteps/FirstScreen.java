@@ -160,7 +160,7 @@ public class FirstScreen extends ScreenAdapter {
                                 // This is the "Yes" choice. We will launch the puzzle.
                                 // We are removing the Runnable and adding 'this.uiManager'.
                                 // This constructor now has 6 arguments.
-                                game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager));
+                                game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager, elian));
                                 // --- End of Change ---
 
                             } else {

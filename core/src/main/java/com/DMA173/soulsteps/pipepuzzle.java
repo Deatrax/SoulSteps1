@@ -1,5 +1,6 @@
 package com.DMA173.soulsteps;
 
+import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
@@ -22,6 +23,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import java.util.ArrayList;
 
 public class pipepuzzle extends ScreenAdapter implements InputProcessor {
+
+
+    
+  
 
     private enum ToolType {
         BRUSH, WRENCH, SCREWDRIVER
@@ -58,6 +63,9 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     private ScreenAdapter previousScreen;
     private UIManager uiManager;
     private StoryProgressionManager storyManager;
+
+    private Player player;
+    
 
     private static final float WORLD_WIDTH = 1280;
     private static final float WORLD_HEIGHT = 720;
@@ -165,11 +173,12 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         }
     }
 
-    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen, StoryProgressionManager story, WorldManager world, UIManager uiManager) {
+    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen, StoryProgressionManager story, WorldManager world, UIManager uiManager,  Player player) {
         this.game = game;
         this.previousScreen = previousScreen;
         this.uiManager = uiManager;
         this.storyManager = story;
+        this.player = player;
     }
 
     @Override
@@ -380,6 +389,9 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             batch.draw(winPipeTexture, x, y);
 
             if(Gdx.input.justTouched()){
+                
+                storyManager.triggerStoryEvent("pipe_puzzle_completed", player);
+
                  game.setScreen(previousScreen);
                  // --- Start of Necessary Change ---
                  // REMOVED the dispose() call from here.

@@ -120,7 +120,7 @@ public class StoryProgressionManager {
         objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
 
         objectiveOrder.add("Enteroffice");
-        objectiveTexts.put("Enteroffice","\nGo to office");
+        objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
 
        
         
@@ -199,14 +199,14 @@ public class StoryProgressionManager {
         exitDanHouse.triggerArea = new Vector2(80, 93);
         exitDanHouse.triggerRadius = 100f;
         exitDanHouse.spawnPosition = new Vector2(740, 545);
-        exitDanHouse.requiredObjective = "Enteroffice";
+        exitDanHouse.requiredObjective = null;
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
         MapTransition enteroffice = new MapTransition();
         enteroffice.fromZone = "Tile_City";
         enteroffice.toZone = "office/office";
-        enteroffice.triggerArea = new Vector2(745, 1205);
+        enteroffice.triggerArea = new Vector2(852, 1197);
         enteroffice.triggerRadius = 50f;
         enteroffice.spawnPosition = new Vector2(440, 345);
         enteroffice.requiredObjective = "Enteroffice";
@@ -550,6 +550,14 @@ public class StoryProgressionManager {
                         }
                     }
                 );
+                break;
+
+                            case "pipe_puzzle_completed":
+                uiManager.showNarration(
+                    null,
+                    "You fixed the pipes successfully! Now you should head to the office."
+                );
+                completeCurrentObjective(); // Move to the next objective in the list
                 break;
 
             // --- FUTURE EXAMPLE: Interacting with a computer terminal ---
