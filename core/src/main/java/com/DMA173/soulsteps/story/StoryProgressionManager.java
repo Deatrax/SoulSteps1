@@ -112,6 +112,9 @@ public class StoryProgressionManager {
         objectiveOrder.add("goToDanHouse");
         objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
 
+        objectiveOrder.add("talked_to_rep");
+        objectiveTexts.put("talked_to_rep", "Talk to receptionist");
+
         // //Objective 2: Fix dan's plumbing
         // objectiveOrder.add("fixDanPlumbing");
         // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");

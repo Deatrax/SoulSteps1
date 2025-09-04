@@ -4,6 +4,7 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
 import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
+import com.DMA173.soulsteps.Charecters.NPCs.manager;
 import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
@@ -173,7 +174,7 @@ public class WorldManager {
         new Vector2(380, 340)  
         // --- END OF FIX ---
     );
-                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+               // receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
                 currentNpcManager.addNPC(receptionist);
                 // EXAMPLE: Building interior NPCs
               /*   NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
@@ -186,6 +187,11 @@ public class WorldManager {
                 security.setDialogue("This is a restricted area. Please state your business.");
                 currentNpcManager.addNPC(security);
                 */
+                
+
+            manager Manager = new manager(characterAssets, 5, 435, 300, "Manager", "veridia_employee");
+                Manager.setDialogue("Please help a man in need");
+                currentNpcManager.addNPC(Manager);
                 break;
                 
             // EXAMPLE: How to add more zones
