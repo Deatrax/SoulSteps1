@@ -119,6 +119,10 @@ public class StoryProgressionManager {
         objectiveOrder.add("gotolenahouse");
         objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
 
+         //Objective 2: Fix dan's plumbing
+        objectiveOrder.add("fixDanPlumbing");
+        objectiveTexts.put("fixDanPlumbing", "Check the kitchen sink");
+
         objectiveOrder.add("Enteroffice");
         objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
 
@@ -321,10 +325,11 @@ public class StoryProgressionManager {
                 }
                 break;
 
-            // case "talk_to_lena_first_time":
-            //     // This gets completed in NPC.interact() when talking to Lena
-            //     // No additional check needed here
-            //     break;
+            case "fixDanPlumbing":
+                 if(gameState.hasCompletedObjective("fixDanPlumbing")){
+                    completeCurrentObjective();
+                }
+                break;
                 
             
             // EXAMPLE for player

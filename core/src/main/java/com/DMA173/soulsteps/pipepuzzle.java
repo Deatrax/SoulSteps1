@@ -20,8 +20,6 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.util.ArrayList;
-
 public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
 
@@ -390,12 +388,10 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
             if(Gdx.input.justTouched()){
                 
+                
                 storyManager.triggerStoryEvent("pipe_puzzle_completed", player);
 
                  game.setScreen(previousScreen);
-                 // --- Start of Necessary Change ---
-                 // REMOVED the dispose() call from here.
-                 // --- End of Necessary Change ---
             }
         }
 
