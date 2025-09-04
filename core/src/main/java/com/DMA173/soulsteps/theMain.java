@@ -14,6 +14,8 @@ public class theMain extends Game {
     public void create() {
         FontManager.load();
 
+        //setScreen(new pipepuzzle());
+
         // Start with the menu screen
         setScreen(new MenuScreen(this));
         System.out.println("SoulSteps game started with new menu system");
