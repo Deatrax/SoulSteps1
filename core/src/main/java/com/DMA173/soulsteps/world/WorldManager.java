@@ -4,6 +4,7 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
 import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
+import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
@@ -115,7 +116,7 @@ public class WorldManager {
                 currentNpcManager.addNPC(deliveryman1);
 
                 if (/*gsm.hasCompletedObjective("goToDanHouse")*/ true) {
-                    NPC teen1 = new NPC(characterAssets, 4, 146, 249, "Vandal", "resident_casual");
+                    vandalTeenNPC teen1 = new vandalTeenNPC(characterAssets, 4, 146, 249, "Vandal", "resident_casual");
                     
                     // --- USE THE NEW METHOD ---
                     teen1.performEffect("spray_effect"); // The NPC will now show its idle animation with the spray effect on top.

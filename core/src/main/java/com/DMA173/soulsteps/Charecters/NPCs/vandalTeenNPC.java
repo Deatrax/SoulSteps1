@@ -24,51 +24,37 @@ public class vandalTeenNPC extends  NPC{
                     new String[] { "What are you doing?"}, // Choices
                     (choice) -> {
                         // This code runs AFTER the player makes a choice from the dialogue box.
-                        if (choice == 1) { // Chose to help
-                            player.adjustKindness(10);
-                            gsm.completeObjective("given_alms_to_begger");
-                            this.setDialogue("You are a kind person, sir!");
-                            
-                            uiManager.showNarration("Poor begger", "Thank you very much sir, may Almighty bless you.");
+                        if (true) { // Chose to help
                             
                             
-                            
-                        } else { // Chose to refuse
-                            player.adjustKindness(-5);
-                            gsm.completeObjective("denied_alms_to_begger");
-                            this.setDialogue("");
-                            
-                            uiManager.showNarration("Poor Begger", "Oh... alright then.");
-                        }
-                    }
-                );
-        }
-        else if(gsm.hasCompletedObjective("denied_alms_to_begger") && !gsm.hasCompletedObjective("given_alms_to_begger")){
-            uiManager.showChoice(
-                    "Poor begger", // Speaker
-                    "Will you still help me?", // Prompt
-                    new String[] { "Ok, Here help yourself", "No, I'm very busy now" }, // Choices
-                    (choice) -> {
-                        // This code runs AFTER the player makes a choice from the dialogue box.
-                        if (choice == 1) { // Chose to help
-                            player.adjustKindness(5);
-                            gsm.completeObjective("given_alms_to_begger");
-                            this.setDialogue("You are a kind person, sir!");
-                            
-                            uiManager.showNarration("Poor begger", "Thank you very much sir, may Almighty bless you.");
-                        }else { // Chose to refuse
-                            player.adjustKindness(-10);
-                            gsm.completeObjective("denied_alms_to_begger");
-                            this.setDialogue("");
-                            
-                            uiManager.showNarration("Poor Begger", "Oh... alright then.");
-                        }
+                            // uiManager.showNarration("Teen doing vandalism", "What ever the heck I wish to do!!");
+                            uiManager.showChoice(
+                                "Teen doing vandalism", 
+                                "What ever the heck I wish to do!!", 
+                                new String[] { "[Stop the kid] You should not do that!!", "[let him be and mind your own] ...alright"}, // Choices
+                                (choice2) -> {
+                                    if(choice2 == 1){
+                                        player.adjustKindness(10);
+                                        gsm.completeObjective("tried_to_stop_teen");
+                                        this.setDialogue("FFFINNEEE....you are no fun.. *hmph*");
+                                    }
+                                    else if(choice2 == 2){
+                                        player.adjustKindness(-10);
+                                        gsm.completeObjective("tried_to_stop_teen");
+                                        this.setDialogue("Yeah right, get lost boomer");
+                                    }
 
+                                }
+                            );
+                            
+                            
+                        } 
                     }
                 );
         }
+        
         else{
-            uiManager.showNarration("Poor begger", this.dialogue);
+            uiManager.showNarration("Teen doing vandalism", this.dialogue);
         }
         
     }
