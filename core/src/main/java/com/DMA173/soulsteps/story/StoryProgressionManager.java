@@ -124,14 +124,17 @@ public class StoryProgressionManager {
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
-        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+        objectiveTexts.put("goToDanHouse", "\nGo to Dan's house to check his plumbing");
 
         // //Objective 2: Fix dan's plumbing
         // objectiveOrder.add("fixDanPlumbing");
         // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
 
         objectiveOrder.add("gotolenahouse");
-        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
+        objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
+
+        //objectiveOrder.add("gotolenahouse");
+        //objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
         
         
         
@@ -279,7 +282,7 @@ public class StoryProgressionManager {
         MapTransition enteroffice = new MapTransition();
         enteroffice.fromZone = "Tile_City";
         enteroffice.toZone = "office";
-        enteroffice.triggerArea = new Vector2(100, 410);
+        enteroffice.triggerArea = new Vector2(540, 115);
         enteroffice.triggerRadius = 100f;
         enteroffice.spawnPosition = new Vector2(740, 440);
         enteroffice.requiredObjective = null;

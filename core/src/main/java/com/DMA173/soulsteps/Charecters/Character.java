@@ -324,12 +324,12 @@ public abstract class Character {
                 System.out.println("[ Character] Applied scaling factor = "+ scale + "in the new map");
                 break;
                 
-            // --- FUTURE: Add other maps that need scaling here ---
-            /*
-            case "office_map":
-                this.scale = 1.5f;
+            
+            case "office":
+                this.scale = 1.9f;
+                this.speed = 120f;
                 break;
-            */
+            
             
             default:
                 // For all other maps, use the default scale.
