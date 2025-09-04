@@ -40,10 +40,7 @@ public class FirstScreen extends ScreenAdapter {
 
     public FirstScreen(Game game) {
         this.game = game;
-    }
 
-    @Override
-    public void show() {
         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.zoom = camZoom;
@@ -68,6 +65,11 @@ public class FirstScreen extends ScreenAdapter {
 
         storyManager = new StoryProgressionManager(uiManager, worldManager);
         inputHandler.setStoryManager(storyManager);
+    }
+
+    @Override
+    public void show() {
+        
     }
 
     private void initializeCollision() {
@@ -155,8 +157,10 @@ public class FirstScreen extends ScreenAdapter {
                             choice -> {
                                 if (choice == 1) {
                                     game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager));
+                                    elian.adjustKindness(10);
                                 } else {
                                     uiManager.showNotification("You decided not to fix the pipe.");
+                                    elian.adjustKindness(-10);
                                 }
                                 uiManager.hideDialogue();
                                 elian.getPosition().y -= 20;
