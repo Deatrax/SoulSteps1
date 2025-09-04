@@ -200,10 +200,10 @@ public class StoryProgressionManager {
 
         MapTransition enteroffice = new MapTransition();
         enteroffice.fromZone = "Tile_City";
-        enteroffice.toZone = "office_interior";
+        enteroffice.toZone = "office/office";
         enteroffice.triggerArea = new Vector2(745, 1205);
         enteroffice.triggerRadius = 50f;
-        enteroffice.spawnPosition = new Vector2(740, 545);
+        enteroffice.spawnPosition = new Vector2(440, 345);
         enteroffice.requiredObjective = null;
         enteroffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("shku", enteroffice);
