@@ -1,5 +1,8 @@
 package com.DMA173.soulsteps;
 
+import com.DMA173.soulsteps.story.StoryProgressionManager;
+import com.DMA173.soulsteps.story.StoryProgressionManager.MapTransition;
+import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
@@ -20,7 +23,6 @@ import java.util.ArrayList;
 
 public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
-    // Added SCREWDRIVER to the list of available tools
     private enum ToolType {
         BRUSH, WRENCH, SCREWDRIVER
     }
@@ -32,12 +34,10 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     private Texture brushIconTexture, wrenchIconTexture, selectionHighlightTexture;
     private Texture toolBgTexture;
     private Texture winPipeTexture;
-    // NEW: Textures for the new tool and obstacle
     private Texture limiterTexture, screwdriverTexture, screwdriverIconTexture;
 
     private ArrayList<DirtSpot> dirtSpots;
     private ArrayList<Crack> cracks;
-    // NEW: An ArrayList for the new limiter objects
     private ArrayList<Limiter> limiters;
 
     private OrthographicCamera camera;
@@ -46,7 +46,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
     private Rectangle brushSelectionBounds;
     private Rectangle wrenchSelectionBounds;
-    // NEW: A clickable area for the new screwdriver icon
     private Rectangle screwdriverSelectionBounds;
     private Rectangle toolBgBounds;
 
@@ -56,9 +55,7 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     private int totalProblems = 0;
 
     private Game game;
-
     private String previousMapName;
-
     private ScreenAdapter previousScreen;
 
     private static final float WORLD_WIDTH = 1280;
@@ -122,7 +119,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         }
     }
 
-    // NEW: A class for the limiter, just like the others
     class Limiter {
         Vector2 position;
         Rectangle bounds;
@@ -136,7 +132,7 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
         void remove() {
             if (isRemoved()) return;
-            this.removalProgress += Gdx.graphics.getDeltaTime() * 1.8f; // Removal speed
+            this.removalProgress += Gdx.graphics.getDeltaTime() * 1.8f;
 
             if (this.removalProgress >= 1f) {
                 this.removalProgress = 1f;
@@ -153,7 +149,7 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     }
 
 
-    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen) {
+    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen, StoryProgressionManager story, WorldManager world ) {
         this.game = game;
         this.previousMapName = previousMapName;
         this.previousScreen = previousScreen;
@@ -177,33 +173,28 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         selectionHighlightTexture = new Texture("selection_highlight.png");
         toolBgTexture = new Texture("tool-bg.png");
         winPipeTexture = new Texture("pipe.png");
-        // NEW: Load textures for the screwdriver and limiter
         limiterTexture = new Texture("limiter.png");
         screwdriverTexture = new Texture("screwdriver.png");
         screwdriverIconTexture = new Texture("screwdriver_icon.png");
         
         dirtSpots = new ArrayList<>();
         cracks = new ArrayList<>();
-        limiters = new ArrayList<>(); // Initialize the new list
+        limiters = new ArrayList<>();
 
-        // Your original 5 dirt spots are unchanged
         dirtSpots.add(new DirtSpot(157, 550, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(350, 380, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(617, 260, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(900, 172, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(1010, 300, dirtSpotTexture));
 
-        // Your original 5 cracks are unchanged
         cracks.add(new Crack(115, 210, crackTexture));
         cracks.add(new Crack(440, 210, crackTexture));
         cracks.add(new Crack(570, 560, crackTexture));
         cracks.add(new Crack(810, 455, crackTexture));
         cracks.add(new Crack(1050, 500, crackTexture));
         
-        // NEW: Add exactly one limiter
         limiters.add(new Limiter(700, 350, limiterTexture));
         
-        // MODIFIED: The total number of problems is now 5 + 5 + 1 = 11
         totalProblems = dirtSpots.size() + cracks.size() + limiters.size();
         
         float iconSize = 80;
@@ -211,15 +202,13 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         
         brushSelectionBounds = new Rectangle(20, 20, iconSize, iconSize);
         wrenchSelectionBounds = new Rectangle(20 + iconSize + iconSpacing, 20, iconSize, iconSize);
-        // NEW: Position the new screwdriver icon next to the wrench
         screwdriverSelectionBounds = new Rectangle(20 + (iconSize + iconSpacing) * 2, 20, iconSize, iconSize);
 
         float bgPadding = 10;
-        // MODIFIED: Widen the background to fit three icons
         toolBgBounds = new Rectangle(
             brushSelectionBounds.x - bgPadding,
             brushSelectionBounds.y - bgPadding,
-            (iconSize * 3) + (iconSpacing * 2) + (bgPadding * 2), // Width for 3 icons
+            (iconSize * 3) + (iconSpacing * 2) + (bgPadding * 2),
             iconSize + (bgPadding * 2)
         );
 
@@ -234,13 +223,12 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         worldCoordinates.set(screenX, screenY, 0);
         viewport.unproject(worldCoordinates);
 
-        // MODIFIED: Logic to select the correct cursor texture based on the active tool
         Texture currentCursorTexture;
         if (currentTool == ToolType.BRUSH) {
             currentCursorTexture = brushTexture;
         } else if (currentTool == ToolType.WRENCH) {
             currentCursorTexture = wrenchTexture;
-        } else { // It must be the screwdriver
+        } else {
             currentCursorTexture = screwdriverTexture;
         }
 
@@ -262,7 +250,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
                     crack.repair();
                 }
             }
-        // NEW: Added the logic block for the screwdriver
         } else if (currentTool == ToolType.SCREWDRIVER) {
             for (Limiter limiter : limiters) {
                 if (!limiter.isRemoved() && limiter.bounds.overlaps(interactionBounds)) {
@@ -301,7 +288,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             batch.draw(crackTexture, crack.position.x, crack.position.y);
         }
         
-        // NEW: A loop to draw the limiter(s)
         for (Limiter limiter : limiters) {
             batch.setColor(1, 1, 1, 1 - limiter.removalProgress);
             batch.draw(limiterTexture, limiter.position.x, limiter.position.y);
@@ -312,15 +298,13 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         batch.draw(toolBgTexture, toolBgBounds.x, toolBgBounds.y, toolBgBounds.width, toolBgBounds.height);
         batch.draw(brushIconTexture, brushSelectionBounds.x, brushSelectionBounds.y, brushSelectionBounds.width, brushSelectionBounds.height);
         batch.draw(wrenchIconTexture, wrenchSelectionBounds.x, wrenchSelectionBounds.y, wrenchSelectionBounds.width, wrenchSelectionBounds.height);
-        // NEW: Draw the screwdriver icon in the toolbar
         batch.draw(screwdriverIconTexture, screwdriverSelectionBounds.x, screwdriverSelectionBounds.y, screwdriverSelectionBounds.width, screwdriverSelectionBounds.height);
 
-        // MODIFIED: Update the highlight logic to include the new tool
         if (currentTool == ToolType.BRUSH) {
             batch.draw(selectionHighlightTexture, brushSelectionBounds.x, brushSelectionBounds.y, brushSelectionBounds.width, brushSelectionBounds.height);
         } else if (currentTool == ToolType.WRENCH) {
             batch.draw(selectionHighlightTexture, wrenchSelectionBounds.x, wrenchSelectionBounds.y, wrenchSelectionBounds.width, wrenchSelectionBounds.height);
-        } else { // It must be the screwdriver
+        } else {
             batch.draw(selectionHighlightTexture, screwdriverSelectionBounds.x, screwdriverSelectionBounds.y, screwdriverSelectionBounds.width, screwdriverSelectionBounds.height);
         }
         
@@ -331,13 +315,12 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             worldCoordinates.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             viewport.unproject(worldCoordinates);
             
-            // MODIFIED: Logic to select the correct cursor to draw
             Texture cursorTexture;
             if (currentTool == ToolType.BRUSH) {
                 cursorTexture = brushTexture;
             } else if (currentTool == ToolType.WRENCH) {
                 cursorTexture = wrenchTexture;
-            } else { // It must be the screwdriver
+            } else {
                 cursorTexture = screwdriverTexture;
             }
             
@@ -351,6 +334,14 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             float y = (WORLD_HEIGHT - imageHeight) / 2f;
             
             batch.draw(winPipeTexture, x, y);
+
+            if(Gdx.input.justTouched()){
+                 game.setScreen(previousScreen);
+                 // --- Start of Change ---
+                 // DO NOT call dispose() here. Let the game handle the screen transition first.
+                 // The old screen will be garbage collected.
+                 // --- End of Change ---
+            }
         }
 
         batch.end();
@@ -358,6 +349,8 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
     @Override
     public void dispose() {
+        // This method is now called correctly by LibGDX when the game closes,
+        // or if you manually manage and dispose of screens.
         batch.dispose();
         cleanPipeTexture.dispose();
         dirtSpotTexture.dispose();
@@ -371,7 +364,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         winPipeTexture.dispose();
         font.dispose();
 
-        // NEW: Dispose of the new textures to prevent memory leaks
         limiterTexture.dispose();
         screwdriverTexture.dispose();
         screwdriverIconTexture.dispose();
@@ -379,7 +371,14 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        if (allFixed) return false;
+        // --- Start of Change ---
+        // If the game is won, we let the render loop handle the final "exit" click.
+        // Returning true here prevents the click from being processed by the game world
+        // after the win image appears.
+        if (allFixed) {
+            return true;
+        }
+        // --- End of Change ---
 
         worldCoordinates.set(screenX, screenY, 0);
         viewport.unproject(worldCoordinates);
@@ -392,7 +391,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             currentTool = ToolType.WRENCH;
             return true;
         }
-        // NEW: Check if the screwdriver icon was clicked
         if (screwdriverSelectionBounds.contains(worldCoordinates.x, worldCoordinates.y)) {
             currentTool = ToolType.SCREWDRIVER;
             return true;

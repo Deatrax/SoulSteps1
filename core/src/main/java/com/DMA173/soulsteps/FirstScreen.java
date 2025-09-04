@@ -154,7 +154,7 @@ public class FirstScreen extends ScreenAdapter {
                             new String[]{"Yes", "No"},
                             choice -> {
                                 if (choice == 1) {
-                                    game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this));
+                                    game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager));
                                 } else {
                                     uiManager.showNotification("You decided not to fix the pipe.");
                                 }
