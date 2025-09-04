@@ -2,6 +2,7 @@ package com.DMA173.soulsteps;
 
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
@@ -35,7 +36,7 @@ public class FirstScreen extends ScreenAdapter {
 
     private TiledMapTileLayer collisionLayer;
     private float tileWidth, tileHeight;
-
+    private GameStateManager gsm;
     private float camZoom = 0.3f;
 
     public FirstScreen(Game game) {
@@ -51,6 +52,7 @@ public class FirstScreen extends ScreenAdapter {
 
         worldManager = new WorldManager(characterAssets);
         worldManager.loadZone("Tile_City");
+        gsm = worldManager.getGsm();
 
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 
@@ -160,7 +162,9 @@ public class FirstScreen extends ScreenAdapter {
                                 // This is the "Yes" choice. We will launch the puzzle.
                                 // We are removing the Runnable and adding 'this.uiManager'.
                                 // This constructor now has 6 arguments.
+                                worldManager.completeObjective("fixDanPlumbing"); //DEBUG for now
                                 game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager));
+
                                 // --- End of Change ---
 
                             } else {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
+import com.badlogic.gdx.Game;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -190,6 +191,22 @@ public class NPC extends Character {
             //    break;
 
             // ... etc.
+             // --- NEW: Add a case for Kael ---
+            case "Kael":
+                uiManager.showChoice(
+                    "Mysterious Figure (Kael)",
+                    "You're the one who was at Dan's place, right? I saw you. You're looking into the water problem. We need to talk, but not here.",
+                    new String[]{"Who are you?", "How do you know that?"},
+                    (choice) -> {
+                        // Regardless of the choice, the outcome is the same for this ambush
+                        uiManager.showNarration("Kael", "Names don't matter right now. Meet me at the old mechanic shop on the west side of town. I can explain everything.");
+                        
+                        // --- THIS IS THE KEY STORY PROGRESSION ---
+                        gsm.completeObjective("meet_the_informant");
+                    }
+                );
+                break;
+            // --------------------------------
 
             default:
                 // For any other NPC that doesn't have special logic,
@@ -540,7 +557,10 @@ public class NPC extends Character {
         hasBeenTalkedTo = true;
     }
 
-
+     // Add Game parameter to the interact method
+    public void interact(Player player, GameStateManager gsm, UIManager uiManager, Game game) {
+        // ... (Default logic)
+    }
     ////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////////

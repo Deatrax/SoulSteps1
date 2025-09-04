@@ -1,5 +1,7 @@
 package com.DMA173.soulsteps;
 
+import java.util.ArrayList;
+
 import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
@@ -18,8 +20,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-
-import java.util.ArrayList;
 
 public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
@@ -380,10 +380,8 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             batch.draw(winPipeTexture, x, y);
 
             if(Gdx.input.justTouched()){
+                
                  game.setScreen(previousScreen);
-                 // --- Start of Necessary Change ---
-                 // REMOVED the dispose() call from here.
-                 // --- End of Necessary Change ---
             }
         }
 

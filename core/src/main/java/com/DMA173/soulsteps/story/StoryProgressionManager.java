@@ -112,26 +112,11 @@ public class StoryProgressionManager {
         objectiveOrder.add("goToDanHouse");
         objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
 
-        // //Objective 2: Fix dan's plumbing
-        // objectiveOrder.add("fixDanPlumbing");
-        // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
+        //Objective 2: Fix dan's plumbing
+        objectiveOrder.add("fixDanPlumbing");
+        objectiveTexts.put("fixDanPlumbing", "Check the kitchen sink");
 
-        objectiveOrder.add("gotolenahouse");
-        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
-        
-        
-        
-        // EXAMPLE: How to add more objectives
-        /*
-        objectiveOrder.add("confront_ceo");
-        objectiveTexts.put("confront_ceo", "Confront the CEO with evidence");
-        
-        objectiveOrder.add("escape_building");
-        objectiveTexts.put("escape_building", "Escape the Veridia Corporation building");
-        
-        objectiveOrder.add("report_to_authorities");
-        objectiveTexts.put("report_to_authorities", "Report your findings to the authorities");
-        */
+      
         
         System.out.println("[STORY] Initialized " + objectiveOrder.size() + " objectives");
     }
@@ -194,7 +179,7 @@ public class StoryProgressionManager {
         exitDanHouse.triggerArea = new Vector2(80, 93);
         exitDanHouse.triggerRadius = 100f;
         exitDanHouse.spawnPosition = new Vector2(740, 545);
-        exitDanHouse.requiredObjective = "gotolenahouse";
+        exitDanHouse.requiredObjective = null;
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
@@ -301,10 +286,11 @@ public class StoryProgressionManager {
                 }
                 break;
 
-            // case "talk_to_lena_first_time":
-            //     // This gets completed in NPC.interact() when talking to Lena
-            //     // No additional check needed here
-            //     break;
+            case "fixDanPlumbing":
+                 if(gameState.hasCompletedObjective("fixDanPlumbing")){
+                    completeCurrentObjective();
+                }
+                break;
                 
             
             // EXAMPLE for player
