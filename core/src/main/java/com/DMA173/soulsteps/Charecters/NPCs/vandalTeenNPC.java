@@ -6,23 +6,22 @@ import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
 
-public class beggerNPC extends NPC {
-    
-    public beggerNPC(CharecterAssets assets, int characterType, float startX, float startY, String name, String npcType){
+public class vandalTeenNPC extends  NPC{
+    public vandalTeenNPC(CharecterAssets assets, int characterType, float startX, float startY, String name, String npcType){
         super( assets,  characterType,  startX,  startY,  name,  npcType);
     }
 
     @Override
     public void interact(Player player, GameStateManager gsm, UIManager uiManager) {
         
-        if(!gsm.hasCompletedObjective("Talked_with_begger")){
+        if(!gsm.hasCompletedObjective("Talked_with_vandal")){
 
-            gsm.completeObjective("Talked_with_begger");
-
+            gsm.completeObjective("Talked_with_vandal");
+            
             uiManager.showChoice(
-                    "Poor begger", // Speaker
-                    "Please help a man in need, will you?", // Prompt
-                    new String[] { "Here help yourself", "No, I'm very busy now" }, // Choices
+                    "Teen doing vandalism", // Speaker
+                    "What do you want?", // Prompt
+                    new String[] { "What are you doing?"}, // Choices
                     (choice) -> {
                         // This code runs AFTER the player makes a choice from the dialogue box.
                         if (choice == 1) { // Chose to help
@@ -74,5 +73,3 @@ public class beggerNPC extends NPC {
         
     }
 }
-
-

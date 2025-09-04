@@ -11,12 +11,8 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.MapLayer;
-import com.badlogic.gdx.maps.MapObject;
-import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
 /**
@@ -172,24 +168,24 @@ public class FirstScreen extends ScreenAdapter {
     
     // MERGED: Trigger checking logic from your teammate
     private void checkTriggers() {
-        MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
-        if (triggerLayer == null) return;
+        // MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
+        // if (triggerLayer == null) return;
 
-        for (MapObject obj : triggerLayer.getObjects()) {
-            if (obj instanceof RectangleMapObject) {
-                Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
+        // for (MapObject obj : triggerLayer.getObjects()) {
+        //     if (obj instanceof RectangleMapObject) {
+        //         Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
 
-                if (triggerRect.contains(elian.getPosition())) {
-                    String type = obj.getProperties().get("type", String.class);
-                    if ("pipeGame".equals(type)) {
-                        System.out.println("Pipe game trigger activated!");
-                        // TODO: Implement the pipe game screen transition
-                        // game.setScreen(new PipeGameScreen(game, this)); // Example
-                    }
-                    // Add other trigger types here as needed
-                }
-            }
-        }
+        //         if (triggerRect.contains(elian.getPosition())) {
+        //             String type = obj.getProperties().get("type", String.class);
+        //             if ("pipeGame".equals(type)) {
+        //                 System.out.println("Pipe game trigger activated!");
+        //                 // TODO: Implement the pipe game screen transition
+        //                 // game.setScreen(new PipeGameScreen(game, this)); // Example
+        //             }
+        //             // Add other trigger types here as needed
+        //         }
+        //     }
+        // }
     }
     
     private void updateCamera() {

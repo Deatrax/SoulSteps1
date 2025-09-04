@@ -9,6 +9,7 @@ import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * UPDATED WORLD MANAGER
@@ -103,6 +104,27 @@ public class WorldManager {
                 begger.setDialogue("Please help a man in need");
                 currentNpcManager.addNPC(begger);
 
+
+
+                NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
+                deliveryman1.walkPath(
+                    50f, // Speed
+                    true,
+                    new Vector2(50, 127)  // Then back to the start (to loop, you'd need more logic)
+                );
+                currentNpcManager.addNPC(deliveryman1);
+
+                if (/*gsm.hasCompletedObjective("goToDanHouse")*/ true) {
+                    NPC teen1 = new NPC(characterAssets, 4, 146, 249, "Vandal", "resident_casual");
+                    
+                    // --- USE THE NEW METHOD ---
+                    teen1.performEffect("spray_effect"); // The NPC will now show its idle animation with the spray effect on top.
+                    
+                    // You can even set their facing direction
+                    teen1.setCurrentDir(CharecterAssets.Direction.LEFT); // Make them face a wall
+                    
+                    currentNpcManager.addNPC(teen1);
+                }
 
                 
                 // EXAMPLE: Add more town NPCs

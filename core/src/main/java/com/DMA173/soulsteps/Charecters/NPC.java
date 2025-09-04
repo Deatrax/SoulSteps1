@@ -1,7 +1,15 @@
 package com.DMA173.soulsteps.Charecters;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import com.DMA173.soulsteps.story.GameStateManager;
 import com.DMA173.soulsteps.ui.UIManager;
+import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * UPDATED NPC CLASS
@@ -20,12 +28,38 @@ public class NPC extends Character {
     private String npcType;
     private String npcId; // Unique identifier for story tracking
 
+
+    // --- NEW: State management for NPC behavior ---
+    private enum NpcState { IDLE, WALKING, PERFORMING_ACTION }
+    private NpcState currentState = NpcState.IDLE;
+    private Animation<TextureRegion> currentActionAnimation;
+
+    // --- NEW: Pathfinding variables (for Part 2) ---
+    private List<Vector2> pathPoints;
+    private int currentPathIndex;
+    private float arrivalThreshold = 2f; // How close to a point to be considered "arrived"
+    private boolean isPathLooping = false;
+
+    // --- MODIFY: We no longer need to replace the character's animation ---
+    private Animation<TextureRegion> currentEffectAnimation; // Changed from currentActionAnimation
+
+
     public NPC(CharecterAssets assets, int characterType, float startX, float startY, String name, String npcType) {
         super(assets, characterType, startX, startY, 0f, getAppearanceForNPCType(npcType));
         this.name = name;
         this.npcType = npcType;
         this.npcId = name.toLowerCase().replace(" ", "_"); // Generate ID from name
         this.isInteractable = true;
+        this.hasBeenTalkedTo = false;
+        this.dialogue = "Hello there.";
+    }
+
+    public NPC(CharecterAssets assets, int characterType, float startX, float startY, String name, String npcType, boolean interatable) {
+        super(assets, characterType, startX, startY, 0f, getAppearanceForNPCType(npcType));
+        this.name = name;
+        this.npcType = npcType;
+        this.npcId = name.toLowerCase().replace(" ", "_"); // Generate ID from name
+        this.isInteractable = interatable;
         this.hasBeenTalkedTo = false;
         this.dialogue = "Hello there.";
     }
@@ -55,8 +89,85 @@ public class NPC extends Character {
     @Override
     public void update(float delta) {
         updateStateTime(delta);
-        this.setMoving(false);
+        
+        switch (currentState) {
+            case IDLE:
+                this.setMoving(false);
+                break;
+            case WALKING:
+                updatePathMovement(delta);
+                break;
+            case PERFORMING_ACTION:
+                // When performing an action, the NPC is not moving.
+                this.setMoving(false);
+                break;
+        }
     }
+
+     // --- UPGRADE the render method to draw the effect as an overlay ---
+    @Override
+    public void render(Batch batch) {
+        // Step 1: Render the character itself as normal (idle, walking, etc.)
+        super.render(batch);
+
+        // Step 2: If the NPC is performing an action, draw the effect on top.
+        if (currentState == NpcState.PERFORMING_ACTION && currentEffectAnimation != null) {
+            TextureRegion effectFrame = currentEffectAnimation.getKeyFrame(stateTime, true);
+            
+            if (effectFrame != null) {
+                // --- POSITIONING LOGIC for the effect ---
+                // We want to position the spray can near the character's hands.
+                float offsetX = 0;
+                float offsetY = 12; // Position it slightly above the character's feet (adjust as needed)
+
+                // Adjust the offset based on the character's facing direction
+                switch (this.currentDir) {
+                    case RIGHT:
+                        offsetX = 10; // To the right of the character's center
+                        break;
+                    case LEFT:
+                        offsetX = -10 - effectFrame.getRegionWidth(); // To the left, accounting for width
+                        break;
+                    case UP:
+                        offsetY = 16;
+                        break;
+                    case DOWN:
+                        offsetY = 8;
+                        break;
+                }
+
+                // We don't need to scale the effect, so we draw it at its normal size
+                batch.draw(effectFrame, position.x + offsetX, position.y + offsetY);
+            }
+        }
+    }
+
+
+    // --- NEW: Public method to make an NPC perform an action ---
+    /**
+     * Assigns a special, looping action animation to this NPC.
+     * @param actionId The ID of the animation loaded in CharecterAssets (e.g., "spray_paint").
+     */
+    public void performAction(String actionId) {
+        // Animation<TextureRegion> actionAnim = assets.getActionAnimation(actionId);
+        // if (actionAnim != null) {
+        //     this.currentState = NpcState.PERFORMING_ACTION;
+        //     this.currentActionAnimation = actionAnim;
+        // } else {
+        //     System.err.println("Could not find action animation with ID: " + actionId);
+        // }
+    }
+
+    // --- NEW: Method to stop the action and return to idle ---
+    public void stopAction() {
+        this.currentState = NpcState.IDLE;
+        this.currentActionAnimation = null;
+    }
+
+    // --- Pathfinding logic will go here in Part 2 ---
+
+
+
 
      /**
      * STORY-AWARE INTERACT METHOD (Refactored for On-Screen Dialogue)
@@ -88,7 +199,193 @@ public class NPC extends Character {
                 break;
         }
     }
+
+
+    // --- RENAME the performAction method for clarity ---
+    /**
+     * Assigns a looping effect animation to this NPC. The NPC will continue
+     * to render its base idle/walk animation underneath the effect.
+     * @param effectId The ID of the animation loaded in CharecterAssets (e.g., "spray_effect").
+     */
+    public void performEffect(String effectId) {
+        Animation<TextureRegion> effectAnim = assets.getActionAnimation(effectId);
+        if (effectAnim != null) {
+            this.currentState = NpcState.PERFORMING_ACTION;
+            this.currentEffectAnimation = effectAnim;
+            // The NPC's base animation can be set to idle
+            this.setMoving(false); 
+        } else {
+            System.err.println("Could not find effect animation with ID: " + effectId);
+        }
+    }
+
+    // --- RENAME the stopAction method for clarity ---
+    public void stopEffect() {
+        this.currentState = NpcState.IDLE;
+        this.currentEffectAnimation = null;
+    }
+
+
+    /**
+     * Assigns a path for the NPC to walk along.
+     * The NPC will move from its current position to point A, then B, C, etc.
+     * @param speed The movement speed for this path.
+     * @param points A series of Vector2 points to walk to.
+     */
+    public void walkPath(float speed, Vector2... points) {
+        if (points.length == 0) return;
+
+        this.speed = speed;
+        this.pathPoints = new ArrayList<>(Arrays.asList(points));
+        this.currentPathIndex = 0;
+        this.currentState = NpcState.WALKING;
+        this.setMoving(true); // Set the animation state to walking
+    }
+
+    /**
+     * Assigns a path for the NPC to walk along.
+     * @param speed The movement speed for this path.
+     * @param loop If true, the NPC will return to the first point after reaching the last.
+     * @param points A series of Vector2 points to walk to.
+     */
+    public void walkPath(float speed, boolean loop, Vector2... points) {
+        if (points.length == 0) return;
+
+        this.speed = speed;
+        this.isPathLooping = loop; // Store the loop flag
+        this.pathPoints = new ArrayList<>(Arrays.asList(points));
+        this.currentPathIndex = 0;
+        this.currentState = NpcState.WALKING;
+        this.setMoving(true);
+    }
+
+    /**
+     * This method is called by update() when the NPC is in the WALKING state.
+     * It handles moving the NPC towards the current target point on its path.
+     */
+    private void updatePathMovement(float delta) {
+    // --- PRE-CONDITION CHECKS ---
+    if (pathPoints == null || pathPoints.isEmpty()) {
+        // No path to follow, switch to IDLE and exit.
+        currentState = NpcState.IDLE;
+        setMoving(false);
+        setCurrentDir(CharecterAssets.Direction.DOWN); // Reset to default facing direction
+        isPathLooping = false; // Reset loop flag
+        return;
+    }
+
+    // --- STEP 1: GET THE CURRENT TARGET ---
+    // If the path index is somehow invalid, reset the path.
+    if (currentPathIndex >= pathPoints.size()) {
+         if (isPathLooping) {
+            currentPathIndex = 0;
+        } else {
+            currentState = NpcState.IDLE;
+            setMoving(false);
+            setCurrentDir(CharecterAssets.Direction.DOWN); // Reset to default facing direction
+            isPathLooping = false;
+            return;
+        }
+    }
+    Vector2 targetPoint = pathPoints.get(currentPathIndex);
+
+    // --- STEP 2: CALCULATE MOVEMENT ---
+    // Calculate the vector from our position to the target.
+    Vector2 movementVector = new Vector2(targetPoint).sub(position);
+    float distanceToTarget = movementVector.len();
+
+    // Normalize the vector to get a pure direction.
+    Vector2 direction = movementVector.nor();
+
+    // --- STEP 3: MOVE THE CHARACTER ---
+    // Calculate how much to move this frame.
+    float moveAmount = speed * delta;
+
+    // An important check: Do not overshoot the target!
+    // If the distance to the target is less than how much we would move,
+    // just move directly to the target. This prevents jittering at the destination.
+    if (distanceToTarget < moveAmount) {
+        position.set(targetPoint);
+    } else {
+        // Otherwise, move normally along the direction vector.
+        position.add(direction.scl(moveAmount));
+    }
     
+    // Update the character's visual facing direction.
+    updateFacingDirection(direction);
+
+    // --- STEP 4: CHECK FOR ARRIVAL AND ADVANCE PATH ---
+    // Check if we have arrived at or passed the target point.
+    if (position.dst(targetPoint) < arrivalThreshold) {
+        // We've arrived. Advance to the next point in the path for the *next* frame.
+        currentPathIndex++;
+
+        // Now, check if we have finished the entire path.
+        if (currentPathIndex >= pathPoints.size()) {
+            if (isPathLooping) {
+                // If looping, reset to the beginning of the path.
+                currentPathIndex = 0;
+            } else {
+                // If not looping, the path is complete. Stop.
+                currentState = NpcState.IDLE;
+                setMoving(false);
+                setCurrentDir(CharecterAssets.Direction.DOWN); // Reset to default facing direction
+                isPathLooping = false; // Clear the flag
+            }
+        }
+    }
+}
+    
+    // ... (the rest of your NPC.java file remains the same)
+ 
+
+    /**
+     * A helper method to make the NPC's sprite face the direction it's moving.
+     */
+    private void updateFacingDirection(Vector2 direction) {
+        // Prioritize horizontal or vertical facing direction for 4-directional sprites
+        if (Math.abs(direction.x) > Math.abs(direction.y)) {
+            // Moving more horizontally
+            if (direction.x > 0) {
+                setCurrentDir(CharecterAssets.Direction.RIGHT);
+            } else {
+                setCurrentDir(CharecterAssets.Direction.LEFT);
+            }
+        } else {
+            // Moving more vertically
+            if (direction.y > 0) {
+                setCurrentDir(CharecterAssets.Direction.UP);
+            } else {
+                setCurrentDir(CharecterAssets.Direction.DOWN);
+            }
+        }
+    }
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// ━━━━━━━━━━━━━━━━━━━━━┏┓━┏┓━━━━━━━━━━━━━━━━┏┓━━━━━━┏┓━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┏┓━━━━━
+// ━━━━━━━━━━━━━━━━━━━━┏┛┗┓┃┃━━━━━━━━━━━━━━━━┃┃━━━━━━┃┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃┃━━━━━
+// ┏━━┓┏┓┏┓┏━━┓┏━┓┏┓━┏┓┗┓┏┛┃┗━┓┏┓┏━┓━┏━━┓━━━━┃┗━┓┏━━┓┃┃━┏━━┓┏┓┏┓┏┓━━━━┏┓┏━━┓━━━━┏━━┓┏┓┏┓┏━━┓━┏┓┏┓┏━━┓┃┃━┏━━┓
+// ┃┏┓┃┃┗┛┃┃┏┓┃┃┏┛┃┃━┃┃━┃┃━┃┏┓┃┣┫┃┏┓┓┃┏┓┃━━━━┃┏┓┃┃┏┓┃┃┃━┃┏┓┃┃┗┛┗┛┃━━━━┣┫┃━━┫━━━━┃┏┓┃┗╋╋┛┗━┓┃━┃┗┛┃┃┏┓┃┃┃━┃┏┓┃
+// ┃┃━┫┗┓┏┛┃┃━┫┃┃━┃┗━┛┃━┃┗┓┃┃┃┃┃┃┃┃┃┃┃┗┛┃━━━━┃┗┛┃┃┃━┫┃┗┓┃┗┛┃┗┓┏┓┏┛━━━━┃┃┣━━┃━━━━┃┃━┫┏╋╋┓┃┗┛┗┓┃┃┃┃┃┗┛┃┃┗┓┃┃━┫
+// ┗━━┛━┗┛━┗━━┛┗┛━┗━┓┏┛━┗━┛┗┛┗┛┗┛┗┛┗┛┗━┓┃━━━━┗━━┛┗━━┛┗━┛┗━━┛━┗┛┗┛━━━━━┗┛┗━━┛━━━━┗━━┛┗┛┗┛┗━━━┛┗┻┻┛┃┏━┛┗━┛┗━━┛
+// ━━━━━━━━━━━━━━━┏━┛┃━━━━━━━━━━━━━━━┏━┛┃━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┃┃━━━━━━━━━
+// ━━━━━━━━━━━━━━━┗━━┛━━━━━━━━━━━━━━━┗━━┛━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┗┛━━━━━━━━━
+
+
     /**
      * Your original complex story logic for Lena, now using the UIManager.
      */
@@ -211,6 +508,7 @@ public class NPC extends Character {
         
         hasBeenTalkedTo = true;
     }
+
     
     /**
      * EXAMPLE 4: Police respond to evidence and story progress
@@ -241,6 +539,13 @@ public class NPC extends Character {
         
         hasBeenTalkedTo = true;
     }
+
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////////////////////
+    /// ////////////////////////////////////////////////////////////////////////////////////
+    
     
     // GETTERS AND SETTERS
     public String getDialogue() { return dialogue; }
