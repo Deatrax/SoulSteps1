@@ -18,8 +18,9 @@ public class vandalTeenNPC extends  NPC{
 
             gsm.completeObjective("Talked_with_vandal");
             
+            String nam= "Teen doing vandalism";
             uiManager.showChoice(
-                    "Teen doing vandalism", // Speaker
+                    nam, // Speaker
                     "What do you want?", // Prompt
                     new String[] { "What are you doing?"}, // Choices
                     (choice) -> {
@@ -29,19 +30,23 @@ public class vandalTeenNPC extends  NPC{
                             
                             // uiManager.showNarration("Teen doing vandalism", "What ever the heck I wish to do!!");
                             uiManager.showChoice(
-                                "Teen doing vandalism", 
+                                nam, 
                                 "What ever the heck I wish to do!!", 
                                 new String[] { "[Stop the kid] You should not do that!!", "[let him be and mind your own] ...alright"}, // Choices
                                 (choice2) -> {
                                     if(choice2 == 1){
                                         player.adjustKindness(10);
                                         gsm.completeObjective("tried_to_stop_teen");
-                                        this.setDialogue("FFFINNEEE....you are no fun.. *hmph*");
+                                        uiManager.showNarration(nam,"FFFINNEEE....you are no fun.. *hmph*");
+                                        this.setDialogue("you are no fun");
+                                        this.stopEffect();
                                     }
                                     else if(choice2 == 2){
                                         player.adjustKindness(-10);
                                         gsm.completeObjective("tried_to_stop_teen");
-                                        this.setDialogue("Yeah right, get lost boomer");
+                                        this.setDialogue("Get lost boomer");
+                                        uiManager.showNarration(nam,"Yeah that's right get lost boomer!");
+
                                     }
 
                                 }

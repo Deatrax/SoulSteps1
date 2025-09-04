@@ -63,27 +63,43 @@ public class InputHandler {
     private void handleInteractions() {
         // Interaction press - NOW HANDLES BOTH NPCs AND MAP TRANSITIONS
         if (Gdx.input.isKeyJustPressed(Input.Keys.E)) {
-            boolean interactionHandled = false;
+            //boolean interactionHandled = false;
             
-            // First try NPC interaction
-            boolean npcInteracted = worldManager.handleInteraction(player, uiManager);
-            if (npcInteracted) {
-                uiManager.clearInteractionHint();
-                interactionHandled = true;
-            }
+
+            ///=======================OLD SYSTEM 
+            /// 
+            /// 
+            // // First try NPC interaction
+            // boolean npcInteracted = worldManager.handleInteraction(player, uiManager);
+            // if (npcInteracted) {
+            //     uiManager.clearInteractionHint();
+            //     interactionHandled = true;
+            // }
             
-            // If no NPC interaction, try map transition
-            if (!interactionHandled && storyManager != null) {
-                boolean transitionHandled = storyManager.handleMapTransition(player);
-                if (transitionHandled) {
+            // // If no NPC interaction, try map transition
+            // if (!interactionHandled && storyManager != null) {
+            //     boolean transitionHandled = storyManager.handleMapTransition(player);
+            //     if (transitionHandled) {
+            //         uiManager.clearInteractionHint();
+            //         interactionHandled = true;
+            //     }
+            // }
+            
+            // // If nothing was interacted with
+            // if (!interactionHandled) {
+            //     uiManager.showNotification("Nothing to interact with here.");
+            // }
+
+            //=========================NEW
+
+
+            if (storyManager != null) {
+                boolean interactionHandled = storyManager.handleInteraction(player);
+                if (interactionHandled) {
                     uiManager.clearInteractionHint();
-                    interactionHandled = true;
+                } else {
+                    uiManager.showNotification("Nothing to interact with here.");
                 }
-            }
-            
-            // If nothing was interacted with
-            if (!interactionHandled) {
-                uiManager.showNotification("Nothing to interact with here.");
             }
         }
 

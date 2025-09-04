@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.StoryProgressionManager.MapTransition;
 import com.DMA173.soulsteps.ui.UIManager;
@@ -52,6 +53,12 @@ public class StoryProgressionManager {
     
     //flag for if the game was loaded from a saved state or file
     private Boolean isContinuedStory;
+
+    // --- NEW: A map to store all our programmatic dialogue triggers ---
+    private Map<String, DialogueTrigger> dialogueTriggers;
+
+    // --- NEW: A map to store all our automatic dialogue triggers ---
+    private Map<String, AutoDialogueTrigger> autoDialogueTriggers;
     
     public Boolean getIsContinuedStory() {
         return isContinuedStory;
@@ -73,6 +80,13 @@ public class StoryProgressionManager {
         // --- NEW: Add the initialization for objective locations ---
         this.objectiveLocations = new HashMap<>();
         initializeObjectiveLocations();
+
+        // --- NEW: Initialize the dialogue triggers ---
+        this.dialogueTriggers = new HashMap<>();
+        initializeDialogueTriggers();
+
+        this.autoDialogueTriggers = new HashMap<>(); // Initialize the new map
+        initializeAutoDialogueTriggers();
     }
 
 
@@ -152,6 +166,70 @@ public class StoryProgressionManager {
         // If an objective doesn't have a specific location (e.g., "collect 3 items"),
         // you simply don't add an entry for it.
     }
+
+
+    // --- NEW: Add this entire new method to define your triggers ---
+    private void initializeDialogueTriggers() {
+        System.out.println("[STORY] Initializing programmatic dialogue triggers...");
+
+        // EXAMPLE: A trigger to find the limiter at the main water valve.
+        DialogueTrigger findLimiterTrigger = new DialogueTrigger();
+        findLimiterTrigger.zone = "town_square"; // This trigger is in the main town
+        findLimiterTrigger.eventId = "found_limiter_device"; // This MUST match a case in triggerStoryEvent()
+        findLimiterTrigger.triggerArea = new Vector2(800, 400); // The coordinates of the water valve
+        findLimiterTrigger.triggerRadius = 35f;
+        findLimiterTrigger.interactionText = "Press E to Examine Valve";
+        findLimiterTrigger.isOneTime = true; // It should only be findable once
+        findLimiterTrigger.requiredObjective = "investigate_water_system"; // Only appears during this quest
+        
+        // Add it to our map with a unique key
+        dialogueTriggers.put("valve_investigation", findLimiterTrigger);
+
+        // --- FUTURE: Add more triggers here ---
+        /*
+        DialogueTrigger loreNoteTrigger = new DialogueTrigger();
+        loreNoteTrigger.zone = "interior";
+        loreNoteTrigger.eventId = "read_lore_note";
+        loreNoteTrigger.triggerArea = new Vector2(250, 180); // A desk inside the house
+        loreNoteTrigger.triggerRadius = 30f;
+        loreNoteTrigger.interactionText = "Press E to Read Note";
+        loreNoteTrigger.isOneTime = false; // Player can re-read it
+        loreNoteTrigger.requiredObjective = null; // Always available
+        dialogueTriggers.put("dan_house_lore_note", loreNoteTrigger);
+        */
+    }
+
+    // --- NEW: Add this entire new method to define your auto-triggers ---
+    private void initializeAutoDialogueTriggers() {
+        System.out.println("[STORY] Initializing automatic dialogue triggers...");
+
+        // EXAMPLE: A trigger where Lena calls out to the player as they walk by.
+        AutoDialogueTrigger lenaCallout = new AutoDialogueTrigger();
+        lenaCallout.zone = "town_square";
+        lenaCallout.npcName = "Lena"; // The NPC who will initiate the dialogue
+        lenaCallout.triggerArea = new Vector2(400, 280); // An area near Lena
+        lenaCallout.triggerRadius = 60f;
+        lenaCallout.isOneTime = true;
+        // This trigger will only fire if the player has NOT yet talked to Lena.
+        lenaCallout.requiredObjective = "talk_to_lena_first_time"; 
+        
+        autoDialogueTriggers.put("lena_initial_callout", lenaCallout);
+
+        // --- FUTURE EXAMPLE ---
+        /*
+        AutoDialogueTrigger guardWarning = new AutoDialogueTrigger();
+        guardWarning.zone = "veridia_interior";
+        guardWarning.npcName = "Security Chief";
+        guardWarning.triggerArea = new Vector2(300, 150);
+        guardWarning.triggerRadius = 50f;
+        guardWarning.isOneTime = false; // The guard can warn you every time you get too close
+        guardWarning.requiredObjective = "discover_water_limiter"; // Only happens after you've found evidence
+        autoDialogueTriggers.put("veridia_guard_warning", guardWarning);
+        */
+    }
+    
+    
+
 
     // --- NEW: Add this public getter method ---
     /**
@@ -281,6 +359,8 @@ public class StoryProgressionManager {
     public void update(float delta, Player player) {
         checkObjectiveCompletion(player);
         //checkMapTransitions(player);
+
+        checkAutoDialogueTriggers(player);
     }
     
     /**
@@ -354,6 +434,54 @@ public class StoryProgressionManager {
             */
         }
     }
+
+
+    // --- NEW: Add this entire new method to handle the checking logic ---
+    private void checkAutoDialogueTriggers(Player player) {
+        // We cannot fire a new auto-dialogue if one is already active.
+        if (uiManager.isDialogueActive()) {
+            return;
+        }
+
+        String currentZone = worldManager.getCurrentZoneName();
+        Vector2 playerPos = player.getPosition();
+
+        for (AutoDialogueTrigger trigger : autoDialogueTriggers.values()) {
+            // Check if the trigger is for the current zone and the player is inside its radius
+            if (trigger.zone.equals(currentZone) && playerPos.dst(trigger.triggerArea) <= trigger.triggerRadius) {
+                
+                // Check if objective requirement is met
+                if (trigger.requiredObjective != null && !isObjectiveActive(trigger.requiredObjective)) {
+                    continue; // Skip if the wrong quest is active
+                }
+
+                // Check if it's a one-time trigger that has already been used
+                String triggerFlag = "auto_triggered_" + trigger.npcName;
+                if (trigger.isOneTime && gameState.getFlag(triggerFlag)) {
+                    continue; // Skip if already fired
+                }
+
+                // --- FIRE THE DIALOGUE ---
+                // Find the NPC in the world who is supposed to speak.
+                NPC speaker = worldManager.getCurrentNpcManager().getNPCByName(trigger.npcName);
+                if (speaker != null) {
+                    System.out.println("[STORY] Firing auto-dialogue for NPC: " + speaker.getName());
+                    
+                    // Use the NPC's own interact method to show their dialogue.
+                    // This reuses your existing story logic perfectly!
+                    speaker.interact(player, gameState, uiManager);
+
+                    // If it's a one-time event, set the flag so it doesn't fire again.
+                    if (trigger.isOneTime) {
+                        gameState.setFlag(triggerFlag, true);
+                    }
+                }
+                
+                // We only fire one auto-trigger per frame to avoid conflicts.
+                return;
+            }
+        }
+    }
     
     /**
      * STEP 5: Check for map transitions (doors, zone changes)
@@ -372,25 +500,40 @@ public class StoryProgressionManager {
      * It prioritizes map transitions over NPC dialogue.
      * @param player The player character.
      * @return The text for the interaction hint, or null if nothing is in range.
+     * Now checks for Dialogue Triggers, then Map Transitions, then NPCs.
      */
     public String getInteractionHint(Player player) {
         String currentZone = worldManager.getCurrentZoneName();
         Vector2 playerPos = player.getPosition();
 
-        // 1. Check for Map Transitions First (they are high priority)
-        for (MapTransition transition : mapTransitions.values()) {
-            if (transition.fromZone.equals(currentZone) && playerPos.dst(transition.triggerArea) <= transition.triggerRadius) {
+        // 1. Check for Dialogue Triggers (highest priority)
+        for (DialogueTrigger trigger : dialogueTriggers.values()) {
+            // Check if the trigger is in the current zone and in range
+            if (trigger.zone.equals(currentZone) && playerPos.dst(trigger.triggerArea) <= trigger.triggerRadius) {
                 // Check if the objective requirement is met
-                if (transition.requiredObjective == null || isObjectiveActive(transition.requiredObjective)) {
-                    return transition.interactionText; // Return the map transition hint
+                if (trigger.requiredObjective == null || isObjectiveActive(trigger.requiredObjective)) {
+                    // Check if it's a one-time trigger that has already been used
+                    if (trigger.isOneTime && gameState.getFlag("triggered_" + trigger.eventId)) {
+                        continue; // Skip this one, it's been used
+                    }
+                    return trigger.interactionText;
                 }
             }
         }
 
-        // 2. If no map transition is found, check for NPC interactions.
-        // We delegate this to the WorldManager.
+        // 2. Check for Map Transitions
+        for (MapTransition transition : mapTransitions.values()) {
+            if (transition.fromZone.equals(currentZone) && playerPos.dst(transition.triggerArea) <= transition.triggerRadius) {
+                if (transition.requiredObjective == null || isObjectiveActive(transition.requiredObjective)) {
+                    return transition.interactionText;
+                }
+            }
+        }
+
+        // 3. If nothing else, check for NPCs.
         return worldManager.getInteractionHint(player);
     }
+
     
     
     
@@ -553,6 +696,48 @@ public class StoryProgressionManager {
             // Add more cases for other programmatic events here.
         }
     }
+
+
+    public boolean handleInteraction(Player player) {
+        String currentZone = worldManager.getCurrentZoneName();
+        Vector2 playerPos = player.getPosition();
+
+        // 1. Check for Dialogue Triggers first
+        for (DialogueTrigger trigger : dialogueTriggers.values()) {
+            if (trigger.zone.equals(currentZone) && playerPos.dst(trigger.triggerArea) <= trigger.triggerRadius) {
+                if (trigger.requiredObjective == null || isObjectiveActive(trigger.requiredObjective)) {
+                    // Check if it's a one-time trigger that has already been used
+                    if (trigger.isOneTime && gameState.getFlag("triggered_" + trigger.eventId)) {
+                        continue;
+                    }
+
+                    // --- FIRE THE EVENT ---
+                    triggerStoryEvent(trigger.eventId, player);
+                    
+                    // If it's a one-time trigger, set a flag so it can't be used again
+                    if (trigger.isOneTime) {
+                        gameState.setFlag("triggered_" + trigger.eventId, true);
+                    }
+                    return true; // Interaction was handled
+                }
+            }
+        }
+
+        // 2. If no dialogue trigger was fired, try for a map transition
+        if (handleMapTransition(player)) {
+            return true;
+        }
+
+        // 3. If still nothing, try for an NPC interaction
+        if (worldManager.handleInteraction(player, uiManager)) {
+            return true;
+        }
+
+        return false; // No interaction was found
+    }
+
+
+
     
     /**
      * INNER CLASS: Represents a map transition (door, exit, etc.)
@@ -565,5 +750,33 @@ public class StoryProgressionManager {
         public Vector2 spawnPosition;     // Where player spawns in new map
         public String requiredObjective;  // Objective that must be active (null = always available)
         public String interactionText;    // Text to show when near transition
+    }
+
+    /**
+     * NEW INNER CLASS: Represents a trigger that automatically starts a dialogue
+     * when the player walks into its radius, without needing to press 'E'.
+     */
+    public static class AutoDialogueTrigger {
+        public String zone;                 // The map this trigger exists on.
+        public String npcName;              // The name of the NPC who will speak.
+        public Vector2 triggerArea;         // The center of the trigger zone.
+        public float triggerRadius;         // The size of the trigger zone.
+        public String requiredObjective;    // (Optional) An objective that must be active for this to fire.
+        public boolean isOneTime = true;    // If true, this trigger only fires once per game.
+    }
+
+
+    /**
+     * NEW INNER CLASS: Represents an invisible, programmatic trigger on a map
+     * that fires a dialogue event when the player interacts with it.
+     */
+    public static class DialogueTrigger {
+        public String zone;                 // The map this trigger exists on (e.g., "town_square").
+        public String eventId;              // A unique ID that connects to the triggerStoryEvent method.
+        public Vector2 triggerArea;         // The X, Y coordinates of the trigger.
+        public float triggerRadius;         // How close the player needs to be.
+        public String interactionText;      // The hint to show (e.g., "[E] Examine").
+        public boolean isOneTime = true;    // If true, the trigger disappears after being used once.
+        public String requiredObjective;    // (Optional) An objective that must be active for this to appear.
     }
 }
