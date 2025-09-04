@@ -195,7 +195,15 @@ public class StoryProgressionManager {
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
-
+        MapTransition enteroffice = new MapTransition();
+        enteroffice.fromZone = "Tile_City";
+        enteroffice.toZone = "office/office";
+        enteroffice.triggerArea = new Vector2(745, 1205);
+        enteroffice.triggerRadius = 50f;
+        enteroffice.spawnPosition = new Vector2(440, 345);
+        enteroffice.requiredObjective = null;
+        enteroffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("shku", enteroffice);
 
        
 

@@ -194,6 +194,9 @@ public class FirstScreen extends ScreenAdapter {
             case "Tile_City":
                 camZoom = 0.3f;
                 break;
+            case "office/office":
+                camZoom = 0.6f;
+                break;
             default:
                 return camZoom;
         }

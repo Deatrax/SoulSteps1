@@ -106,7 +106,7 @@ public class WorldManager {
                 currentNpcManager.addNPC(begger);
 
                 // The NPC is created at position (200, 150)
-    NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+  /*  NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
 
     // Define the path for the NPC to walk
     receptionist.walkPath(
@@ -122,7 +122,7 @@ public class WorldManager {
         // --- END OF FIX ---
     );
                 receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
-                currentNpcManager.addNPC(receptionist);
+                currentNpcManager.addNPC(receptionist);*/
 
                 NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
                 deliveryman1.walkPath(
@@ -157,7 +157,24 @@ public class WorldManager {
                 */
                 break;
                 
-            case "office":
+            case "office/office":
+                NPC receptionist = new NPC(characterAssets, 2, 380, 340, "Ms. Chen", "veridia_employee");
+
+    // Define the path for the NPC to walk
+    receptionist.walkPath(
+        50f,  // Speed
+        true, // Tell the NPC to loop this path
+        
+        // --- THIS IS THE FIX ---
+        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+        new Vector2(960, 340),  
+        
+        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+        new Vector2(380, 340)  
+        // --- END OF FIX ---
+    );
+                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+                currentNpcManager.addNPC(receptionist);
                 // EXAMPLE: Building interior NPCs
               /*   NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
                 receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
