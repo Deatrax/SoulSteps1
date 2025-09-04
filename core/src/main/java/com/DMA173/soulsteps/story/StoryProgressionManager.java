@@ -198,6 +198,12 @@ public class StoryProgressionManager {
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
+
+
+       
+
+
+
         // EXAMPLE TRANSITIONS - MODIFY/ADD YOUR OWN:
         
         // From town_square to veridia_interior (entering building)

@@ -11,38 +11,37 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapLayer;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 
-/**
- * Updated FirstScreen that properly integrates with the new menu system.
- * Now passes the Game reference for proper screen transitions.
- */
 public class FirstScreen extends ScreenAdapter {
     private Game game;
     private OrthographicCamera camera;
     private OrthogonalTiledMapRenderer mapRenderer;
     private SpriteBatch batch;
-    
+
     private Player elian;
     private CharecterAssets characterAssets;
     private UIManager uiManager;
     private InputHandler inputHandler;
-    
+
     private WorldManager worldManager;
     private StoryProgressionManager storyManager;
-    
-    // --- MERGED: Features from teammate's code ---
+
     private TiledMapTileLayer collisionLayer;
     private float tileWidth, tileHeight;
-    
+
     private float camZoom = 0.3f;
-    
+
     public FirstScreen(Game game) {
         this.game = game;
     }
-    
+
     @Override
     public void show() {
         camera = new OrthographicCamera();
@@ -52,45 +51,31 @@ public class FirstScreen extends ScreenAdapter {
         batch = new SpriteBatch();
         characterAssets = new CharecterAssets();
         characterAssets.init();
-        
+
         worldManager = new WorldManager(characterAssets);
-        
-        System.err.println("Starting new game.....");
         worldManager.loadZone("Tile_City");
-        
-        // The map renderer now gets its map from the world manager
+
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 
-        // MERGED: Initialize collision layer and tile properties after the map is loaded
-        System.out.println("entering collision init...");
         initializeCollision();
 
-        float mapWidth = worldManager.getCurrentMap().getProperties().get("width", Integer.class) * tileWidth;
-        float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * tileHeight;
-        elian = new Player(characterAssets, 330, 130); //story start point
+        elian = new Player(characterAssets, 330, 130);
         elian.setCurrentMapName(worldManager.getCurrentZoneName());
-        elian.setCollisionLayer(collisionLayer); // MERGED: Give the player access to the collision layer
+        elian.setCollisionLayer(collisionLayer);
 
         uiManager = new UIManager(game);
         inputHandler = new InputHandler(camera, elian, uiManager, worldManager);
-        
+
         storyManager = new StoryProgressionManager(uiManager, worldManager);
         inputHandler.setStoryManager(storyManager);
-        
-        System.out.println("SoulSteps - Game initialized successfully with MERGED collision and story systems!");
     }
-    
-    // MERGED: New method to handle collision layer setup
+
     private void initializeCollision() {
-        System.out.println("....initializing collision.....");
         collisionLayer = (TiledMapTileLayer) worldManager.getCurrentMap().getLayers().get("Collision");
         if (collisionLayer != null) {
             tileWidth = collisionLayer.getTileWidth();
             tileHeight = collisionLayer.getTileHeight();
-            System.out.println("Collision layer loaded successfully.");
         } else {
-            System.out.println("WARNING: 'Collision' layer not found in map. Collision will not work.");
-            // Set default tile sizes to prevent crashes
             tileWidth = 32;
             tileHeight = 32;
         }
@@ -98,10 +83,9 @@ public class FirstScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        // --- Update Logic (no changes here) ---
         uiManager.update(delta);
         inputHandler.handleInput(delta);
-        
+
         if (!inputHandler.isPaused()) {
             elian.update(delta);
             worldManager.update(delta);
@@ -109,42 +93,32 @@ public class FirstScreen extends ScreenAdapter {
             updateCamera();
             checkTriggers();
         }
-        
-        // --- Clear Screen (no changes here) ---
+
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.1f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        // --- Map Change Logic (no changes here) ---
         if (worldManager.hasMapChanged()) {
             mapRenderer.setMap(worldManager.getCurrentMap());
             initializeCollision();
             elian.setCollisionLayer(collisionLayer);
             worldManager.confirmMapChange();
         }
-        
+
         mapRenderer.setView(camera);
-        
-        // --- NEW: DYNAMIC LAYER RENDERING ---
 
         int characterLayerIndex = -1;
-        // Find the index of the layer named by getCharacterLayerName()
         if (worldManager.getCurrentMap().getLayers().get(worldManager.getCharacterLayerName()) != null) {
             characterLayerIndex = worldManager.getCurrentMap().getLayers().getIndex(worldManager.getCharacterLayerName());
         }
 
         if (characterLayerIndex == -1) {
-            // FALLBACK: If the character layer is not found, render all layers as background.
-            System.err.println("Warning: Map '" + worldManager.getCurrentZoneName() + "' is missing the '" + worldManager.getCharacterLayerName() + "' layer. Player will be drawn on top of everything.");
-            mapRenderer.render(); // Render all layers
+            mapRenderer.render();
         } else {
-            // DYNAMICALLY RENDER BACKGROUND LAYERS
-            // This renders all layers from the bottom up to (but not including) the character layer.
             for (int i = 0; i < characterLayerIndex; i++) {
                 mapRenderer.render(new int[]{i});
             }
         }
 
-        // --- RENDER CHARACTERS (at the correct depth) ---
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         worldManager.getCurrentNpcManager().render(batch);
@@ -152,42 +126,50 @@ public class FirstScreen extends ScreenAdapter {
         batch.end();
 
         if (characterLayerIndex != -1) {
-            // DYNAMICALLY RENDER FOREGROUND LAYERS
-            // This renders the character layer itself, plus all layers above it.
             for (int i = characterLayerIndex; i < worldManager.getCurrentMap().getLayers().getCount(); i++) {
-                // We also make sure the layer is visible before rendering it
                 if (worldManager.getCurrentMap().getLayers().get(i).isVisible()) {
                     mapRenderer.render(new int[]{i});
                 }
             }
         }
 
-        // --- RENDER UI (on top of everything) ---
         uiManager.render(elian, camera, storyManager);
     }
-    
-    // MERGED: Trigger checking logic from your teammate
+
     private void checkTriggers() {
-        // MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
-        // if (triggerLayer == null) return;
+        MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
+        if (triggerLayer == null) return;
 
-        // for (MapObject obj : triggerLayer.getObjects()) {
-        //     if (obj instanceof RectangleMapObject) {
-        //         Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
+        for (MapObject obj : triggerLayer.getObjects()) {
+            if (obj instanceof RectangleMapObject) {
+                Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
 
-        //         if (triggerRect.contains(elian.getPosition())) {
-        //             String type = obj.getProperties().get("type", String.class);
-        //             if ("pipeGame".equals(type)) {
-        //                 System.out.println("Pipe game trigger activated!");
-        //                 // TODO: Implement the pipe game screen transition
-        //                 // game.setScreen(new PipeGameScreen(game, this)); // Example
-        //             }
-        //             // Add other trigger types here as needed
-        //         }
-        //     }
-        // }
+                if (triggerRect.contains(elian.getPosition())) {
+                    String type = obj.getProperties().get("type", String.class);
+
+                    if ("pipeGame".equals(type)) {
+                        uiManager.showChoice(
+                            "System",
+                            "The pipe looks broken. Wanna fix it?",
+                            new String[]{"Yes", "No"},
+                            choice -> {
+                                if (choice == 1) {
+                                    game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager));
+                                } else {
+                                    uiManager.showNotification("You decided not to fix the pipe.");
+                                }
+                                uiManager.hideDialogue();
+                                elian.getPosition().y -= 20;
+                            }
+                        );
+                    }
+
+                    
+                }
+            }
+        }
     }
-    
+
     private void updateCamera() {
         camera.zoom = updateCamZoom();
         camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
@@ -212,14 +194,8 @@ public class FirstScreen extends ScreenAdapter {
     private boolean isCellBlocked(float x, float y) {
         int cellX = (int) (x / tileWidth);
         int cellY = (int) (y / tileHeight);
-
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(cellX, cellY);
-
-        if (cell == null || cell.getTile() == null) {
-            return false; // no tile → walkable
-        }
-
-        // Check if the tile has a "blocked" property in Tiled
+        if (cell == null || cell.getTile() == null) return false;
         Object blocked = cell.getTile().getProperties().get("blocked");
         return blocked != null && blocked.equals(true);
     }
