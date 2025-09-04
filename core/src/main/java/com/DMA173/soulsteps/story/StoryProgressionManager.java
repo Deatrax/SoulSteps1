@@ -110,13 +110,43 @@ public class StoryProgressionManager {
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
-        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+        objectiveTexts.put("goToDanHouse", "\nGo to Dan's house to check his plumbing");
 
-        //Objective 2: Fix dan's plumbing
+        // //Objective 2: Fix dan's plumbing
+        // objectiveOrder.add("fixDanPlumbing");
+        // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
+
+        objectiveOrder.add("gotolenahouse");
+        objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
+
+         //Objective 2: Fix dan's plumbing
         objectiveOrder.add("fixDanPlumbing");
         objectiveTexts.put("fixDanPlumbing", "Check the kitchen sink");
 
-      
+        objectiveOrder.add("Enteroffice");
+        objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
+
+        objectiveOrder.add("talked_to_rep");
+        objectiveTexts.put("talked_to_rep","\nTalk to receptionist");
+
+        objectiveOrder.add("talked_to_man");
+        objectiveTexts.put("talked_to_man","\nTalk to Manager");
+
+       
+        
+        
+        
+        // EXAMPLE: How to add more objectives
+        /*
+        objectiveOrder.add("confront_ceo");
+        objectiveTexts.put("confront_ceo", "Confront the CEO with evidence");
+        
+        objectiveOrder.add("escape_building");
+        objectiveTexts.put("escape_building", "Escape the Veridia Corporation building");
+        
+        objectiveOrder.add("report_to_authorities");
+        objectiveTexts.put("report_to_authorities", "Report your findings to the authorities");
+        */
         
         System.out.println("[STORY] Initialized " + objectiveOrder.size() + " objectives");
     }
@@ -183,6 +213,15 @@ public class StoryProgressionManager {
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
+        MapTransition enteroffice = new MapTransition();
+        enteroffice.fromZone = "Tile_City";
+        enteroffice.toZone = "office/office";
+        enteroffice.triggerArea = new Vector2(852, 1197);
+        enteroffice.triggerRadius = 50f;
+        enteroffice.spawnPosition = new Vector2(440, 345);
+        enteroffice.requiredObjective = "Enteroffice";
+        enteroffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("shku", enteroffice);
 
 
        
@@ -522,6 +561,14 @@ public class StoryProgressionManager {
                         }
                     }
                 );
+                break;
+
+                            case "pipe_puzzle_completed":
+                uiManager.showNarration(
+                    null,
+                    "You fixed the pipes successfully! Now you should head to the office."
+                );
+                completeCurrentObjective(); // Move to the next objective in the list
                 break;
 
             // --- FUTURE EXAMPLE: Interacting with a computer terminal ---

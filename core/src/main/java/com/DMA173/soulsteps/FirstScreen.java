@@ -163,7 +163,7 @@ public class FirstScreen extends ScreenAdapter {
                                 // We are removing the Runnable and adding 'this.uiManager'.
                                 // This constructor now has 6 arguments.
                                 worldManager.completeObjective("fixDanPlumbing"); //DEBUG for now
-                                game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager));
+                                game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager, elian));
 
                                 // --- End of Change ---
 
@@ -198,6 +198,8 @@ public class FirstScreen extends ScreenAdapter {
             case "Tile_City":
                 camZoom = 0.3f;
                 break;
+            case "office/office":
+                camZoom = 0.6f;
             default:
                 return camZoom;
         }
