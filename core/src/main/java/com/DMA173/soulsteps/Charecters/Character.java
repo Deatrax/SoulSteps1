@@ -326,16 +326,12 @@ public abstract class Character {
             
             case "office/office":
                 // For the 'interior' map, make the character 50% larger.
-                this.scale = 1.6f;
-                this.speed = 100f;
+                this.scale = 3.2f;
+                this.speed = speed*3.2f;
                 System.out.println("[ Character] Applied scaling factor = "+ scale + "in the new map");
                 break;
                 
-            // --- FUTURE: Add other maps that need scaling here ---
-            
-            case "office/office":
-                this.scale = 1.8f;
-                break;
+            // --- FUTURE: Add other maps that need scaling here --
             
             
             default:

@@ -31,7 +31,7 @@ public class KaelNPC extends NPC {
 
             uiManager.showChoice(
                 "Hurt Man", // Speaker
-                "Hey, you! You're the one who was at Dan's place, right? I saw you. You're looking into the water problem.\n We need to talk, but not here. Please, help me. They're after me... I dropped my car keys somewhere in this trash.", // Prompt
+                "Hey, you! Please, help me. They're after me... I dropped my car keys somewhere in this trash.", // Prompt
                 new String[]{"Help him look for the keys.", "Ignore him and walk away."}, // Choices for Path A and Path B
                 (choice) -> {
                     if (choice == 1) {
@@ -46,7 +46,7 @@ public class KaelNPC extends NPC {
 
         } else {
             // This is the default dialogue if the player interacts with Kael at any other time.
-            uiManager.showNarration(this.getName(), this.getDialogue(), () -> {});
+            uiManager.showNarration(this.getName(), this.getDialogue());
         }
     }
 
@@ -57,15 +57,15 @@ public class KaelNPC extends NPC {
         player.adjustKindness(10);
         gsm.setFlag("player_helped_kael", true);
         
-        uiManager.showNarration("Elian", "Alright, stay calm. I'll help you look.", () -> {
-            // This code runs AFTER the first narration box is closed.
-            uiManager.showNarration("Kael", "Thank you! I think they're buried under all this junk.", () -> {
-                // This runs after the second narration, triggering the minigame.
-                System.out.println("[STORY] Triggering Object Finder Minigame to find Kael's keys.");
-                // --- MINIGAME TRIGGER ---
-                // game.setScreen(new ObjectFinder(game, thisScreen, ...)); // TODO: Launch the ObjectFinder screen
-            });
-        });
+        // uiManager.showChoice("Elian", "Alright, stay calm. I'll help you look.",  new String[] {
+        //     // This code runs AFTER the first narration box is closed.
+        //     uiManager.showChoice("Kael", "Thank you! I think they're buried under all this junk.",  new String[] {
+        //         // This runs after the second narration, triggering the minigame.
+        //         System.out.println("[STORY] Triggering Object Finder Minigame to find Kael's keys.");
+        //         // --- MINIGAME TRIGGER ---
+        //         // game.setScreen(new ObjectFinder(game, thisScreen, ...)); // TODO: Launch the ObjectFinder screen
+        //     });
+        // });
     }
 
     /**
@@ -75,14 +75,14 @@ public class KaelNPC extends NPC {
         player.adjustKindness(-15);
         gsm.setFlag("player_ignored_kael", true);
         
-        uiManager.showNarration("Elian", "Sorry, I can't get involved.", () -> {
-            uiManager.showNarration("Narrator", "The man is quickly apprehended by security. As they drag him away, you notice a shredded file fall from his jacket.", () -> {
-                System.out.println("[STORY] Player can now interact with the file to trigger the Paper Puzzle.");
-                // Here, you would typically spawn a new interactable "object" in the world.
-                // For now, we can launch the puzzle directly for testing.
-                // --- MINIGAME TRIGGER ---
-                // game.setScreen(new PagePuzzle(game, thisScreen, ...)); // TODO: Launch the PagePuzzle screen
-            });
-        });
+        // uiManager.showChoice("Elian", "Sorry, I can't get involved.",  new String[] {
+        //     uiManager.showChoice("Narrator", "The man is quickly apprehended by security. As they drag him away, you notice a shredded file fall from his jacket.",  new String[] {
+        //         System.out.println("[STORY] Player can now interact with the file to trigger the Paper Puzzle.");
+        //         // Here, you would typically spawn a new interactable "object" in the world.
+        //         // For now, we can launch the puzzle directly for testing.
+        //         // --- MINIGAME TRIGGER ---
+        //         // game.setScreen(new PagePuzzle(game, thisScreen, ...)); // TODO: Launch the PagePuzzle screen
+        //     });
+        // });
     }
 }
