@@ -116,9 +116,6 @@ public class StoryProgressionManager {
         // objectiveOrder.add("fixDanPlumbing");
         // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
 
-        objectiveOrder.add("gotolenahouse");
-        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
-        
         
         
         // EXAMPLE: How to add more objectives

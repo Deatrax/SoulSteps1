@@ -73,4 +73,3 @@ public class receptionist extends NPC{
         
     }
  }
-

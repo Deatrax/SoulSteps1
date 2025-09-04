@@ -105,7 +105,22 @@ public class WorldManager {
                 begger.setDialogue("Please help a man in need");
                 currentNpcManager.addNPC(begger);
 
-                NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+                // The NPC is created at position (200, 150)
+    NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+
+    // Define the path for the NPC to walk
+    receptionist.walkPath(
+        50f,  // Speed
+        true, // Tell the NPC to loop this path
+        
+        // --- THIS IS THE FIX ---
+        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+        new Vector2(50, 150),  
+        
+        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+        new Vector2(200, 150)  
+        // --- END OF FIX ---
+    );
                 receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
                 currentNpcManager.addNPC(receptionist);
 
