@@ -1,14 +1,15 @@
 package com.DMA173.soulsteps.story;
 
-import com.DMA173.soulsteps.Charecters.Player;
-import com.DMA173.soulsteps.ui.UIManager;
-import com.DMA173.soulsteps.world.WorldManager;
-import com.badlogic.gdx.math.Vector2;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.story.StoryProgressionManager.MapTransition;
+import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.world.WorldManager;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * STORY PROGRESSION SYSTEM
@@ -45,12 +46,41 @@ public class StoryProgressionManager {
     private List<String> objectiveOrder;
     private Map<String, String> objectiveTexts;
     private Map<String, MapTransition> mapTransitions;
+
+    // --- NEW: A map to store the world coordinates for each objective ---
+    private Map<String, Vector2> objectiveLocations;
     
+    //flag for if the game was loaded from a saved state or file
+    private Boolean isContinuedStory;
+    
+    public Boolean getIsContinuedStory() {
+        return isContinuedStory;
+    }
+
+    public void setIsContinuedStory(Boolean isContinuedStory) {
+        this.isContinuedStory = isContinuedStory;
+    }
+    
+
+    // --- MODIFY THE CONSTRUCTOR ---
     public StoryProgressionManager(UIManager uiManager, WorldManager worldManager) {
         this.gameState = GameStateManager.getInstance();
         this.uiManager = uiManager;
         this.worldManager = worldManager;
         
+        initializeStorySystem();
+
+        // --- NEW: Add the initialization for objective locations ---
+        this.objectiveLocations = new HashMap<>();
+        initializeObjectiveLocations();
+    }
+
+
+    public StoryProgressionManager(UIManager uiManager, WorldManager worldManager, Boolean continued) {
+        this.gameState = GameStateManager.getInstance();
+        this.uiManager = uiManager;
+        this.worldManager = worldManager;
+        isContinuedStory = continued;
         initializeStorySystem();
     }
     
@@ -73,30 +103,23 @@ public class StoryProgressionManager {
         objectiveTexts = new HashMap<>();
         
         // EXAMPLE STORY FLOW - MODIFY THIS TO ADD YOUR STORY:
+
+        //Objective 0: monologue
+        objectiveOrder.add("introMonologue");
+        objectiveTexts.put("introMonologue", "");
         
         // Objective 1: Tutorial/Introduction
-        objectiveOrder.add("talk_to_lena_first_time");
-        objectiveTexts.put("talk_to_lena_first_time", "Find Lena and learn about the water crisis");
+        objectiveOrder.add("goToDanHouse");
+        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+
+        // //Objective 2: Fix dan's plumbing
+        // objectiveOrder.add("fixDanPlumbing");
+        // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
+
+        objectiveOrder.add("gotolenahouse");
+        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
         
-        // Objective 2: Investigation begins
-        objectiveOrder.add("investigate_water_system");
-        objectiveTexts.put("investigate_water_system", "Investigate the town's water supply system");
         
-        // Objective 3: First clue
-        objectiveOrder.add("find_first_evidence");
-        objectiveTexts.put("find_first_evidence", "Search for evidence of tampering (Press L to collect debug evidence)");
-        
-        // Objective 4: Map transition example
-        objectiveOrder.add("enter_veridia_building");
-        objectiveTexts.put("enter_veridia_building", "Enter the Veridia Corporation building");
-        
-        // Objective 5: Inside building investigation
-        objectiveOrder.add("talk_to_receptionist");
-        objectiveTexts.put("talk_to_receptionist", "Talk to the receptionist inside Veridia Corp");
-        
-        // Objective 6: Find the truth
-        objectiveOrder.add("discover_water_limiter");
-        objectiveTexts.put("discover_water_limiter", "Find evidence of the water limiting device");
         
         // EXAMPLE: How to add more objectives
         /*
@@ -112,6 +135,35 @@ public class StoryProgressionManager {
         
         System.out.println("[STORY] Initialized " + objectiveOrder.size() + " objectives");
     }
+
+
+    // --- NEW: Add this entire new method ---
+    private void initializeObjectiveLocations() {
+        System.out.println("[STORY] Initializing objective waypoint locations...");
+
+        // Define the X, Y world coordinates for the target of each objective.
+        // These should match the locations in your Tiled maps.
+
+        // Objective: "talk_to_lena_first_time" -> The location of Lena in the 'town_square' map.
+        //objectiveLocations.put("talk_to_lena_first_time", new Vector2(350, 250));
+        
+        objectiveLocations.put("goToDanHouse", new Vector2(750,550));
+        // As you add new objectives, you can add their target locations here.
+        // If an objective doesn't have a specific location (e.g., "collect 3 items"),
+        // you simply don't add an entry for it.
+    }
+
+    // --- NEW: Add this public getter method ---
+    /**
+     * Returns the world coordinates of the current objective's target.
+     * Returns null if the current objective has no specific location.
+     */
+    public Vector2 getCurrentObjectiveLocation() {
+        if (currentObjective != null) {
+            return objectiveLocations.get(currentObjective);
+        }
+        return null;
+    }
     
     /**
      * STEP 2: Define map transitions (doors, exits, zone changes)
@@ -124,29 +176,47 @@ public class StoryProgressionManager {
     private void initializeMapTransitions() {
         mapTransitions = new HashMap<>();
         
+
+        MapTransition enterDansHouse = new MapTransition();
+        enterDansHouse.fromZone = "Tile_City";
+        enterDansHouse.toZone = "interior";
+        enterDansHouse.triggerArea = new Vector2(750, 550); // Position of building door
+        enterDansHouse.triggerRadius = 30f;
+        enterDansHouse.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
+        enterDansHouse.requiredObjective = "goToDanHouse"; // Must have this objective active
+        enterDansHouse.interactionText = "Press E to enter Dan's House";
+        mapTransitions.put("town_to_Dans_house", enterDansHouse);
+
+
+        MapTransition exitDanHouse = new MapTransition();
+        exitDanHouse.fromZone = "interior";
+        exitDanHouse.toZone = "Tile_City";
+        exitDanHouse.triggerArea = new Vector2(80, 93);
+        exitDanHouse.triggerRadius = 100f;
+        exitDanHouse.spawnPosition = new Vector2(740, 545);
+        exitDanHouse.requiredObjective = "gotolenahouse";
+        exitDanHouse.interactionText = "Press E to exit Dan's House";
+        mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
+
+
+
+       
+
+
+
         // EXAMPLE TRANSITIONS - MODIFY/ADD YOUR OWN:
         
         // From town_square to veridia_interior (entering building)
-        MapTransition enterBuilding = new MapTransition();
-        enterBuilding.fromZone = "town_square";
-        enterBuilding.toZone = "veridia_interior";
-        enterBuilding.triggerArea = new Vector2(500, 300); // Position of building door
-        enterBuilding.triggerRadius = 30f;
-        enterBuilding.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
-        enterBuilding.requiredObjective = "enter_veridia_building"; // Must have this objective active
-        enterBuilding.interactionText = "Press E to enter Veridia Corporation";
-        mapTransitions.put("town_to_veridia", enterBuilding);
+        // MapTransition enterBuilding = new MapTransition();
+        // enterBuilding.fromZone = "town_square";
+        // enterBuilding.toZone = "office";
+        // enterBuilding.triggerArea = new Vector2(500, 300); // Position of building door
+        // enterBuilding.triggerRadius = 30f;
+        // enterBuilding.spawnPosition = new Vector2(100, 100); // Where player spawns in new map
+        // enterBuilding.requiredObjective = "enter_veridia_building"; // Must have this objective active
+        // enterBuilding.interactionText = "Press E to enter Veridia Corporation";
+        // mapTransitions.put("town_to_veridia", enterBuilding);
         
-        // From veridia_interior back to town_square (exiting building)
-        MapTransition exitBuilding = new MapTransition();
-        exitBuilding.fromZone = "veridia_interior";
-        exitBuilding.toZone = "town_square";
-        exitBuilding.triggerArea = new Vector2(100, 50); // Position of exit door inside
-        exitBuilding.triggerRadius = 30f;
-        exitBuilding.spawnPosition = new Vector2(500, 250); // Back outside the building
-        exitBuilding.requiredObjective = null; // No objective required to exit
-        exitBuilding.interactionText = "Press E to exit building";
-        mapTransitions.put("veridia_to_town", exitBuilding);
         
         // EXAMPLE: How to add more map transitions
         /*
@@ -161,16 +231,7 @@ public class StoryProgressionManager {
         toResidential.interactionText = "Press E to enter residential district";
         mapTransitions.put("town_to_residential", toResidential);
         
-        // From residential_area to police_station
-        MapTransition toPoliceStation = new MapTransition();
-        toPoliceStation.fromZone = "residential_area";
-        toPoliceStation.toZone = "police_station";
-        toPoliceStation.triggerArea = new Vector2(300, 150);
-        toPoliceStation.triggerRadius = 35f;
-        toPoliceStation.spawnPosition = new Vector2(200, 100);
-        toPoliceStation.requiredObjective = "report_to_authorities";
-        toPoliceStation.interactionText = "Press E to enter police station";
-        mapTransitions.put("residential_to_police", toPoliceStation);
+    
         */
         
         System.out.println("[STORY] Initialized " + mapTransitions.size() + " map transitions");
@@ -181,6 +242,24 @@ public class StoryProgressionManager {
         if (!objectiveOrder.isEmpty()) {
             currentObjective = objectiveOrder.get(0);
             uiManager.updateObjective(getObjectiveText(currentObjective));
+            //uiManager.showNarration("Narrator...", "Athelgard, once a thriving town with jolly people is now slowly\ntaking a dark turn. Captured into capitalistic greed the town is now seeing\na case of resource scarcity. You are elian, a plumber trying to live life without mich ruckus.\nHowever your choices will now seal the face of the town forever");
+            uiManager.showChoice(
+                "Narrator...", 
+                "Athelgard, once a thriving town with jolly people is now slowly\ntaking a dark turn. Captured into capitalistic greed the town is now seeing\na case of resource scarcity. You are elian, a plumber trying to live life without mich ruckus.\nHowever your choices will now seal the face of the town forever", 
+                new String[] { "Press [1] to continue" }, // Choices
+                (choice) -> {
+                    // This code runs AFTER the player makes a choice from the dialogue box.
+                    if (choice == 1) { 
+                        
+                        gameState.completeObjective("introMonologue");
+                        
+                        System.err.println("[narrator] Player pressed [1] ");
+                        // Give the player their next objective via a narration box
+                        uiManager.showNarration(null, "Press aswd / arrow keys to move, E to interact. You now will go to dan's house to check his kitchen plumbing");
+                        
+                    }
+                }
+            );
         }
         System.out.println("[STORY] Story started with objective: " + currentObjective);
     }
@@ -201,7 +280,7 @@ public class StoryProgressionManager {
      */
     public void update(float delta, Player player) {
         checkObjectiveCompletion(player);
-        checkMapTransitions(player);
+        //checkMapTransitions(player);
     }
     
     /**
@@ -216,43 +295,38 @@ public class StoryProgressionManager {
         if (currentObjective == null) return;
         
         switch (currentObjective) {
-            case "talk_to_lena_first_time":
-                // This gets completed in NPC.interact() when talking to Lena
-                // No additional check needed here
-                break;
-                
-            case "investigate_water_system":
-                // Auto-complete after talking to Lena (could add timer or other conditions)
-                if (gameState.hasCompletedObjective("talked_to_lena_first_time")) {
+            case "introMonologue":
+                if(gameState.hasCompletedObjective("introMonologue")){
                     completeCurrentObjective();
                 }
                 break;
+
+            // case "talk_to_lena_first_time":
+            //     // This gets completed in NPC.interact() when talking to Lena
+            //     // No additional check needed here
+            //     break;
                 
-            case "find_first_evidence":
-                // Complete when player collects evidence (using debug key L or real evidence)
-                if (player.getEvidenceCount() > 0) {
-                    completeCurrentObjective();
-                }
-                break;
+            
+            // EXAMPLE for player
+            // case "find_first_evidence":
+            //     // Complete when player collects evidence (using debug key L or real evidence)
+            //     if (player.getEvidenceCount() > 0) {
+            //         completeCurrentObjective();
+            //     }
+            //     break;
                 
-            case "enter_veridia_building":
-                // This gets completed by map transition system
-                // No additional check needed here
-                break;
+            // case "enter_veridia_building":
+            //     // This gets completed by map transition system
+            //     // No additional check needed here
+            //     break;
                 
-            case "talk_to_receptionist":
-                // This would be completed by NPC interaction in the new map
-                if (gameState.hasCompletedObjective("talked_to_receptionist_veridia")) {
-                    completeCurrentObjective();
-                }
-                break;
                 
-            case "discover_water_limiter":
-                // Complete when player finds the water limiter device
-                if (player.hasWaterLimiter()) {
-                    completeCurrentObjective();
-                }
-                break;
+            // case "discover_water_limiter":
+            //     // Complete when player finds the water limiter device
+            //     if (player.hasWaterLimiter()) {
+            //         completeCurrentObjective();
+            //     }
+            //     break;
                 
             // EXAMPLE: How to add more objective completion conditions
             /*
@@ -286,31 +360,39 @@ public class StoryProgressionManager {
      * 
      * This automatically handles map transitions when player approaches trigger areas
      */
-    private void checkMapTransitions(Player player) {
+    /**
+     * DEPRECATED: This method is being replaced by the new getInteractionHint().
+     * You can delete this old method.
+     */
+    // private void checkMapTransitions(Player player) { ... }
+    
+    /**
+     * NEW, UNIFIED HINT SYSTEM
+     * This is now the single source of truth for all interaction hints.
+     * It prioritizes map transitions over NPC dialogue.
+     * @param player The player character.
+     * @return The text for the interaction hint, or null if nothing is in range.
+     */
+    public String getInteractionHint(Player player) {
         String currentZone = worldManager.getCurrentZoneName();
         Vector2 playerPos = player.getPosition();
-        
-        for (Map.Entry<String, MapTransition> entry : mapTransitions.entrySet()) {
-            MapTransition transition = entry.getValue();
-            
-            // Check if this transition applies to current zone
-            if (!transition.fromZone.equals(currentZone)) continue;
-            
-            // Check if player is near the transition trigger
-            float distance = playerPos.dst(transition.triggerArea);
-            if (distance <= transition.triggerRadius) {
-                // Check if objective requirement is met (if any)
-                if (transition.requiredObjective != null && 
-                    !currentObjective.equals(transition.requiredObjective)) {
-                    continue; // Objective not active
+
+        // 1. Check for Map Transitions First (they are high priority)
+        for (MapTransition transition : mapTransitions.values()) {
+            if (transition.fromZone.equals(currentZone) && playerPos.dst(transition.triggerArea) <= transition.triggerRadius) {
+                // Check if the objective requirement is met
+                if (transition.requiredObjective == null || isObjectiveActive(transition.requiredObjective)) {
+                    return transition.interactionText; // Return the map transition hint
                 }
-                
-                // Show interaction hint
-                uiManager.setInteractionHint(transition.interactionText);
-                return; // Only show one hint at a time
             }
         }
+
+        // 2. If no map transition is found, check for NPC interactions.
+        // We delegate this to the WorldManager.
+        return worldManager.getInteractionHint(player);
     }
+    
+    
     
     /**
      * Handle map transition when player presses E near a door/exit
@@ -352,6 +434,7 @@ public class StoryProgressionManager {
         
         // Move player to spawn position
         player.setPosition(transition.spawnPosition.x, transition.spawnPosition.y);
+        player.setCurrentMapName(worldManager.getCurrentZoneName());
         
         // If this transition completes an objective, do it
         if (transition.requiredObjective != null && 
@@ -418,6 +501,57 @@ public class StoryProgressionManager {
      */
     public boolean isObjectiveActive(String objectiveId) {
         return objectiveId.equals(currentObjective);
+    }
+
+
+    /**
+     * NEW METHOD for programmatic, object-based interactions.
+     * Call this from other game systems (like after a puzzle is solved) to trigger a story event.
+     * @param eventId A unique string identifying the event, e.g., "found_limiter".
+     */
+    public void triggerStoryEvent(String eventId, Player player) {
+        System.out.println("[STORY] Programmatic event triggered: " + eventId);
+
+        // Use a switch to handle different programmed events
+        switch (eventId) {
+            
+            case "solved_lena_pipes_puzzle":
+                // This event is called after the player solves the pipe puzzle at Lena's house.
+                // It now presents the critical choice about the limiter.
+                uiManager.showChoice(
+                    "Investigation", // Speaker
+                    "While fixing the pipes, you discover a strange, non-standard device attached to the water main. It seems to be restricting the flow.", // Prompt
+                    new String[]{"Remove it and investigate.", "Just fix the pipes and ignore it."}, // Choices
+                    (choice) -> {
+                        // This code runs AFTER the player makes a choice.
+                        if (choice == 1) {
+                            player.findWaterLimiter(); // Method from Player.java
+                            uiManager.showNarration(null, "You carefully remove the device and stash it in your bag. This could be important evidence.");
+                            // You could also complete an objective here if you want
+                            // completeCurrentObjective(); 
+                        } else {
+                            gameState.setFlag("ignored_first_limiter", true);
+                            player.adjustKindness(-10);
+                            uiManager.showNarration(null, "It's not your business. You fix the pipes around the device and leave.");
+                        }
+                    }
+                );
+                break;
+
+            // --- FUTURE EXAMPLE: Interacting with a computer terminal ---
+            /*
+            case "hacked_veridia_computer":
+                uiManager.showNarration(
+                    "System Log",
+                    "Accessing encrypted files... \n\nProject Aquila: Water diversion to sector 7 approved. \nStatus: ACTIVE."
+                );
+                gameState.setFlag("knows_about_project_aquila", true);
+                player.collectEvidence();
+                break;
+            */
+            
+            // Add more cases for other programmatic events here.
+        }
     }
     
     /**

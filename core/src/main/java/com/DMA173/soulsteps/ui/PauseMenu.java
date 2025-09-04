@@ -1,19 +1,17 @@
 package com.DMA173.soulsteps.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.utils.Align;
-import com.DMA173.soulsteps.MenuScreen;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * In-game pause menu that overlays the game screen.
@@ -24,8 +22,10 @@ public class PauseMenu {
     private OrthographicCamera camera;
     private SpriteBatch batch;
     private ShapeRenderer shapeRenderer;
-    private BitmapFont font;
-    private BitmapFont titleFont;
+    
+    //font no longer here
+    // private BitmapFont font;
+    // private BitmapFont titleFont;
     
     private List<MenuButton> buttons;
     private int selectedButtonIndex = 0;
@@ -52,12 +52,12 @@ public class PauseMenu {
         batch = new SpriteBatch();
         shapeRenderer = new ShapeRenderer();
         
-        // Initialize fonts
-        font = new BitmapFont();
-        font.getData().setScale(1.5f);
+        // Initialize fonts no longer needed
+        // font = new BitmapFont();
+        // font.getData().setScale(1.5f);
         
-        titleFont = new BitmapFont();
-        titleFont.getData().setScale(2.5f);
+        // titleFont = new BitmapFont();
+        // titleFont.getData().setScale(2.5f);
         
         // Load background
         loadBackground();
@@ -207,14 +207,20 @@ public class PauseMenu {
         
         // Render title
         batch.begin();
-        titleFont.setColor(Color.YELLOW);
-        titleFont.draw(batch, "PAUSED", Gdx.graphics.getWidth() / 2f, 
-                      Gdx.graphics.getHeight() / 2f + 150, 0, Align.center, false);
+        // titleFont.setColor(Color.YELLOW);
+        // titleFont.draw(batch, "PAUSED", Gdx.graphics.getWidth() / 2f, 
+        //                Gdx.graphics.getHeight() / 2f + 150, 0, Align.center, false);
+
+        FontManager.titleFont.setColor(Color.YELLOW);
+        FontManager.titleFont.draw(batch, "PAUSED", Gdx.graphics.getWidth() / 2f, 
+                                   Gdx.graphics.getHeight() / 2f + 150, 0, Align.center, false);
+
         batch.end();
         
         // Render buttons
         for (MenuButton button : buttons) {
-            button.render(batch, shapeRenderer, font);
+            // --- PASS FONT FROM MANAGER ---
+            button.render(batch, shapeRenderer, FontManager.standardFont);
         }
     }
     
@@ -299,8 +305,9 @@ public class PauseMenu {
     public void dispose() {
         if (batch != null) batch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
-        if (font != null) font.dispose();
-        if (titleFont != null) titleFont.dispose();
+        //font is no longer needed
+        // if (font != null) font.dispose();
+        // if (titleFont != null) titleFont.dispose();
         if (backgroundTexture != null) backgroundTexture.dispose();
         
         for (MenuButton button : buttons) {

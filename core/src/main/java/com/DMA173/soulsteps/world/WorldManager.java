@@ -3,10 +3,14 @@ package com.DMA173.soulsteps.world;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
+import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
+import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
+import com.badlogic.gdx.math.Vector2;
 
 /**
  * UPDATED WORLD MANAGER
@@ -35,6 +39,9 @@ public class WorldManager {
 
     // MERGED: Add a flag to signal that the map has changed
     private boolean mapChanged = false;
+
+    // --- NEW: Define the name of the layer characters will be on ---
+    private final String characterLayerName = "PlayerLayer";
 
     public WorldManager(CharecterAssets assets) {
         this.characterAssets = assets;
@@ -71,6 +78,10 @@ public class WorldManager {
         // Create a new NPCManager and load the NPCs for this specific zone
         currentNpcManager = new NPCManager(characterAssets);
         loadNpcsForZone(zoneId);
+
+        for (NPC npc : currentNpcManager.getAllNPCs()) {
+            npc.setCurrentMapName(zoneId);
+        }
         this.mapChanged = true;
     }
     
@@ -88,11 +99,34 @@ public class WorldManager {
         currentNpcManager.clearNPCs(); // Clear previous zone's NPCs
         
         switch (zoneId) {
-            case "town_square":
-                // EXAMPLE: Main town NPCs
-                NPC lena = new NPC(characterAssets, 1, 350, 250, "Lena", "ally");
-                lena.setDialogue("Elian! I've been looking for you. The water pressure is terrible!");
-                currentNpcManager.addNPC(lena);
+            case "Tile_City":
+                
+                beggerNPC begger = new beggerNPC(characterAssets, 5, 435, 300, "begger", "begger");
+                begger.setDialogue("Please help a man in need");
+                currentNpcManager.addNPC(begger);
+
+
+
+                NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
+                deliveryman1.walkPath(
+                    50f, // Speed
+                    true,
+                    new Vector2(50, 127)  // Then back to the start (to loop, you'd need more logic)
+                );
+                currentNpcManager.addNPC(deliveryman1);
+
+                if (/*gsm.hasCompletedObjective("goToDanHouse")*/ true) {
+                    vandalTeenNPC teen1 = new vandalTeenNPC(characterAssets, 4, 146, 249, "Vandal", "resident_casual");
+                    
+                    // --- USE THE NEW METHOD ---
+                    teen1.performEffect("spray_effect"); // The NPC will now show its idle animation with the spray effect on top.
+                    
+                    // You can even set their facing direction
+                    teen1.setCurrentDir(CharecterAssets.Direction.LEFT); // Make them face a wall
+                    
+                    currentNpcManager.addNPC(teen1);
+                }
+
                 
                 // EXAMPLE: Add more town NPCs
                 /*
@@ -173,9 +207,9 @@ public class WorldManager {
     /**
      * Delegates interaction to the current zone's NPCManager.
      */
-    public boolean handleInteraction(Player player) {
+    public boolean handleInteraction(Player player, UIManager uiManager) { // <-- Add UIManager here
         if (currentNpcManager != null) {
-            return currentNpcManager.handleInteraction(player, gsm);
+            return currentNpcManager.handleInteraction(player, gsm, uiManager); // <-- Pass it down
         }
         return false;
     }
@@ -208,6 +242,11 @@ public class WorldManager {
     public String getCurrentZoneName() {
         return currentZoneName;
     }
+
+    public String getCharacterLayerName() {
+        return characterLayerName;
+    }
+
 
     public void dispose() {
         if (currentMap != null) {

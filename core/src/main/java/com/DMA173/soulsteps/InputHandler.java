@@ -37,12 +37,20 @@ public class InputHandler {
     }
 
     public void handleInput(float delta) {
+
+        // --- NEW: Prioritize dialogue input ---
+        // If the dialogue box is active, it consumes all input and nothing else happens.
+        if (uiManager.isDialogueActive()) {
+            uiManager.handleDialogueInput();
+            return; 
+        }
+
         // Check if any menu is active - if so, don't handle game input
         if (uiManager.isAnyMenuActive()) {
             return; // Let the menu system handle all input
         }
 
-        handleUIInput();
+        //handleUIInput();
         handlePlayerMovement(delta);
         handleCameraControls(delta);
         handleInteractions();
@@ -58,9 +66,9 @@ public class InputHandler {
             boolean interactionHandled = false;
             
             // First try NPC interaction
-            boolean npcInteracted = worldManager.handleInteraction(player);
+            boolean npcInteracted = worldManager.handleInteraction(player, uiManager);
             if (npcInteracted) {
-                uiManager.setInteractionHint("");
+                uiManager.clearInteractionHint();
                 interactionHandled = true;
             }
             
@@ -100,23 +108,22 @@ public class InputHandler {
     }
     
     /**
-     * Update interaction hints for both NPCs and map transitions
+     * Update interaction hints for both NPCs and map transitions.
      */
     private void updateInteractionHints() {
-        // First check for NPC interactions
-        String npcHint = worldManager.getInteractionHint(player);
-        if (npcHint != null) {
-            uiManager.setInteractionHint(npcHint);
-            return;
+        // --- THIS IS THE FIX ---
+        // Instead of asking the WorldManager, we now ask the StoryProgressionManager,
+        // which handles both map transitions and NPCs.
+        
+        String hint = null;
+        if (storyManager != null) {
+            hint = storyManager.getInteractionHint(player);
         }
-        
-        // If no NPC nearby, check for map transitions (handled in story manager update)
-        // The story manager sets interaction hints for map transitions automatically
-        
-        // Only clear hint if neither NPC nor transition is available
-        if (npcHint == null) {
-            // Note: Don't clear here, let story manager handle transition hints
-             uiManager.clearInteractionHint();
+
+        if (hint != null) {
+            uiManager.setInteractionHint(hint);
+        } else {
+            uiManager.clearInteractionHint();
         }
     }
 
@@ -144,8 +151,11 @@ public class InputHandler {
         System.out.println("Danger Zone Active: " + player.isDangerZoneActive());
         System.out.println("Speed: " + player.getSpeed());
         System.out.println("==================");
+        System.out.println("Current objective: "+ storyManager.getCurrentObjective());
     }
 
+    @SuppressWarnings("unused")
+	@Deprecated
     private void handleUIInput() {
         // Additional UI controls can go here
     }
@@ -153,6 +163,7 @@ public class InputHandler {
     private void handlePlayerMovement(float delta) {
         // Player movement is now handled in the Player class itself
         // This method is kept for potential future movement restrictions or special cases
+        player.handleMovementWithCollision(delta);
     }
 
     private void handleCameraControls(float delta) {
@@ -166,7 +177,7 @@ public class InputHandler {
         }
 
         // Clamp zoom to reasonable values
-        camera.zoom = Math.max(0.2f, Math.min(2.0f, camera.zoom));
+        camera.zoom = Math.max(0.3f, Math.min(1.5f, camera.zoom));
     }
 
     public boolean isPaused() {

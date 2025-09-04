@@ -54,6 +54,11 @@ public class CharecterAssets {
     private Map<String, Animation<TextureRegion>[]> outfitWalkUpAnims;
     private Map<String, TextureRegion[]> outfitIdleFrames;
 
+
+    // --- NEW: Storage for action animations ---
+    // We use a Map to store different actions by name (e.g., "spray_paint", "typing", "panhandling")
+    private Map<String, Animation<TextureRegion>> actionAnimations;
+
     @SuppressWarnings("unchecked")
     public void init() {
         // Initialize character sheet
@@ -86,6 +91,10 @@ public class CharecterAssets {
         outfitWalkUpAnims = new HashMap<>();
         outfitIdleFrames = new HashMap<>();
 
+        // --- NEW: Initialize the action map ---
+        actionAnimations = new HashMap<>();
+        loadActionAnimations();
+
         // Load character animations
         TextureRegion[][] allCharacterFrames = extractFramesManually(characterSheet);
         for (int i = 0; i < NUM_CHARACTER_TYPES; i++) {
@@ -111,7 +120,7 @@ public class CharecterAssets {
     private void createHairAnimationsForType(int hairIndex, TextureRegion[] frames) {
         final int FRAMES_PER_DIRECTION = 6;
         if (frames.length < FRAMES_PER_DIRECTION * 4) {
-            System.err.println("Not enough frames for hair type " + hairIndex);
+            System.out.println("Not enough frames for hair type " + hairIndex);
             return;
         }
 
@@ -178,7 +187,30 @@ public class CharecterAssets {
             outfitIdleFrames.put(texturePath, idles);
             
         } catch (Exception e) {
-            System.err.println("Could not load outfit texture: " + texturePath + " - " + e.getMessage());
+            System.out.println("Could not load outfit texture: " + texturePath + " - " + e.getMessage());
+        }
+    }
+
+    private void loadActionAnimations() {
+        try {
+            Texture spraySheet = new Texture("Character/actions/spray_effect.png");
+            // Let's say you have 3 frames
+            TextureRegion[] sprayFrames = new TextureRegion[3];
+            
+            for (int i = 0; i < 2; i++) {
+                // Assuming each frame is 14x10
+                sprayFrames[i] = new TextureRegion(spraySheet, i * 14, 0, 14, 10);
+            }
+            
+            Animation<TextureRegion> sprayAnimation = new Animation<>(0.15f, sprayFrames);
+            sprayAnimation.setPlayMode(Animation.PlayMode.LOOP);
+            // We'll give this effect a unique ID
+            actionAnimations.put("spray_effect", sprayAnimation);
+
+            System.out.println("Loaded effect animation: spray_effect");
+
+        } catch (Exception e) {
+            System.out.println("Could not load effect animation spritesheet: " + e.getMessage());
         }
     }
     
@@ -192,7 +224,7 @@ public class CharecterAssets {
         // Layout: Each row has 24 frames: down(0-5), right(6-11), up(12-17), left(18-23)
         final int FRAMES_PER_DIRECTION = 6;
         if (frames.length < FRAMES_PER_DIRECTION * 4) {
-            System.err.println("Not enough frames for clothing row " + rowIndex);
+            System.out.println("Not enough frames for clothing row " + rowIndex);
             return;
         }
 
@@ -241,7 +273,7 @@ public class CharecterAssets {
     private void createAnimationsForCharacter(int characterIndex, TextureRegion[] frames) {
         final int FRAMES_PER_DIRECTION = 6;
         if (frames.length < FRAMES_PER_DIRECTION * 4) {
-            System.err.println("Not enough frames for character " + characterIndex);
+            System.out.println("Not enough frames for character " + characterIndex);
             return;
         }
 
@@ -416,6 +448,11 @@ public class CharecterAssets {
             return outfitType - 101; // Suits use rows 0-3
         }
         return -1;
+    }
+
+    // --- NEW: A public getter for action animations ---
+    public Animation<TextureRegion> getActionAnimation(String actionId) {
+        return actionAnimations.get(actionId);
     }
 
     public void dispose() {
