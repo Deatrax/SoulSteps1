@@ -332,11 +332,11 @@ public abstract class Character {
                 break;
                 
             // --- FUTURE: Add other maps that need scaling here ---
-            /*
-            case "office_map":
-                this.scale = 1.5f;
+            
+            case "office/office":
+                this.scale = 1.8f;
                 break;
-            */
+            
             
             default:
                 // For all other maps, use the default scale.

@@ -36,6 +36,9 @@ public class WorldManager {
     private NPCManager currentNpcManager; // Each zone gets its own NPC manager
     private CharecterAssets characterAssets;
     private GameStateManager gsm;
+    
+
+
     private String currentZoneName; // Track which zone we're in
 
     // MERGED: Add a flag to signal that the map has changed
@@ -43,11 +46,15 @@ public class WorldManager {
 
     // --- NEW: Define the name of the layer characters will be on ---
     private final String characterLayerName = "PlayerLayer";
+     
+    // --- NEW: A variable to remember the last zone we were in ---
+    private String previousZoneName;
 
     public WorldManager(CharecterAssets assets) {
         this.characterAssets = assets;
         this.gsm = GameStateManager.getInstance();
         this.currentZoneName = "";
+        this.previousZoneName = ""; // Initialize as empty
     }
 
     /**
@@ -55,6 +62,10 @@ public class WorldManager {
      * UPDATED: Now tracks zone name for story system
      */
     public void loadZone(String zoneId) {
+
+        // --- NEW: Remember the current zone before changing it ---
+        this.previousZoneName = this.currentZoneName;
+
         // Dispose previous map
         if (currentMap != null) {
             currentMap.dispose();
@@ -233,6 +244,12 @@ public class WorldManager {
         return mapChanged;
     }
 
+      // --- NEW: A public getter for the previous zone name ---
+    public String getPreviousZoneName() {
+        return previousZoneName;
+    }
+    
+
     public void confirmMapChange() {
         this.mapChanged = false;
     }
@@ -252,6 +269,10 @@ public class WorldManager {
             return currentNpcManager.handleInteraction(player, gsm, uiManager); // <-- Pass it down
         }
         return false;
+    }
+
+    public void completeObjective(String str){
+        gsm.completeObjective(str);
     }
 
     /**
@@ -285,6 +306,14 @@ public class WorldManager {
 
     public String getCharacterLayerName() {
         return characterLayerName;
+    }
+
+    public GameStateManager getGsm() {
+        return gsm;
+    }
+
+    public void setGsm(GameStateManager gsm) {
+        this.gsm = gsm;
     }
 
 
