@@ -111,6 +111,13 @@ public class StoryProgressionManager {
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
         objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+
+        // //Objective 2: Fix dan's plumbing
+        // objectiveOrder.add("fixDanPlumbing");
+        // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
+
+        objectiveOrder.add("gotolenahouse");
+        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
         
         
         
@@ -181,6 +188,19 @@ public class StoryProgressionManager {
         mapTransitions.put("town_to_Dans_house", enterDansHouse);
 
 
+        MapTransition exitDanHouse = new MapTransition();
+        exitDanHouse.fromZone = "interior";
+        exitDanHouse.toZone = "Tile_City";
+        exitDanHouse.triggerArea = new Vector2(80, 93);
+        exitDanHouse.triggerRadius = 100f;
+        exitDanHouse.spawnPosition = new Vector2(740, 545);
+        exitDanHouse.requiredObjective = "gotolenahouse";
+        exitDanHouse.interactionText = "Press E to exit Dan's House";
+        mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
+
+
+
+       
 
 
 

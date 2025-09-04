@@ -185,7 +185,7 @@ public abstract class Character {
      * A new, unified helper method that draws any texture region with the correct scale.
      * This prevents code duplication.
      */
-    private void drawLayer(Batch batch, TextureRegion frame) {
+    protected void drawLayer(Batch batch, TextureRegion frame) {
         if (frame == null) return;
 
         // Calculate the scaled width and height
@@ -314,6 +314,13 @@ public abstract class Character {
                 // For the 'interior' map, make the character 50% larger.
                 this.scale = 4f;
                 this.speed = this.speed*4;
+                System.out.println("[ Character] Applied scaling factor = "+ scale + "in the new map");
+                break;
+
+            case "Tile_City":
+                // For the 'interior' map, make the character 50% larger.
+                this.scale = 1f;
+                this.speed = 100f;
                 System.out.println("[ Character] Applied scaling factor = "+ scale + "in the new map");
                 break;
                 
