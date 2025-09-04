@@ -40,11 +40,7 @@ public class FirstScreen extends ScreenAdapter {
 
     public FirstScreen(Game game) {
         this.game = game;
-    }
-
-    @Override
-    public void show() {
-        camera = new OrthographicCamera();
+         camera = new OrthographicCamera();
         camera.setToOrtho(false, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
         camera.zoom = camZoom;
 
@@ -68,6 +64,11 @@ public class FirstScreen extends ScreenAdapter {
 
         storyManager = new StoryProgressionManager(uiManager, worldManager);
         inputHandler.setStoryManager(storyManager);
+    }
+
+    @Override
+    public void show() {
+       
     }
 
     private void initializeCollision() {
@@ -185,6 +186,9 @@ public class FirstScreen extends ScreenAdapter {
             case "Tile_City":
                 camZoom = 0.3f;
                 break;
+            case "office":
+                camZoom = 0.6f;
+                break;    
             default:
                 return camZoom;
         }
