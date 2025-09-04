@@ -37,7 +37,7 @@ public class MenuScreen extends ScreenAdapter {
             // Check if we should transition to game
             if (mainMenu.shouldTransitionToGame()) {
                 System.out.println("Transitioning to game...");
-                game.setScreen(new FirstScreen(game)); // Pass game reference
+                game.setScreen(new pipepuzzle()); // Pass game reference
                 return;
             }
             
