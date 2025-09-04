@@ -110,14 +110,19 @@ public class StoryProgressionManager {
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
-        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+        objectiveTexts.put("goToDanHouse", "\nGo to Dan's house to check his plumbing");
 
         // //Objective 2: Fix dan's plumbing
         // objectiveOrder.add("fixDanPlumbing");
         // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
 
         objectiveOrder.add("gotolenahouse");
-        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
+        objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
+
+        objectiveOrder.add("Enteroffice");
+        objectiveTexts.put("Enteroffice","\nGo to office");
+
+       
         
         
         
@@ -194,7 +199,7 @@ public class StoryProgressionManager {
         exitDanHouse.triggerArea = new Vector2(80, 93);
         exitDanHouse.triggerRadius = 100f;
         exitDanHouse.spawnPosition = new Vector2(740, 545);
-        exitDanHouse.requiredObjective = "gotolenahouse";
+        exitDanHouse.requiredObjective = "Enteroffice";
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
@@ -204,7 +209,7 @@ public class StoryProgressionManager {
         enteroffice.triggerArea = new Vector2(745, 1205);
         enteroffice.triggerRadius = 50f;
         enteroffice.spawnPosition = new Vector2(440, 345);
-        enteroffice.requiredObjective = null;
+        enteroffice.requiredObjective = "Enteroffice";
         enteroffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("shku", enteroffice);
 
