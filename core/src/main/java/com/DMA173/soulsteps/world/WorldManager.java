@@ -5,6 +5,7 @@ import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
 import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
 import com.DMA173.soulsteps.Charecters.NPCs.manager;
+import com.DMA173.soulsteps.Charecters.NPCs.receptionist;
 import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
@@ -170,7 +171,7 @@ public class WorldManager {
                 break;
                 
             case "office/office":
-                NPC receptionist = new NPC(characterAssets, 2, 380, 340, "Ms. Chen", "veridia_employee");
+                receptionist receptionist = new receptionist(characterAssets, 2, 380, 340, "Ms. Chen", "veridia_employee");
 
     // Define the path for the NPC to walk
     receptionist.walkPath(
@@ -200,7 +201,7 @@ public class WorldManager {
                 */
                 
 
-            manager Manager = new manager(characterAssets, 5, 435, 300, "Manager", "veridia_employee");
+            manager Manager = new manager(characterAssets, 5, 951, 894, "Manager", "veridia_employee");
                 Manager.setDialogue("Please help a man in need");
                 currentNpcManager.addNPC(Manager);
                 break;
