@@ -183,6 +183,9 @@ public class FirstScreen extends ScreenAdapter {
         }
     }
 }
+
+
+
     private void updateCamera() {
         camera.zoom = updateCamZoom();
         camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
