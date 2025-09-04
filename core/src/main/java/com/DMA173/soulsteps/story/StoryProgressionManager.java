@@ -125,6 +125,9 @@ public class StoryProgressionManager {
         objectiveOrder.add("talked_to_rep");
         objectiveTexts.put("talked_to_rep","\nTalk to receptionist");
 
+        objectiveOrder.add("talked_to_man");
+        objectiveTexts.put("talked_to_man","\nTalk to Manager");
+
        
         
         
