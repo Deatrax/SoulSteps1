@@ -138,42 +138,47 @@ public class FirstScreen extends ScreenAdapter {
         uiManager.render(elian, camera, storyManager);
     }
 
-    private void checkTriggers() {
-        MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
-        if (triggerLayer == null) return;
+   private void checkTriggers() {
+    MapLayer triggerLayer = worldManager.getCurrentMap().getLayers().get("Triggers");
+    if (triggerLayer == null) return;
 
-        for (MapObject obj : triggerLayer.getObjects()) {
-            if (obj instanceof RectangleMapObject) {
-                Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
+    for (MapObject obj : triggerLayer.getObjects()) {
+        if (obj instanceof RectangleMapObject) {
+            Rectangle triggerRect = ((RectangleMapObject) obj).getRectangle();
 
-                if (triggerRect.contains(elian.getPosition())) {
-                    String type = obj.getProperties().get("type", String.class);
+            if (triggerRect.contains(elian.getPosition())) {
+                String type = obj.getProperties().get("type", String.class);
 
-                    if ("pipeGame".equals(type)) {
-                        uiManager.showChoice(
-                            "System",
-                            "The pipe looks broken. Wanna fix it?",
-                            new String[]{"Yes", "No"},
-                            choice -> {
-                                if (choice == 1) {
-                                    game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager));
-                                    elian.adjustKindness(10);
-                                } else {
-                                    uiManager.showNotification("You decided not to fix the pipe.");
-                                    elian.adjustKindness(-10);
-                                }
-                                uiManager.hideDialogue();
-                                elian.getPosition().y -= 20;
+                if ("pipeGame".equals(type)) {
+                    uiManager.showChoice(
+                        "System",
+                        "The pipe looks broken. Wanna fix it?",
+                        new String[]{"Yes", "No"},
+                        choice -> {
+                            if (choice == 1) {
+                                // --- Start of Change ---
+                                // This is the "Yes" choice. We will launch the puzzle.
+                                // We are removing the Runnable and adding 'this.uiManager'.
+                                // This constructor now has 6 arguments.
+                                game.setScreen(new pipepuzzle(game, worldManager.getCurrentZoneName(), this, storyManager, worldManager, this.uiManager));
+                                // --- End of Change ---
+
+                            } else {
+                                // This is the "No" choice. It remains the same.
+                                uiManager.showNotification("You decided not to fix the pipe.");
+                                elian.adjustKindness(-10); // Penalty for not helping
                             }
-                        );
-                    }
-
-                    
+                            
+                            // This logic runs for both "Yes" and "No" choices.
+                            uiManager.hideDialogue();
+                            elian.getPosition().y -= 20; // Move player off the trigger
+                        }
+                    );
                 }
             }
         }
     }
-
+}
     private void updateCamera() {
         camera.zoom = updateCamZoom();
         camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
