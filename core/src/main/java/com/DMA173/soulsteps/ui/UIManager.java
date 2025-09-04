@@ -158,6 +158,14 @@ public class UIManager {
      * Now uses percentage-based positioning for proper scaling
      */
     private void renderGameUI(Player player) {
+        // --- Start of Necessary Change ---
+        // If no player is provided (e.g., in the pipe puzzle screen),
+        // skip rendering player-specific UI to prevent a crash.
+        if (player == null) {
+            return;
+        }
+        // --- End of Necessary Change ---
+
         renderHealthBar(player);
         renderKindnessBar(player);
         renderObjectiveText();
