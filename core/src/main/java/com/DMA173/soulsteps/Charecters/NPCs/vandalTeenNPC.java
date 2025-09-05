@@ -36,11 +36,12 @@ public class vandalTeenNPC extends  NPC{
                                     if(choice2 == 1){
                                         player.adjustKindness(10);
                                         gsm.completeObjective("tried_to_stop_teen");
-                                        this.setDialogue("FFFINNEEE....you are no fun.. *hmph*");
+                                        uiManager.showNarration("Kid doing vandalism","FFFINNEEE....you are no fun.. *hmph*");
                                     }
                                     else if(choice2 == 2){
                                         player.adjustKindness(-10);
                                         gsm.completeObjective("tried_to_stop_teen");
+                                        uiManager.showNarration("Kid doing vandalism","Yeah right, get lost boomer");
                                         this.setDialogue("Yeah right, get lost boomer");
                                     }
 

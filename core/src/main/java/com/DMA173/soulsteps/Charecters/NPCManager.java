@@ -59,6 +59,26 @@ public class NPCManager {
             npc.render(batch);
         }
     }
+
+
+    /**
+     * Find an NPC by name, skipping a certain number of matches.
+     * Useful for finding the 2nd, 3rd, etc. NPC with the same name.
+     * @param name The name of the NPC to find.
+     * @param skip The number of initial matches to skip (0 for the first, 1 for the second).
+     */
+    public NPC getNPCByName(String name, int skip) {
+        int skipped = 0;
+        for (NPC npc : npcs) {
+            if (npc.getName().equals(name)) {
+                if (skipped == skip) {
+                    return npc;
+                }
+                skipped++;
+            }
+        }
+        return null;
+    }
     
     /**
      * Handle interaction with NPCs in this zone

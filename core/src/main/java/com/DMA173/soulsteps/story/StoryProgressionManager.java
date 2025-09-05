@@ -165,6 +165,7 @@ public class StoryProgressionManager {
         //objectiveLocations.put("talk_to_lena_first_time", new Vector2(350, 250));
         
         objectiveLocations.put("goToDanHouse", new Vector2(750,550));
+        objectiveLocations.put("Enteroffice", new Vector2(852,1197));
         // As you add new objectives, you can add their target locations here.
         // If an objective doesn't have a specific location (e.g., "collect 3 items"),
         // you simply don't add an entry for it.
@@ -231,7 +232,7 @@ public class StoryProgressionManager {
         exitOffice.triggerArea = new Vector2(44,394 );
         exitOffice.triggerRadius = 50f;
         exitOffice.spawnPosition = new Vector2(852, 1197);
-        exitOffice.requiredObjective = "exitOffice";
+        exitOffice.requiredObjective = null;
         exitOffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("ftdfg", exitOffice);
 

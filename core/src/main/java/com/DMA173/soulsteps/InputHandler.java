@@ -38,6 +38,11 @@ public class InputHandler {
 
     public void handleInput(float delta) {
 
+        // --- NEW: Add a check for the cutscene state ---
+        if (worldManager.isCutsceneActive()) {
+            return; // If a cutscene is active, block ALL player input.
+        }
+
         // --- NEW: Prioritize dialogue input ---
         // If the dialogue box is active, it consumes all input and nothing else happens.
         if (uiManager.isDialogueActive()) {

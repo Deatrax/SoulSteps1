@@ -22,6 +22,8 @@ public class theMain extends Game {
 
         ///setScreen(new ObjectFinder(this));
         ///setScreen(new pipepuzzle());
+        //setScreen(new PagePuzzle());
+        /// 
     }
 
     @Override
