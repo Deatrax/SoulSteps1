@@ -51,8 +51,11 @@ public class FirstScreen extends ScreenAdapter {
         characterAssets.init();
 
         worldManager = new WorldManager(characterAssets);
+        worldManager.setGam(game);
+        worldManager.setScreen(this);
         worldManager.loadZone("Tile_City");
         gsm = worldManager.getGsm();
+
 
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 
@@ -67,6 +70,8 @@ public class FirstScreen extends ScreenAdapter {
 
         storyManager = new StoryProgressionManager(uiManager, worldManager);
         inputHandler.setStoryManager(storyManager);
+
+        
     }
 
     @Override
@@ -183,9 +188,34 @@ public class FirstScreen extends ScreenAdapter {
         }
     }
 }
+
+//for fixing camera location
+
+private void clampCameraToMap() {
+    if (worldManager.getCurrentMap() == null) return;
+
+    float mapWidth = worldManager.getCurrentMap().getProperties().get("width", Integer.class) * 
+                     worldManager.getCurrentMap().getProperties().get("tilewidth", Integer.class);
+    float mapHeight = worldManager.getCurrentMap().getProperties().get("height", Integer.class) * 
+                      worldManager.getCurrentMap().getProperties().get("tileheight", Integer.class);
+
+    float halfViewportWidth = camera.viewportWidth * camera.zoom / 2f;
+    float halfViewportHeight = camera.viewportHeight * camera.zoom / 2f;
+
+    // Clamp camera X between left and right bounds
+    camera.position.x = Math.max(halfViewportWidth, Math.min(camera.position.x, mapWidth - halfViewportWidth));
+
+    // Clamp camera Y between bottom and top bounds
+    camera.position.y = Math.max(halfViewportHeight, Math.min(camera.position.y, mapHeight - halfViewportHeight));
+}
+
+
     private void updateCamera() {
         camera.zoom = updateCamZoom();
         camera.position.lerp(new Vector3(elian.getPosition().x, elian.getPosition().y, 0), 8.0f * Gdx.graphics.getDeltaTime());
+
+        //Fixed camera location
+        clampCameraToMap();
         camera.update();
     }
 

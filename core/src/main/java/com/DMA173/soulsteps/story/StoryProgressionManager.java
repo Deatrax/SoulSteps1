@@ -127,11 +127,13 @@ public class StoryProgressionManager {
         objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
 
         objectiveOrder.add("talked_to_rep");
-        objectiveTexts.put("talked_to_rep","\nTalk to receptionist");
+        objectiveTexts.put("talked_to_rep","\nTalk to the employees");
 
         objectiveOrder.add("talked_to_man");
-        objectiveTexts.put("talked_to_man","\nTalk to Manager");
+        objectiveTexts.put("talked_to_man","\nTalk to employees");
 
+        objectiveOrder.add("exitOffice");
+        objectiveTexts.put("exitOffice","\nLeave the HQ");
        
         
         
@@ -222,6 +224,16 @@ public class StoryProgressionManager {
         enteroffice.requiredObjective = "Enteroffice";
         enteroffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("shku", enteroffice);
+
+        MapTransition exitOffice = new MapTransition();
+        exitOffice.fromZone = "office/office";
+        exitOffice.toZone = "Tile_City";
+        exitOffice.triggerArea = new Vector2(44,394 );
+        exitOffice.triggerRadius = 50f;
+        exitOffice.spawnPosition = new Vector2(852, 1197);
+        exitOffice.requiredObjective = "exitOffice";
+        exitOffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("ftdfg", exitOffice);
 
 
        
@@ -563,10 +575,10 @@ public class StoryProgressionManager {
                 );
                 break;
 
-                            case "pipe_puzzle_completed":
+                case "pipe_puzzle_completed":
                 uiManager.showNarration(
                     null,
-                    "You fixed the pipes successfully! Now you should head to the office."
+                    "You fixed the pipes successfully! Now you should head to the office with the limiter immediately."
                 );
                 completeCurrentObjective(); // Move to the next objective in the list
                 break;

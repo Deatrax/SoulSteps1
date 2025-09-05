@@ -4,7 +4,7 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
-import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.ui.UIManager; // 👈 add this import
 
 public class receptionist extends NPC {
 
