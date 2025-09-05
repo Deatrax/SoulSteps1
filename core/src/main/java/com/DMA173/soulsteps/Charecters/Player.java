@@ -26,7 +26,7 @@ public class Player extends Character {
     public Player(CharecterAssets assets, float startX, float startY) {
         // Use character type 3 for Elian's appearance with specific hair and clothing configuration
         // ClothesContainer(hairType, outfitType, modelType, accessoryType)
-        super(assets, 1, startX, startY, 100f, new ClothesContainer(3, 6, 3, 6));
+        super(assets, 1, startX, startY, 100f, new ClothesContainer(1, 6, 3, 6));
         
         // Initialize Elian's properties
         this.name = "Elian";
