@@ -566,7 +566,7 @@ public class StoryProgressionManager {
                 case "pipe_puzzle_completed":
                 uiManager.showNarration(
                     null,
-                    "You fixed the pipes successfully! Now you should head to the office."
+                    "You fixed the pipes successfully! Now you should head to the office with the limiter immediately."
                 );
                 completeCurrentObjective(); // Move to the next objective in the list
                 break;
