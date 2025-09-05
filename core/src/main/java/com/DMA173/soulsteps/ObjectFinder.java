@@ -1,20 +1,41 @@
 package com.DMA173.soulsteps;
 
-import com.badlogic.gdx.*;
-import com.badlogic.gdx.graphics.*;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Random;
+
+import com.DMA173.soulsteps.Charecters.NPCs.KaelNPC;
+import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.world.WorldManager;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Rectangle;
-
-import java.util.*;
 
 public class ObjectFinder implements Screen {
 
-    theMain game;
+    Game game;
+      // --- ADD THIS NEW FLAG at the top of your class with the other variables ---
+    private boolean celebrationFunctionCalled = false;
 
     public ObjectFinder(theMain game) {
         this.game = game;
+    }
+    
+    private WorldManager worldManager;
+
+    public ObjectFinder(Game game2, String currentZoneName, KaelNPC kaelNPC, WorldManager worldManager, UIManager uiManager, Player player) {
+        this.worldManager = worldManager;
+        this.game = game2; // 
+        //TODO Auto-generated constructor stub
     }
 
     SpriteBatch batch;
@@ -178,6 +199,16 @@ public void render(float delta) {
         centerY = Gdx.graphics.getHeight() / 2 - keyHeight / 2;
 
         batch.draw(keyTex, centerX, centerY, keyWidth, keyHeight);
+
+          // Check if the animation is finished AND the function hasn't been called yet.
+        if (animationFinished && !celebrationFunctionCalled) {
+            
+            // Mark the function as called so it doesn't run again.
+            celebrationFunctionCalled = true; 
+            
+            // Call the function you want to execute after the animation.
+            onCelebrationFinished(); 
+        }
     } else {
         // Draw all items normally
         for (Item item : items) {
@@ -229,6 +260,22 @@ public void render(float delta) {
         }
     }
 }
+
+    private void onCelebrationFinished() {
+        System.out.println("Key animation finished! Returning to the game.");
+        game.setScreen(worldManager.getScreen());
+        // Here you would put the logic to return to your main game screen.
+        // For example:
+        
+        // 1. Give the player the "key" or set a story flag
+        // GameStateManager.getInstance().setFlag("found_kaels_keys", true);
+        
+        // 2. Switch back to the previous screen
+        // game.setScreen(previousScreen); // You would need to pass the previous screen into this class's constructor
+
+        // For now, as a placeholder, we can just exit the minigame.
+        // Gdx.app.exit(); // Replace this with your screen transition logic
+    }
 
 
     @Override public void resize(int width, int height) {}

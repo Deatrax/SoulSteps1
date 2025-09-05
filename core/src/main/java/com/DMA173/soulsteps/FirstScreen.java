@@ -51,9 +51,11 @@ public class FirstScreen extends ScreenAdapter {
         characterAssets.init();
 
         worldManager = new WorldManager(characterAssets);
+        worldManager.setGam(game);
+        worldManager.setScreen(this);
         worldManager.loadZone("Tile_City");
         gsm = worldManager.getGsm();
-        worldManager.setGam(game);
+
 
         mapRenderer = new OrthogonalTiledMapRenderer(worldManager.getCurrentMap());
 
@@ -68,6 +70,8 @@ public class FirstScreen extends ScreenAdapter {
 
         storyManager = new StoryProgressionManager(uiManager, worldManager);
         inputHandler.setStoryManager(storyManager);
+
+        
     }
 
     @Override

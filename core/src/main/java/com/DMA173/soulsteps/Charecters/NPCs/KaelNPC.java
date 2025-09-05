@@ -3,19 +3,27 @@ package com.DMA173.soulsteps.Charecters.NPCs;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.Player;
+import com.DMA173.soulsteps.ObjectFinder;
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Game;
 
 // KaelNPC extends the base NPC class, inheriting all its basic properties.
 public class KaelNPC extends NPC {
 
     private Game game;
+    private   WorldManager worldManager;
+    private   StoryProgressionManager storyManager;
 
-    public KaelNPC(CharecterAssets assets, float startX, float startY) {
+    public KaelNPC(CharecterAssets assets, float startX, float startY, Game  game, WorldManager worldManager, StoryProgressionManager storyManger) {
         // We call the parent constructor with Kael's specific details.
         // We can use character model '4' for him, for example.
         super(assets, 4, startX, startY, "Kael", "ally");
+        this.game = game;
+        this.worldManager =worldManager;
+        this.storyManager = storyManger;
         this.setDialogue("You need to be more careful. They're watching.");
     }
 
@@ -69,6 +77,8 @@ public class KaelNPC extends NPC {
         gsm.setFlag("player_helped_kael", true);
         
        uiManager.showNarration("system", "you will now enter the obj game");
+       
+       game.setScreen(new ObjectFinder(game, worldManager.getCurrentZoneName(), this, worldManager, uiManager, player));
     }
 
     /**
@@ -80,5 +90,13 @@ public class KaelNPC extends NPC {
         
        uiManager.showNarration("system", "you will now see him get abducted");
         
+    }
+
+    public void setStoryManager(StoryProgressionManager storyManager) {
+        this.storyManager = storyManager;
+    }
+
+    public void setWorldManager(WorldManager worldManager) {
+        this.worldManager = worldManager;
     }
 }

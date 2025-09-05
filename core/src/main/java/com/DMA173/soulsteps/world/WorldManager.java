@@ -9,8 +9,10 @@ import com.DMA173.soulsteps.Charecters.NPCs.manager;
 import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -40,8 +42,14 @@ public class WorldManager {
     private GameStateManager gsm;
     KaelNPC kael;
     Game gam;
+    StoryProgressionManager story;
+    ScreenAdapter screen;
     
 
+
+    public void setStory(StoryProgressionManager story) {
+        this.story = story;
+    }
 
     private String currentZoneName; // Track which zone we're in
 
@@ -161,8 +169,8 @@ public class WorldManager {
                 }
 
                 if(true){
-                    kael =new KaelNPC(characterAssets, 920, 1152);
-                    kael.setGame(gam);
+                    kael =new KaelNPC(characterAssets, 920, 1152, gam, this, story);
+                    
                     currentNpcManager.addNPC(kael);
                 }
 
@@ -338,5 +346,13 @@ public class WorldManager {
 
     public void setGam(Game gam) {
         this.gam = gam;
+    }
+
+    public ScreenAdapter getScreen() {
+        return screen;
+    }
+
+    public void setScreen(ScreenAdapter screen) {
+        this.screen = screen;
     }
 }
