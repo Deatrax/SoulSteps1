@@ -1,7 +1,10 @@
 package com.DMA173.soulsteps;
 
+import java.util.ArrayList;
+
+import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.StoryProgressionManager;
-import com.DMA173.soulsteps.story.StoryProgressionManager.MapTransition;
+import com.DMA173.soulsteps.ui.UIManager;
 import com.DMA173.soulsteps.world.WorldManager;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
@@ -19,9 +22,11 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-import java.util.ArrayList;
-
 public class pipepuzzle extends ScreenAdapter implements InputProcessor {
+
+
+    
+  
 
     private enum ToolType {
         BRUSH, WRENCH, SCREWDRIVER
@@ -55,8 +60,12 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     private int totalProblems = 0;
 
     private Game game;
-    private String previousMapName;
     private ScreenAdapter previousScreen;
+    private UIManager uiManager;
+    private StoryProgressionManager storyManager;
+
+    private Player player;
+    
 
     private static final float WORLD_WIDTH = 1280;
     private static final float WORLD_HEIGHT = 720;
@@ -66,10 +75,15 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         Rectangle bounds;
         float cleanProgress = 0f;
         boolean counted = false;
+        private Runnable onCleanedCallback = null;
 
         DirtSpot(float x, float y, Texture texture) {
             this.position = new Vector2(x, y);
             this.bounds = new Rectangle(x, y, texture.getWidth(), texture.getHeight());
+        }
+
+        public void setOnCleanedCallback(Runnable callback) {
+            this.onCleanedCallback = callback;
         }
 
         void clean() {
@@ -81,6 +95,11 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
                 if (!counted) {
                     clearedCount++;
                     counted = true;
+                    System.out.println("dirt cleaned");
+
+                    if (onCleanedCallback != null) {
+                        onCleanedCallback.run();
+                    }
                 }
             }
         }
@@ -124,14 +143,20 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         Rectangle bounds;
         float removalProgress = 0f;
         boolean counted = false;
+        private boolean isRemovable = false;
 
         Limiter(float x, float y, Texture texture) {
             this.position = new Vector2(x, y);
             this.bounds = new Rectangle(x, y, texture.getWidth(), texture.getHeight());
         }
+        
+        public void setRemovable(boolean removable) {
+            this.isRemovable = removable;
+        }
 
         void remove() {
-            if (isRemoved()) return;
+            if (isRemoved() || !isRemovable) return;
+            
             this.removalProgress += Gdx.graphics.getDeltaTime() * 1.8f;
 
             if (this.removalProgress >= 1f) {
@@ -148,11 +173,12 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         }
     }
 
-
-    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen, StoryProgressionManager story, WorldManager world ) {
+    public pipepuzzle(Game game, String previousMapName, ScreenAdapter previousScreen, StoryProgressionManager story, WorldManager world, UIManager uiManager,  Player player) {
         this.game = game;
-        this.previousMapName = previousMapName;
         this.previousScreen = previousScreen;
+        this.uiManager = uiManager;
+        this.storyManager = story;
+        this.player = player;
     }
 
     @Override
@@ -181,6 +207,31 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         cracks = new ArrayList<>();
         limiters = new ArrayList<>();
 
+        final Limiter coveredLimiter = new Limiter(700, 350, limiterTexture);
+        limiters.add(coveredLimiter);
+
+        DirtSpot dirtOnLimiter = new DirtSpot(700, 350, dirtSpotTexture);
+        
+        dirtOnLimiter.setOnCleanedCallback(() -> {
+            uiManager.showChoice(
+                "System",
+                "The limiter is now exposed. Remove it?",
+                new String[]{"Yes", "No"},
+                choice -> {
+                    if (choice == 1) {
+                        coveredLimiter.setRemovable(true);
+                        uiManager.showNotification("You can now use the screwdriver.");
+                    } else {
+                        totalProblems--;
+                        uiManager.showNotification("You leave the limiter in place.");
+                    }
+                    uiManager.hideDialogue();
+                }
+            );
+        });
+        
+        dirtSpots.add(dirtOnLimiter);
+        
         dirtSpots.add(new DirtSpot(157, 550, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(350, 380, dirtSpotTexture));
         dirtSpots.add(new DirtSpot(617, 260, dirtSpotTexture));
@@ -192,8 +243,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         cracks.add(new Crack(570, 560, crackTexture));
         cracks.add(new Crack(810, 455, crackTexture));
         cracks.add(new Crack(1050, 500, crackTexture));
-        
-        limiters.add(new Limiter(700, 350, limiterTexture));
         
         totalProblems = dirtSpots.size() + cracks.size() + limiters.size();
         
@@ -262,10 +311,14 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        uiManager.resize(width, height);
     }
 
     @Override
     public void render(float delta) {
+        uiManager.update(delta);
+        uiManager.handleDialogueInput();
+
         if (!allFixed && clearedCount >= totalProblems) {
             allFixed = true;
         }
@@ -278,6 +331,11 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
         batch.draw(cleanPipeTexture, 0, 0, WORLD_WIDTH, WORLD_HEIGHT);
 
+        for (Limiter limiter : limiters) {
+            batch.setColor(1, 1, 1, 1 - limiter.removalProgress);
+            batch.draw(limiterTexture, limiter.position.x, limiter.position.y);
+        }
+
         for (DirtSpot spot : dirtSpots) {
             batch.setColor(1, 1, 1, 1 - spot.cleanProgress);
             batch.draw(dirtSpotTexture, spot.position.x, spot.position.y);
@@ -286,11 +344,6 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         for (Crack crack : cracks) {
             batch.setColor(1, 1, 1, 1 - crack.repairProgress);
             batch.draw(crackTexture, crack.position.x, crack.position.y);
-        }
-        
-        for (Limiter limiter : limiters) {
-            batch.setColor(1, 1, 1, 1 - limiter.removalProgress);
-            batch.draw(limiterTexture, limiter.position.x, limiter.position.y);
         }
 
         batch.setColor(1, 1, 1, 1);
@@ -311,7 +364,7 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
         String progressText = "Fixed: " + clearedCount + " / " + totalProblems;
         font.draw(batch, progressText, 20, WORLD_HEIGHT - 20);
 
-        if (!allFixed) {
+        if (!allFixed && !uiManager.isDialogueActive()) {
             worldCoordinates.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             viewport.unproject(worldCoordinates);
             
@@ -336,21 +389,21 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
             batch.draw(winPipeTexture, x, y);
 
             if(Gdx.input.justTouched()){
+                
+                
+                storyManager.triggerStoryEvent("pipe_puzzle_completed", player);
+
                  game.setScreen(previousScreen);
-                 // --- Start of Change ---
-                 // DO NOT call dispose() here. Let the game handle the screen transition first.
-                 // The old screen will be garbage collected.
-                 // --- End of Change ---
             }
         }
 
         batch.end();
+        
+        uiManager.render(null, camera, storyManager);
     }
 
     @Override
     public void dispose() {
-        // This method is now called correctly by LibGDX when the game closes,
-        // or if you manually manage and dispose of screens.
         batch.dispose();
         cleanPipeTexture.dispose();
         dirtSpotTexture.dispose();
@@ -371,14 +424,17 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
-        // --- Start of Change ---
-        // If the game is won, we let the render loop handle the final "exit" click.
-        // Returning true here prevents the click from being processed by the game world
-        // after the win image appears.
-        if (allFixed) {
-            return true;
+        if (uiManager.isDialogueActive()) {
+            return false;
         }
-        // --- End of Change ---
+        
+        if (allFixed) {
+            // --- Start of Necessary Change ---
+            // Let the render loop handle the final click to exit.
+            // Returning true here consumes the click so the puzzle doesn't try to process it.
+            return true;
+            // --- End of Necessary Change ---
+        }
 
         worldCoordinates.set(screenX, screenY, 0);
         viewport.unproject(worldCoordinates);
@@ -402,7 +458,9 @@ public class pipepuzzle extends ScreenAdapter implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (allFixed) return false;
+        if (uiManager.isDialogueActive() || allFixed) {
+            return false;
+        }
         
         handleInteraction(screenX, screenY);
         return true;

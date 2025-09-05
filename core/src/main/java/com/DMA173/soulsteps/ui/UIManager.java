@@ -1,6 +1,7 @@
 package com.DMA173.soulsteps.ui;
 
 import java.util.function.Consumer;
+import java.lang.Runnable; // Import Runnable for callbacks
 
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.StoryProgressionManager;
@@ -158,6 +159,10 @@ public class UIManager {
      * Now uses percentage-based positioning for proper scaling
      */
     private void renderGameUI(Player player) {
+        if (player == null) {
+            return;
+        }
+
         renderHealthBar(player);
         renderKindnessBar(player);
         renderObjectiveText();
@@ -285,7 +290,6 @@ public class UIManager {
     }
     
     private void returnToMainMenu() {
-        // This method will be called when the pause menu requests returning to main menu
         if (game != null) {
             game.setScreen(new com.DMA173.soulsteps.MenuScreen(game));
         }
@@ -316,19 +320,8 @@ public class UIManager {
     
     public void showNotification(String message) {
         System.out.println("NOTIFICATION: " + message);
-        // TODO: Add animated floating text notifications here
-        // You can implement a queue of notifications with timers and positions
     }
 
-
-
-     // --- NEW: Public methods to control the Dialogue Box ---
-
-    /**
-     * Shows a simple line of dialogue or narration.
-     * @param speaker The name of the character speaking (or null for narration).
-     * @param text The text to display.
-     */
     public void showNarration(String speaker, String text) {
         this.speakerName = speaker;
         this.dialogueText = text;
@@ -336,14 +329,19 @@ public class UIManager {
         this.choiceCallback = null;
         this.isDialogueActive = true;
     }
+    
+    public void showNarration(String speaker, String text, Runnable onDismiss) {
+        this.speakerName = speaker;
+        this.dialogueText = text;
+        this.dialogueChoices = null;
+        this.choiceCallback = (choice) -> {
+            if (onDismiss != null) {
+                onDismiss.run();
+            }
+        };
+        this.isDialogueActive = true;
+    }
 
-    /**
-     * Shows dialogue with multiple choices for the player.
-     * @param speaker The name of the character asking the question.
-     * @param text The question or prompt.
-     * @param choices An array of strings representing the choices.
-     * @param callback A function that will be executed with the player's choice (1, 2, 3...).
-     */
     public void showChoice(String speaker, String text, String[] choices, Consumer<Integer> callback) {
         this.speakerName = speaker;
         this.dialogueText = text;
@@ -352,71 +350,62 @@ public class UIManager {
         this.isDialogueActive = true;
     }
 
-    /**
-     * Hides the dialogue box.
-     */
     public void hideDialogue() {
         this.isDialogueActive = false;
     }
 
-    /**
-     * The InputHandler will call this when the dialogue box is active.
-     */
     public void handleDialogueInput() {
         if (!isDialogueActive) return;
 
         if (dialogueChoices != null) {
-            // Handle number key presses for choices
             for (int i = 0; i < dialogueChoices.length; i++) {
-                //System.err.println("[UIManager] iterating dialogue choices =" + i);
                 if (Gdx.input.isKeyJustPressed(Input.Keys.NUM_1 + i)) {
-                    choiceCallback.accept(i + 1); // Execute the chosen action
-                    //hideDialogue();
+                    choiceCallback.accept(i + 1);
                     return;
                 }
             }
         } else {
-            // If it's just narration, any key press continues
             if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.isKeyJustPressed(Input.Keys.ENTER) || Gdx.input.justTouched()) {
-                hideDialogue();
+                // --- Start of Necessary Change ---
+                // If a callback exists (for a choice OR a chained narration), execute it.
+                if (choiceCallback != null) {
+                    choiceCallback.accept(0); // Pass a dummy value for narration callbacks.
+                    // IMPORTANT: If we executed a callback, we DO NOT hide the dialogue.
+                    // The callback itself is now responsible for the next step (e.g., showing the next line, or hiding the dialogue).
+                } else {
+                    // Only hide the dialogue if there is no follow-up action.
+                    hideDialogue();
+                }
+                // --- End of Necessary Change ---
             }
         }
     }
 
     private void renderDialogueBox() {
-        float boxHeight = Gdx.graphics.getHeight() * 0.3f; // Box takes up bottom 30% of the screen
+        float boxHeight = Gdx.graphics.getHeight() * 0.3f;
         float boxY = 0;
         float boxX = 0;
         float padding = 20f;
 
-        // --- RENDER BACKGROUND ---
         if (dialogueBoxTexture != null) {
-            // FUTURE: When you have a PNG, this will draw it.
-            // uiBatch.begin();
-            // uiBatch.draw(dialogueBoxTexture, boxX, boxY, Gdx.graphics.getWidth(), boxHeight);
-            // uiBatch.end();
+            // Future drawing for a custom PNG background
         } else {
-            // Fallback: A simple dark rectangle
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
             shapeRenderer.setColor(0.1f, 0.1f, 0.1f, 0.85f);
             shapeRenderer.rect(boxX, boxY, Gdx.graphics.getWidth(), boxHeight);
             shapeRenderer.end();
         }
 
-        // --- RENDER TEXT ---
         uiBatch.begin();
-        // Speaker Name
         if (speakerName != null && !speakerName.isEmpty()) {
             FontManager.standardFont.setColor(Color.YELLOW);
             FontManager.standardFont.draw(uiBatch, speakerName, boxX + padding, boxY + boxHeight - padding);
         }
 
-        // Main Dialogue Text (with wrapping)
         FontManager.standardFont.setColor(Color.WHITE);
         GlyphLayout layout = new GlyphLayout(FontManager.standardFont, dialogueText, Color.WHITE, Gdx.graphics.getWidth() - (padding * 2), Align.left, true);
         FontManager.standardFont.draw(uiBatch, layout, boxX + padding, boxY + boxHeight - padding - (speakerName != null ? 30 : 0));
 
-        // Choices or "Continue" prompt
         if (dialogueChoices != null) {
             float choiceY = boxY + padding + ((dialogueChoices.length - 1) * 25);
             for (int i = 0; i < dialogueChoices.length; i++) {
@@ -429,20 +418,14 @@ public class UIManager {
         uiBatch.end();
     }
     
-    // --- State Getters ---
     public boolean isDialogueActive() {
         return isDialogueActive;
     }
 
-
-    
     public void dispose() {
         if (uiBatch != null) uiBatch.dispose();
         if (shapeRenderer != null) shapeRenderer.dispose();
-        // NO LONGER NEEDED if (font != null) FontManager.standardFont.dispose();
         if (pauseMenu != null) pauseMenu.dispose();
-
-        // --- NEW: Dispose of the waypoint's resources ---
         if (waypointUI != null) {
             waypointUI.dispose();
         }

@@ -66,6 +66,11 @@ public class NPCManager {
     public boolean handleInteraction(Player player, GameStateManager gsm, UIManager uiManager) { // <-- Add UIManager
         NPC target = getNearbyInteractableNPC(player);
         if (target != null) {
+            // --- Start of Necessary Change ---
+            // Before starting the dialogue, tell the target NPC to stop walking.
+            target.stopWalking();
+            // --- End of Necessary Change ---
+            
             target.interact(player, gsm, uiManager); // <-- Pass it to the NPC
             return true;
         }

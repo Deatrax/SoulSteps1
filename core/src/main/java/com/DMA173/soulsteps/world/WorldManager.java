@@ -3,11 +3,17 @@ package com.DMA173.soulsteps.world;
 import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.NPCManager;
+import com.DMA173.soulsteps.Charecters.NPCs.KaelNPC;
 import com.DMA173.soulsteps.Charecters.NPCs.beggerNPC;
+import com.DMA173.soulsteps.Charecters.NPCs.manager;
+import com.DMA173.soulsteps.Charecters.NPCs.receptionist;
 import com.DMA173.soulsteps.Charecters.NPCs.vandalTeenNPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
+import com.DMA173.soulsteps.story.StoryProgressionManager;
 import com.DMA173.soulsteps.ui.UIManager;
+import com.badlogic.gdx.Game;
+import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.math.Vector2;
@@ -35,6 +41,17 @@ public class WorldManager {
     private NPCManager currentNpcManager; // Each zone gets its own NPC manager
     private CharecterAssets characterAssets;
     private GameStateManager gsm;
+    KaelNPC kael;
+    Game gam;
+    StoryProgressionManager story;
+    ScreenAdapter screen;
+    
+
+
+    public void setStory(StoryProgressionManager story) {
+        this.story = story;
+    }
+
     private String currentZoneName; // Track which zone we're in
 
     // MERGED: Add a flag to signal that the map has changed
@@ -42,11 +59,15 @@ public class WorldManager {
 
     // --- NEW: Define the name of the layer characters will be on ---
     private final String characterLayerName = "PlayerLayer";
+     
+    // --- NEW: A variable to remember the last zone we were in ---
+    private String previousZoneName;
 
     public WorldManager(CharecterAssets assets) {
         this.characterAssets = assets;
         this.gsm = GameStateManager.getInstance();
         this.currentZoneName = "";
+        this.previousZoneName = ""; // Initialize as empty
     }
 
     /**
@@ -54,6 +75,10 @@ public class WorldManager {
      * UPDATED: Now tracks zone name for story system
      */
     public void loadZone(String zoneId) {
+
+        // --- NEW: Remember the current zone before changing it ---
+        this.previousZoneName = this.currentZoneName;
+
         // Dispose previous map
         if (currentMap != null) {
             currentMap.dispose();
@@ -105,12 +130,29 @@ public class WorldManager {
                 begger.setDialogue("Please help a man in need");
                 currentNpcManager.addNPC(begger);
 
+                // The NPC is created at position (200, 150)
+                /*  NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
 
+                    // Define the path for the NPC to walk
+                    receptionist.walkPath(
+                        50f,  // Speed
+                        true, // Tell the NPC to loop this path
+                        
+                        // --- THIS IS THE FIX ---
+                        // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+                        new Vector2(50, 150),  
+                        
+                        // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+                        new Vector2(200, 150)  
+                        // --- END OF FIX ---
+                    );
+                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+                currentNpcManager.addNPC(receptionist);*/
 
                 NPC deliveryman1 = new NPC(characterAssets, 3, 610, 127, "Delivery Man", "delivery_person", false);
                 deliveryman1.walkPath(
                     50f, // Speed
-                    true,
+                    false,
                     new Vector2(50, 127)  // Then back to the start (to loop, you'd need more logic)
                 );
                 currentNpcManager.addNPC(deliveryman1);
@@ -127,6 +169,12 @@ public class WorldManager {
                     currentNpcManager.addNPC(teen1);
                 }
 
+                if(true){
+                    kael =new KaelNPC(characterAssets, 920, 1152, gam, this, story);
+                    
+                    currentNpcManager.addNPC(kael);
+                }
+
                 
                 // EXAMPLE: Add more town NPCs
                 /*
@@ -140,11 +188,28 @@ public class WorldManager {
                 */
                 break;
                 
-            case "veridia_interior":
-                // EXAMPLE: Building interior NPCs
-                NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
-                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+            case "office/office":
+                receptionist receptionist = new receptionist(characterAssets, 2, 380, 340, "Ms. Chen", "veridia_employee");
+
+                // Define the path for the NPC to walk
+                receptionist.walkPath(
+                    50f,  // Speed
+                    true, // Tell the NPC to loop this path
+                    
+                    // --- THIS IS THE FIX ---
+                    // Point 1: Walk from the start (200, 150) to the destination (50, 150)
+                    new Vector2(960, 340),  
+                    
+                    // Point 2: Walk from (50, 150) back to the original starting point (200, 150)
+                    new Vector2(380, 340)  
+                    // --- END OF FIX ---
+                );
+               // receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
                 currentNpcManager.addNPC(receptionist);
+                // EXAMPLE: Building interior NPCs
+              /*   NPC receptionist = new NPC(characterAssets, 2, 200, 150, "Ms. Chen", "veridia_employee");
+                receptionist.setDialogue("Welcome to Veridia Corporation. How may I help you?");
+                currentNpcManager.addNPC(receptionist);*/
                 
                 // EXAMPLE: Add security guard
                 /*
@@ -152,6 +217,11 @@ public class WorldManager {
                 security.setDialogue("This is a restricted area. Please state your business.");
                 currentNpcManager.addNPC(security);
                 */
+                
+
+            manager Manager = new manager(characterAssets, 5, 951, 894, "Manager", "veridia_employee");
+                Manager.setDialogue("Please help a man in need");
+                currentNpcManager.addNPC(Manager);
                 break;
                 
             // EXAMPLE: How to add more zones
@@ -193,6 +263,12 @@ public class WorldManager {
         return mapChanged;
     }
 
+      // --- NEW: A public getter for the previous zone name ---
+    public String getPreviousZoneName() {
+        return previousZoneName;
+    }
+    
+
     public void confirmMapChange() {
         this.mapChanged = false;
     }
@@ -212,6 +288,10 @@ public class WorldManager {
             return currentNpcManager.handleInteraction(player, gsm, uiManager); // <-- Pass it down
         }
         return false;
+    }
+
+    public void completeObjective(String str){
+        gsm.completeObjective(str);
     }
 
     /**
@@ -247,6 +327,14 @@ public class WorldManager {
         return characterLayerName;
     }
 
+    public GameStateManager getGsm() {
+        return gsm;
+    }
+
+    public void setGsm(GameStateManager gsm) {
+        this.gsm = gsm;
+    }
+
 
     public void dispose() {
         if (currentMap != null) {
@@ -255,5 +343,17 @@ public class WorldManager {
         if (currentNpcManager != null) {
             currentNpcManager.dispose();
         }
+    }
+
+    public void setGam(Game gam) {
+        this.gam = gam;
+    }
+
+    public ScreenAdapter getScreen() {
+        return screen;
+    }
+
+    public void setScreen(ScreenAdapter screen) {
+        this.screen = screen;
     }
 }

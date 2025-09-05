@@ -110,14 +110,31 @@ public class StoryProgressionManager {
         
         // Objective 1: Tutorial/Introduction
         objectiveOrder.add("goToDanHouse");
-        objectiveTexts.put("goToDanHouse", "Go to Dan's house to check his plumbing");
+        objectiveTexts.put("goToDanHouse", "\nGo to Dan's house to check his plumbing");
 
         // //Objective 2: Fix dan's plumbing
         // objectiveOrder.add("fixDanPlumbing");
         // objectiveTexts.put("fixDanPlumbing", "Go to Dan's house to check his plumbing");
 
         objectiveOrder.add("gotolenahouse");
-        objectiveTexts.put("gotolenahouse","Now go to fix Lena's kitchen plumbing");
+        objectiveTexts.put("gotolenahouse","\nFind sink to fix the pipes");
+
+         //Objective 2: Fix dan's plumbing
+        objectiveOrder.add("fixDanPlumbing");
+        objectiveTexts.put("fixDanPlumbing", "Check the kitchen sink");
+
+        objectiveOrder.add("Enteroffice");
+        objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
+
+        objectiveOrder.add("talked_to_rep");
+        objectiveTexts.put("talked_to_rep","\nTalk to the employees");
+
+        objectiveOrder.add("talked_to_man");
+        objectiveTexts.put("talked_to_man","\nTalk to employees");
+
+        objectiveOrder.add("exitOffice");
+        objectiveTexts.put("exitOffice","\nLeave the HQ");
+       
         
         
         
@@ -194,10 +211,29 @@ public class StoryProgressionManager {
         exitDanHouse.triggerArea = new Vector2(80, 93);
         exitDanHouse.triggerRadius = 100f;
         exitDanHouse.spawnPosition = new Vector2(740, 545);
-        exitDanHouse.requiredObjective = "gotolenahouse";
+        exitDanHouse.requiredObjective = null;
         exitDanHouse.interactionText = "Press E to exit Dan's House";
         mapTransitions.put("sdfhkshjdfsdf", exitDanHouse);
 
+        MapTransition enteroffice = new MapTransition();
+        enteroffice.fromZone = "Tile_City";
+        enteroffice.toZone = "office/office";
+        enteroffice.triggerArea = new Vector2(852, 1197);
+        enteroffice.triggerRadius = 50f;
+        enteroffice.spawnPosition = new Vector2(440, 345);
+        enteroffice.requiredObjective = "Enteroffice";
+        enteroffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("shku", enteroffice);
+
+        MapTransition exitOffice = new MapTransition();
+        exitOffice.fromZone = "office/office";
+        exitOffice.toZone = "Tile_City";
+        exitOffice.triggerArea = new Vector2(44,394 );
+        exitOffice.triggerRadius = 50f;
+        exitOffice.spawnPosition = new Vector2(852, 1197);
+        exitOffice.requiredObjective = "exitOffice";
+        exitOffice.interactionText = "Press E to enter into the office";
+        mapTransitions.put("ftdfg", exitOffice);
 
 
        
@@ -301,10 +337,11 @@ public class StoryProgressionManager {
                 }
                 break;
 
-            // case "talk_to_lena_first_time":
-            //     // This gets completed in NPC.interact() when talking to Lena
-            //     // No additional check needed here
-            //     break;
+            case "fixDanPlumbing":
+                 if(gameState.hasCompletedObjective("fixDanPlumbing")){
+                    completeCurrentObjective();
+                }
+                break;
                 
             
             // EXAMPLE for player
@@ -536,6 +573,14 @@ public class StoryProgressionManager {
                         }
                     }
                 );
+                break;
+
+                case "pipe_puzzle_completed":
+                uiManager.showNarration(
+                    null,
+                    "You fixed the pipes successfully! Now you should head to the office with the limiter immediately."
+                );
+                completeCurrentObjective(); // Move to the next objective in the list
                 break;
 
             // --- FUTURE EXAMPLE: Interacting with a computer terminal ---
