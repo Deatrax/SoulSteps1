@@ -4,58 +4,36 @@ import com.DMA173.soulsteps.Charecters.CharecterAssets;
 import com.DMA173.soulsteps.Charecters.NPC;
 import com.DMA173.soulsteps.Charecters.Player;
 import com.DMA173.soulsteps.story.GameStateManager;
-import com.DMA173.soulsteps.story.StoryProgressionManager; // 👈 add this import
-import com.DMA173.soulsteps.ui.UIManager;
+import com.DMA173.soulsteps.ui.UIManager; // 👈 add this import
 
 public class receptionist extends NPC {
 
-    private final StoryProgressionManager story; // 👈 hold a reference
-
-    public receptionist(
-            CharecterAssets assets,
-            int characterType,
-            float startX,
-            float startY,
-            String name,
-            String npcType,
-            StoryProgressionManager story // 👈 inject here
-    ) {
+    public receptionist(CharecterAssets assets, int characterType, float startX, float startY, String name,
+            String npcType) {
         super(assets, characterType, startX, startY, name, npcType);
-        this.story = story;
     }
 
     @Override
     public void interact(Player player, GameStateManager gsm, UIManager uiManager) {
+        // --- Start of Necessary Change ---
+        stopWalking(); // Stop the receptionist from moving when interacted with.
+        
+        if (!gsm.hasCompletedObjective("talked_to_rep")) {
+            gsm.completeObjective("talked_to_rep");
 
-        // Only run the receptionist dialog when that objective is active.
-        if (story.isObjectiveActive("talked_to_rep")) {
-
-            uiManager.showChoice(
-                "Receptionist",
-                "Welcome to Verdia HQ. How can I help you?",
-                new String[] { "I'm here to investigate.", "Just looking around." },
-                (choice) -> {
-                    if (choice == 1) {
-                        player.adjustKindness(5);
-
-                        // Sync both systems:
-                        // 1) Mark the objective complete in GameStateManager (your save/flags layer)
-                        gsm.completeObjective("talked_to_rep");
-                        // 2) Advance the story to the next objective ("talked_to_man")
-                        story.forceCompleteCurrentObjective();
-
-                        this.setDialogue("Please speak with the manager upstairs.");
-                        uiManager.showNarration(null, "New Objective: Talk to the manager.");
-                    } else {
-                        player.adjustKindness(-5);
-                        uiManager.showNarration("Receptionist", "Alright, but don’t waste our time.");
-                    }
-                }
-            );
+            // This is the sequence of nested callbacks.
+            // Each line of dialogue triggers the next one when the player dismisses it.
+            uiManager.showNarration("Receptionist", "Welcome to Veridia Corporation. How may I help you?", () -> {
+                uiManager.showNarration("Elian", "I would like to inquire about this device?", () -> {
+                    uiManager.showNarration("Receptionist", "Okay! You can talk to our manager over there.");
+                    // The last line has no callback, so the conversation ends here.
+                });
+            });
 
         } else {
-            // Fallback dialog when this isn't the active objective
-            uiManager.showNarration("Receptionist", "Good day!");
+            // This is the dialogue that will be shown if the player talks to the receptionist again.
+            uiManager.showNarration("Receptionist", "The manager is over there if you wish to speak with him.");
         }
+        // --- End of Necessary Change ---
     }
 }
