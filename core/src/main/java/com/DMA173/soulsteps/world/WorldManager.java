@@ -45,7 +45,23 @@ public class WorldManager {
     Game gam;
     StoryProgressionManager story;
     ScreenAdapter screen;
-    
+    // --- NEW: A flag to track if an in-game cutscene is active ---
+    private boolean isCutsceneActive = false;
+
+    // --- NEW: Public methods to control the cutscene state ---
+    public void startCutscene() {
+        this.isCutsceneActive = true;
+        System.out.println("[WORLD] Cutscene started.");
+    }
+
+    public void endCutscene() {
+        this.isCutsceneActive = false;
+        System.out.println("[WORLD] Cutscene ended.");
+    }
+
+    public boolean isCutsceneActive() {
+        return isCutsceneActive;
+    }
 
 
     public void setStory(StoryProgressionManager story) {
@@ -275,10 +291,94 @@ public class WorldManager {
 
 
     public void update(float delta) {
+         handleCutsceneEvents();
         if (currentNpcManager != null) {
             currentNpcManager.update(delta);
         }
     }
+
+    // --- NEW: Add this entire new method to manage cutscene logic ---
+    private void handleCutsceneEvents() {
+        // --- Kael's Abduction Cutscene ---
+        // This checks if the flag for the cutscene has been set and the cutscene isn't already running.
+        if (gsm.getFlag("player_ignored_kael") && !gsm.getFlag("kael_abduction_cutscene_started")) {
+            
+            // Set a new flag to ensure this block only runs once.
+            gsm.setFlag("kael_abduction_cutscene_started", true);
+            startCutscene();
+
+            // Find Kael in the current zone.
+            NPC kael = currentNpcManager.getNPCByName("Kael");
+            if (kael == null) {
+                endCutscene(); // Can't run the cutscene if Kael isn't there.
+                return;
+            }
+
+            // 1. Spawn two guards off-screen.
+            System.out.println("[CUTSCENE] Spawning guards for abduction.");
+            NPC guard1 = new NPC(characterAssets, 1, -50, kael.getPosition().y, "Guard", "police");
+            NPC guard2 = new NPC(characterAssets, 1, -50, kael.getPosition().y + 20, "Guard", "police");
+            currentNpcManager.addNPC(guard1);
+            currentNpcManager.addNPC(guard2);
+
+            // 2. Command the guards to walk to Kael.
+            float guardSpeed = 80f; // Guards move with purpose.
+            guard1.walkPath(guardSpeed, false, new Vector2(kael.getPosition().x - 20, kael.getPosition().y));
+            guard2.walkPath(guardSpeed, false, new Vector2(kael.getPosition().x + 20, kael.getPosition().y));
+            
+            // 3. Command Kael to play an idle animation (he's cornered).
+            kael.stopAction(); // Ensure he's not doing anything else.
+
+            // Set a flag that the next stage of the cutscene is ready.
+            gsm.setFlag("guards_approaching_kael", true);
+        }
+
+        // --- Second stage of the cutscene: The guards have arrived ---
+        if (gsm.getFlag("guards_approaching_kael") && !gsm.getFlag("kael_being_escorted")) {
+            NPC guard1 = currentNpcManager.getNPCByName("Guard"); // Just gets the first one
+            
+            // We check if the guards have finished their path (i.e., they are idle).
+            if (guard1 != null && guard1.getCurrentState() == NPC.NpcState.IDLE) {
+                
+                // Set a new flag to prevent this from re-triggering.
+                gsm.setFlag("kael_being_escorted", true);
+
+                // Find all the relevant NPCs again.
+                NPC kael = currentNpcManager.getNPCByName("Kael");
+                NPC guard2 = currentNpcManager.getNPCByName("Guard", 1); // Helper method needed to get the second guard
+
+                // 4. Command all three to walk off-screen to the left.
+                System.out.println("[CUTSCENE] Escorting Kael off-screen.");
+                float escortSpeed = 60f;
+                kael.walkPath(escortSpeed, false, new Vector2(-100, kael.getPosition().y));
+                guard1.walkPath(escortSpeed, false, new Vector2(-120, guard1.getPosition().y));
+                if (guard2 != null) {
+                     guard2.walkPath(escortSpeed, false, new Vector2(-80, guard2.getPosition().y));
+                }
+
+                // Set a flag for the final stage.
+                gsm.setFlag("kael_escort_finished_check", true);
+            }
+        }
+
+        // --- Final stage of the cutscene: They have walked off-screen ---
+        if (gsm.getFlag("kael_escort_finished_check")) {
+            NPC kael = currentNpcManager.getNPCByName("Kael");
+            
+            // When Kael is off-screen and has finished his path, the cutscene is over.
+            if (kael == null || kael.getCurrentState() == NPC.NpcState.IDLE) {
+                // Remove the NPCs from the world.
+                currentNpcManager.removeNPC("Kael");
+                currentNpcManager.removeNPC("Guard");
+                currentNpcManager.removeNPC("Guard"); // Remove both
+                
+                // End the cutscene and reset the flags.
+                endCutscene();
+                gsm.setFlag("kael_escort_finished_check", false); // Prevent re-triggering
+            }
+        }
+    }
+
 
     /**
      * Delegates interaction to the current zone's NPCManager.

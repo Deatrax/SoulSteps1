@@ -31,7 +31,7 @@ public class NPC extends Character {
 
 
     // --- NEW: State management for NPC behavior ---
-    private enum NpcState { IDLE, WALKING, PERFORMING_ACTION }
+    public enum NpcState { IDLE, WALKING, PERFORMING_ACTION }
     private NpcState currentState = NpcState.IDLE;
     private Animation<TextureRegion> currentActionAnimation;
 
@@ -43,6 +43,17 @@ public class NPC extends Character {
 
     // --- MODIFY: We no longer need to replace the character's animation ---
     private Animation<TextureRegion> currentEffectAnimation; // Changed from currentActionAnimation
+
+    // --- ADD THIS PUBLIC GETTER METHOD ---
+    /**
+     * Returns the current behavior state of the NPC.
+     * This allows external classes like WorldManager to check if the NPC is busy.
+     * @return The current NpcState (IDLE, WALKING, or PERFORMING_ACTION).
+     */
+    public NpcState getCurrentState() {
+        return currentState;
+    }
+    // ------------------------------------
 
 
     public NPC(CharecterAssets assets, int characterType, float startX, float startY, String name, String npcType) {
