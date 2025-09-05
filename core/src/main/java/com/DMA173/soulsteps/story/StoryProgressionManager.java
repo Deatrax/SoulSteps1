@@ -231,7 +231,7 @@ public class StoryProgressionManager {
         exitOffice.triggerArea = new Vector2(44,394 );
         exitOffice.triggerRadius = 50f;
         exitOffice.spawnPosition = new Vector2(852, 1197);
-        exitOffice.requiredObjective = "exitOffice";
+        exitOffice.requiredObjective = null;
         exitOffice.interactionText = "Press E to enter into the office";
         mapTransitions.put("ftdfg", exitOffice);
 

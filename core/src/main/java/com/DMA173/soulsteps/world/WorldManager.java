@@ -169,7 +169,7 @@ public class WorldManager {
                     currentNpcManager.addNPC(teen1);
                 }
 
-                if(true){
+                if(gsm.hasCompletedObjective("talked_to_rep")){
                     kael =new KaelNPC(characterAssets, 920, 1152, gam, this, story);
                     
                     currentNpcManager.addNPC(kael);
