@@ -127,10 +127,10 @@ public class StoryProgressionManager {
         objectiveTexts.put("Enteroffice","\nGo to Verdia dynamics HQ");
 
         objectiveOrder.add("talked_to_rep");
-        objectiveTexts.put("talked_to_rep","\nTalk to receptionist");
+        objectiveTexts.put("talked_to_rep","\nTalk to the employees");
 
         objectiveOrder.add("talked_to_man");
-        objectiveTexts.put("talked_to_man","\nTalk to Manager");
+        objectiveTexts.put("talked_to_man","\nTalk to employees");
 
         objectiveOrder.add("exitOffice");
         objectiveTexts.put("exitOffice","\nLeave the HQ");
@@ -575,10 +575,10 @@ public class StoryProgressionManager {
                 );
                 break;
 
-                            case "pipe_puzzle_completed":
+                case "pipe_puzzle_completed":
                 uiManager.showNarration(
                     null,
-                    "You fixed the pipes successfully! Now you should head to the office."
+                    "You fixed the pipes successfully! Now you should head to the office with the limiter immediately."
                 );
                 completeCurrentObjective(); // Move to the next objective in the list
                 break;
